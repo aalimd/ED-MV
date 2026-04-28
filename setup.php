@@ -14,7 +14,7 @@ $db = getDB();
 $stmt = $db->prepare("SELECT id FROM users WHERE role = 'admin' LIMIT 1");
 $stmt->execute();
 $adminExists = $stmt->fetch();
-if ($adminExists && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+if ($adminExists) {
     http_response_code(404);
     exit('Not found');
 }
