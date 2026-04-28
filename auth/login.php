@@ -33,9 +33,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         session_set_user($user, $remember);
                         $db->prepare('UPDATE users SET last_login=NOW(),last_ip=? WHERE id=?')->execute([$ip,$user['id']]);
                         log_activity('login','Successful login',$user['id']);
-                        $redir = $_SESSION['redirect_after_login'] ?? '/index.php';
+                        $redir = $_SESSION['redirect_after_login'] ?? APP_URL . '/index.php';
                         unset($_SESSION['redirect_after_login']);
-                        redirect_local($redir);
+                        // If $redir is a relative path starting with the app directory, it works fine
+                        // Ensure it doesn't double-prepend APP_URL
+                        if (strpos($redir, APP_URL) === false && strpos($redir, 'http') !== 0) {
+                            $redir = "http://" . $_SERVER['HTTP_HOST'] . $redir;
+                        }
+                        redirect($redir);
                     }
                 } else {
                     record_failed_attempt($ip, $email);
