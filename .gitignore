@@ -1,0 +1,17 @@
+.DS_Store
+
+# Local / production secrets
+config.php
+.env
+.env.*
+!.env.example
+
+# Runtime output
+logs/
+*.log
+
+# Local editor and OS files
+.idea/
+.vscode/
+Thumbs.db
+
