@@ -14,6 +14,7 @@ function admin_header(string $title, string $icon = '📊', string $activePage =
         ['url'=>'index.php','icon'=>'📊','label'=>'Dashboard','key'=>'dashboard'],
         ['url'=>'users.php','icon'=>'👥','label'=>'Users','key'=>'users'],
         ['url'=>'subscriptions.php','icon'=>'💳','label'=>'Subscriptions','key'=>'subscriptions'],
+        ['url'=>'plans.php','icon'=>'🏷️','label'=>'Plans & Pricing','key'=>'plans'],
         ['url'=>'settings.php','icon'=>'⚙️','label'=>'Settings','key'=>'settings'],
         ['url'=>'logs.php','icon'=>'📋','label'=>'Activity Logs','key'=>'logs'],
     ];

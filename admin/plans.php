@@ -1,0 +1,179 @@
+<?php
+/** Admin — Plan Management (CRUD) */
+require_once __DIR__ . '/layout.php';
+$db = getDB();
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
+    $action = $_POST['action'] ?? '';
+    $planId = (int)($_POST['plan_id'] ?? 0);
+
+    if ($action === 'create') {
+        $name = trim($_POST['name'] ?? '');
+        $slug = preg_replace('/[^a-z0-9-]/', '', strtolower(str_replace(' ', '-', $name)));
+        $desc = trim($_POST['description'] ?? '');
+        $features = trim($_POST['features'] ?? '');
+        $days = max(1, (int)($_POST['duration_days'] ?? 30));
+        $price = max(0, floatval($_POST['price'] ?? 0));
+        $currency = strtoupper(trim($_POST['currency'] ?? 'SAR'));
+        $badge = trim($_POST['badge'] ?? '') ?: null;
+        $color = trim($_POST['color'] ?? '#2563eb');
+        $featured = isset($_POST['is_featured']) ? 1 : 0;
+        $active = isset($_POST['is_active']) ? 1 : 0;
+        $sort = (int)($_POST['sort_order'] ?? 0);
+
+        if ($name) {
+            $db->prepare("INSERT INTO plans (name,slug,description,features,duration_days,price,currency,badge,is_featured,color,is_active,sort_order) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
+               ->execute([$name, $slug, $desc, $features, $days, $price, $currency, $badge, $featured, $color, $active, $sort]);
+            log_activity('admin_create_plan', "Created plan: {$name}");
+            flash('success', "Plan \"{$name}\" created!");
+        }
+    } elseif ($action === 'update' && $planId > 0) {
+        $name = trim($_POST['name'] ?? '');
+        $desc = trim($_POST['description'] ?? '');
+        $features = trim($_POST['features'] ?? '');
+        $days = max(1, (int)($_POST['duration_days'] ?? 30));
+        $price = max(0, floatval($_POST['price'] ?? 0));
+        $currency = strtoupper(trim($_POST['currency'] ?? 'SAR'));
+        $badge = trim($_POST['badge'] ?? '') ?: null;
+        $color = trim($_POST['color'] ?? '#2563eb');
+        $featured = isset($_POST['is_featured']) ? 1 : 0;
+        $active = isset($_POST['is_active']) ? 1 : 0;
+        $sort = (int)($_POST['sort_order'] ?? 0);
+
+        if ($name) {
+            $db->prepare("UPDATE plans SET name=?,description=?,features=?,duration_days=?,price=?,currency=?,badge=?,is_featured=?,color=?,is_active=?,sort_order=? WHERE id=?")
+               ->execute([$name, $desc, $features, $days, $price, $currency, $badge, $featured, $color, $active, $sort, $planId]);
+            log_activity('admin_update_plan', "Updated plan ID: {$planId}");
+            flash('success', "Plan updated!");
+        }
+    } elseif ($action === 'delete' && $planId > 0) {
+        // Check if any subscriptions use this plan
+        $check = $db->prepare("SELECT COUNT(*) FROM subscriptions WHERE plan_id = ?");
+        $check->execute([$planId]);
+        if ((int)$check->fetchColumn() > 0) {
+            flash('danger', 'Cannot delete a plan that has subscriptions. Deactivate it instead.');
+        } else {
+            $db->prepare("DELETE FROM plans WHERE id = ?")->execute([$planId]);
+            log_activity('admin_delete_plan', "Deleted plan ID: {$planId}");
+            flash('warning', 'Plan deleted.');
+        }
+    } elseif ($action === 'save_page_settings') {
+        set_setting('sub_page_title', trim($_POST['sub_page_title'] ?? 'Choose Your Plan'));
+        set_setting('sub_page_subtitle', trim($_POST['sub_page_subtitle'] ?? ''));
+        set_setting('sub_page_footer', trim($_POST['sub_page_footer'] ?? ''));
+        set_setting('sub_currency_symbol', strtoupper(trim($_POST['sub_currency_symbol'] ?? 'SAR')));
+        log_activity('admin_update_sub_page', 'Updated subscription page settings');
+        flash('success', 'Page settings saved!');
+    }
+    redirect(APP_URL . '/admin/plans.php');
+}
+
+$plans = $db->query("SELECT * FROM plans ORDER BY sort_order, id")->fetchAll();
+$editing = null;
+if (isset($_GET['edit'])) {
+    $editId = (int)$_GET['edit'];
+    foreach ($plans as $p) { if ($p['id'] === $editId) { $editing = $p; break; } }
+}
+
+admin_header('Plans & Pricing', '🏷️', 'plans');
+?>
+
+<!-- ── Page Settings Card ─────────────────────── -->
+<div class="data-card" style="padding:20px;margin-bottom:20px">
+<h3 style="font-size:.88rem;font-weight:800;color:var(--theme);margin-bottom:14px">📝 Subscription Page Content</h3>
+<p style="font-size:.78rem;color:var(--text-3);margin-bottom:14px">These texts appear on the page your users see when they need to subscribe.</p>
+<form method="POST"><?= csrf_field() ?>
+<input type="hidden" name="action" value="save_page_settings">
+<div class="form-group"><label>Page Title</label>
+<input type="text" name="sub_page_title" value="<?= e(get_setting('sub_page_title','Choose Your Plan')) ?>" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
+<div class="form-group"><label>Subtitle / Description</label>
+<textarea name="sub_page_subtitle" rows="2" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text);resize:vertical"><?= e(get_setting('sub_page_subtitle','')) ?></textarea></div>
+<div class="form-group"><label>Footer Note</label>
+<textarea name="sub_page_footer" rows="2" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text);resize:vertical"><?= e(get_setting('sub_page_footer','')) ?></textarea></div>
+<div class="form-group"><label>Currency Code (shown on plans)</label>
+<input type="text" name="sub_currency_symbol" value="<?= e(get_setting('sub_currency_symbol','SAR')) ?>" maxlength="5" style="width:100px;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
+<button type="submit" class="btn btn-primary" style="max-width:200px">💾 Save Page Settings</button>
+</form>
+</div>
+
+<!-- ── Create / Edit Plan Card ────────────────── -->
+<div class="data-card" style="padding:20px;margin-bottom:20px">
+<h3 style="font-size:.88rem;font-weight:800;color:var(--theme);margin-bottom:14px"><?= $editing ? '✏️ Edit Plan' : '➕ Create New Plan' ?></h3>
+<form method="POST"><?= csrf_field() ?>
+<input type="hidden" name="action" value="<?= $editing ? 'update' : 'create' ?>">
+<?php if($editing): ?><input type="hidden" name="plan_id" value="<?= $editing['id'] ?>"><?php endif; ?>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+
+<div class="form-group"><label>Plan Name *</label>
+<input type="text" name="name" value="<?= e($editing['name'] ?? '') ?>" required placeholder="e.g. Monthly" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
+
+<div class="form-group"><label>Price</label>
+<input type="number" name="price" value="<?= e($editing['price'] ?? '0') ?>" step="0.01" min="0" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
+
+<div class="form-group"><label>Currency</label>
+<input type="text" name="currency" value="<?= e($editing['currency'] ?? 'SAR') ?>" maxlength="5" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
+
+<div class="form-group"><label>Duration (days)</label>
+<input type="number" name="duration_days" value="<?= e($editing['duration_days'] ?? '30') ?>" min="1" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
+
+<div class="form-group"><label>Badge Text <span style="font-size:.72rem;color:var(--text-3)">(optional — e.g. "Best Value")</span></label>
+<input type="text" name="badge" value="<?= e($editing['badge'] ?? '') ?>" placeholder="Leave blank for none" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
+
+<div class="form-group"><label>Card Color</label>
+<input type="color" name="color" value="<?= e($editing['color'] ?? '#2563eb') ?>" style="width:60px;height:38px;padding:2px;border:2px solid var(--border);border-radius:8px;cursor:pointer"></div>
+
+<div class="form-group"><label>Sort Order</label>
+<input type="number" name="sort_order" value="<?= e($editing['sort_order'] ?? '0') ?>" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
+
+</div>
+
+<div class="form-group"><label>Short Description <span style="font-size:.72rem;color:var(--text-3)">(shown under price)</span></label>
+<input type="text" name="description" value="<?= e($editing['description'] ?? '') ?>" placeholder="e.g. Full access for 30 days" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
+
+<div class="form-group"><label>Features <span style="font-size:.72rem;color:var(--text-3)">(one per line — shown as checklist on pricing card)</span></label>
+<textarea name="features" rows="4" placeholder="Full ventilation reference&#10;All clinical scenarios&#10;PBW calculator" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text);resize:vertical"><?= e(str_replace('|', "\n", $editing['features'] ?? '')) ?></textarea></div>
+
+<div style="display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap">
+<label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" name="is_active" <?= ($editing['is_active'] ?? 1) ? 'checked' : '' ?> style="width:18px;height:18px;accent-color:var(--theme)"><span style="font-size:.82rem;font-weight:700">Active (visible to users)</span></label>
+<label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" name="is_featured" <?= ($editing['is_featured'] ?? 0) ? 'checked' : '' ?> style="width:18px;height:18px;accent-color:var(--theme)"><span style="font-size:.82rem;font-weight:700">⭐ Featured (highlighted card)</span></label>
+</div>
+
+<div style="display:flex;gap:8px">
+<button type="submit" class="btn btn-primary" style="max-width:200px"><?= $editing ? '💾 Update Plan' : '➕ Create Plan' ?></button>
+<?php if($editing): ?><a href="<?= APP_URL ?>/admin/plans.php" class="btn btn-secondary" style="max-width:120px">Cancel</a><?php endif; ?>
+</div>
+</form>
+</div>
+
+<!-- ── Existing Plans Table ───────────────────── -->
+<div class="data-card">
+<div class="dc-header"><div class="dc-title">🏷️ Plans (<?= count($plans) ?>)</div></div>
+<div style="overflow-x:auto">
+<table class="data-table">
+<thead><tr><th>Order</th><th>Name</th><th>Price</th><th>Duration</th><th>Badge</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
+<tbody>
+<?php foreach($plans as $p): ?>
+<tr>
+<td style="font-family:'Space Mono',monospace;font-size:.78rem;color:var(--text-3)"><?= $p['sort_order'] ?></td>
+<td><strong style="color:<?= e($p['color']) ?>"><?= e($p['name']) ?></strong><br><span style="font-size:.75rem;color:var(--text-3)"><?= e($p['description'] ?? '') ?></span></td>
+<td style="font-family:'Space Mono',monospace;font-weight:800"><?= e($p['currency']) ?> <?= number_format($p['price'],2) ?></td>
+<td><?= $p['duration_days'] ?> days</td>
+<td><?= $p['badge'] ? '<span class="badge badge-subscriber">' . e($p['badge']) . '</span>' : '—' ?></td>
+<td><span class="badge badge-<?= $p['is_active']?'active':'suspended' ?>"><?= $p['is_active']?'Active':'Hidden' ?></span></td>
+<td><?= $p['is_featured'] ? '⭐' : '' ?></td>
+<td style="white-space:nowrap">
+<a href="?edit=<?= $p['id'] ?>" class="act-btn">✏️ Edit</a>
+<form method="POST" style="display:inline"><?= csrf_field() ?>
+<input type="hidden" name="plan_id" value="<?= $p['id'] ?>">
+<button name="action" value="delete" class="act-btn danger" onclick="return confirm('Delete this plan?')">🗑️</button>
+</form>
+</td>
+</tr>
+<?php endforeach; ?>
+<?php if(empty($plans)): ?><tr><td colspan="8" class="empty-state"><div class="es-icon">🏷️</div><p>No plans yet</p></td></tr><?php endif; ?>
+</tbody></table>
+</div>
+</div>
+
+<?php admin_footer(); ?>

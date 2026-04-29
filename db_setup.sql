@@ -33,19 +33,23 @@ CREATE TABLE IF NOT EXISTS `plans` (
   `name` VARCHAR(100) NOT NULL,
   `slug` VARCHAR(50) NOT NULL UNIQUE,
   `description` TEXT NULL,
+  `features` TEXT NULL COMMENT 'Pipe-separated feature list',
   `duration_days` INT UNSIGNED NOT NULL DEFAULT 30,
   `price` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  `currency` VARCHAR(3) NOT NULL DEFAULT 'USD',
+  `currency` VARCHAR(3) NOT NULL DEFAULT 'SAR',
+  `badge` VARCHAR(50) NULL COMMENT 'e.g. Best Value, Most Popular',
+  `is_featured` TINYINT(1) NOT NULL DEFAULT 0,
+  `color` VARCHAR(7) NOT NULL DEFAULT '#2563eb',
   `is_active` TINYINT(1) NOT NULL DEFAULT 1,
   `sort_order` INT NOT NULL DEFAULT 0,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 -- ── Default Plans ─────────────────────────────────────
-INSERT INTO `plans` (`name`, `slug`, `description`, `duration_days`, `price`, `currency`, `is_active`, `sort_order`) VALUES
-('Monthly', 'monthly', 'Full access for 30 days', 30, 9.99, 'USD', 1, 1),
-('Yearly', 'yearly', 'Full access for 365 days — best value', 365, 49.99, 'USD', 1, 2),
-('Lifetime', 'lifetime', 'Unlimited access forever', 36500, 99.99, 'USD', 1, 3);
+INSERT INTO `plans` (`name`, `slug`, `description`, `features`, `duration_days`, `price`, `currency`, `badge`, `is_featured`, `color`, `is_active`, `sort_order`) VALUES
+('Monthly', 'monthly', 'Full access for 30 days', 'Full ventilation reference|All clinical scenarios|PBW calculator|ABG correction tool', 30, 9.99, 'SAR', NULL, 0, '#2563eb', 1, 1),
+('Yearly', 'yearly', 'Full access for 365 days', 'Full ventilation reference|All clinical scenarios|PBW calculator|ABG correction tool|Priority support', 365, 49.99, 'SAR', 'Best Value', 1, '#7c3aed', 1, 2),
+('Lifetime', 'lifetime', 'Unlimited access forever', 'Full ventilation reference|All clinical scenarios|PBW calculator|ABG correction tool|Priority support|Lifetime updates', 36500, 99.99, 'SAR', 'Most Popular', 0, '#059669', 1, 3);
 
 -- ── Subscriptions ─────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `subscriptions` (
