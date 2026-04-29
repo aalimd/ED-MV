@@ -34,7 +34,7 @@ function pwa_head_tags(string $description = 'Evidence-based emergency departmen
 }
 
 function pwa_script_tag(): string {
-    return '<script src="' . pwa_asset_url('/assets/js/pwa.js') . '" defer></script>';
+    return '<script src="' . pwa_asset_url('/assets/js/pwa.js?v=2') . '" defer></script>';
 }
 
 /**

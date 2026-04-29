@@ -40,7 +40,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <title>Forgot Password — <?= e(APP_NAME) ?></title>
 <?= pwa_zoom_lock_script() ?>
 <?= pwa_head_tags('Reset your ED VentGuide Pro password.') . "\n" ?>
-<link rel="stylesheet" href="<?= APP_URL ?>/assets/css/auth.css">
+<link rel="stylesheet" href="<?= APP_URL ?>/assets/css/auth.css?v=2">
 </head>
 <body>
 <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
