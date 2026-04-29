@@ -177,6 +177,11 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
   <div style="font-size:2.5rem;margin-bottom:12px">🫁</div>
   <h1><?= e($pageTitle) ?></h1>
   <p><?= e($pageSubtitle) ?></p>
+  <?php if($hasSub): ?>
+  <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:#059669;padding:12px;border-radius:12px;margin:20px auto 0;max-width:520px;font-size:0.85rem;font-weight:600;text-align:left;">
+    💡 <strong>Smart Upgrade:</strong> If you upgrade today, the remaining days on your current plan will be automatically added to your new plan! You will not lose any paid time.
+  </div>
+  <?php endif; ?>
 </div>
 
 <div class="pricing-grid">
