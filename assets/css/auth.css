@@ -83,15 +83,11 @@ body {
   padding: 24px 16px;
   position: absolute;
   inset: 0;
-  /* Default: no scroll. JS adds .scrollable only when content overflows. */
-  overflow: hidden;
-  overscroll-behavior: none;
-  touch-action: pan-y;
-}
-/* JS-enabled scroll — only active when card is taller than viewport */
-.auth-wrapper.scrollable {
+  /* The universal JS script in pwa.php will block ghost scrolling automatically if content fits */
   overflow-y: auto;
-  align-items: flex-start;
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+  touch-action: pan-y;
 }
 
 /* Animated background blobs */

@@ -34,7 +34,7 @@ function pwa_head_tags(string $description = 'Evidence-based emergency departmen
 }
 
 function pwa_script_tag(): string {
-    return '<script src="' . pwa_asset_url('/assets/js/pwa.js?v=2') . '" defer></script>';
+    return '<script src="' . pwa_asset_url('/assets/js/pwa.js?v=3') . '" defer></script>';
 }
 
 /**
@@ -50,11 +50,14 @@ document.addEventListener("gesturechange",function(e){e.preventDefault();},{pass
 document.addEventListener("touchmove",function(e){
   /* Always kill multi-touch (pinch) */
   if(e.touches&&e.touches.length>1){e.preventDefault();return;}
-  /* Allow single-finger scroll ONLY inside .auth-wrapper.scrollable or #pwa-ios-sheet */
+  /* Smart scroll: allow single-finger swipe ONLY inside elements that actually overflow and have auto/scroll */
   var el=e.target;
   while(el&&el!==document.documentElement){
     if(el.id==="pwa-ios-sheet"){return;}
-    if(el.classList&&el.classList.contains("auth-wrapper")&&el.classList.contains("scrollable")){return;}
+    if(el.scrollHeight>el.clientHeight){
+      var oy=window.getComputedStyle(el).overflowY;
+      if(oy==="auto"||oy==="scroll"){return;}
+    }
     el=el.parentElement;
   }
   e.preventDefault();
@@ -64,21 +67,5 @@ document.addEventListener("touchend",function(e){
   if(now-_lastTouch<=300){e.preventDefault();}
   _lastTouch=now;
 },{passive:false});
-/* ── Enable scroll only when card overflows viewport ── */
-function checkOverflow(){
-  var w=document.querySelector(".auth-wrapper");
-  var c=document.querySelector(".auth-card");
-  if(!w||!c)return;
-  var needed=c.scrollHeight+(24*2); /* card height + top/bottom padding */
-  if(needed>window.innerHeight){
-    w.classList.add("scrollable");
-  } else {
-    w.classList.remove("scrollable");
-  }
-}
-document.addEventListener("DOMContentLoaded",function(){
-  checkOverflow();
-  window.addEventListener("resize",checkOverflow);
-});
 }());</script>';
 }

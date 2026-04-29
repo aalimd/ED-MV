@@ -54,12 +54,13 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <title><?= e($pageTitle) ?> — <?= e(APP_NAME) ?></title>
 <?= pwa_zoom_lock_script() ?>
 <?= pwa_head_tags('Choose your ED VentGuide Pro access plan.') . "\n" ?>
-<link rel="stylesheet" href="<?= APP_URL ?>/assets/css/auth.css?v=2">
+<link rel="stylesheet" href="<?= APP_URL ?>/assets/css/auth.css?v=3">
 <style>
 /* ── Pricing Page Styles ──────────────────────── */
 .pricing-wrapper {
-  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:40px 16px;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:40px 16px;position:absolute;inset:0;
+  overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:none;touch-action:pan-y;
 }
 .pricing-wrapper::before,.pricing-wrapper::after {
   content:'';position:absolute;border-radius:50%;filter:blur(100px);opacity:0.3;pointer-events:none;
