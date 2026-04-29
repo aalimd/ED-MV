@@ -11,14 +11,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
     $adminId = session_user()['id'];
 
     if ($action === 'activate' && $subId > 0) {
-        $planStmt = $db->prepare("SELECT p.duration_days FROM subscriptions s JOIN plans p ON s.plan_id=p.id WHERE s.id=?");
-        $planStmt->execute([$subId]); $planRow = $planStmt->fetch();
-        $days = $planRow ? $planRow['duration_days'] : 30;
-        $expires = date('Y-m-d H:i:s', time() + ($days * 86400));
-        $db->prepare("UPDATE subscriptions SET status='active', starts_at=NOW(), expires_at=?, activated_by=? WHERE id=?")->execute([$expires, $adminId, $subId]);
-        $db->prepare("UPDATE users u JOIN subscriptions s ON u.id=s.user_id SET u.role='subscriber' WHERE s.id=?")->execute([$subId]);
-        log_activity('admin_activate_sub', "Activated subscription ID: {$subId}");
-        flash('success', 'Subscription activated!');
+        // 1. Get new plan details
+        $planStmt = $db->prepare("SELECT s.user_id, p.duration_days FROM subscriptions s JOIN plans p ON s.plan_id=p.id WHERE s.id=?");
+        $planStmt->execute([$subId]); 
+        $subRow = $planStmt->fetch();
+        
+        if ($subRow) {
+            $subUserId = $subRow['user_id'];
+            $newPlanDays = $subRow['duration_days'] ?: 30;
+            
+            // 2. Find any currently active subscription for this user to calculate rollover days
+            $oldSubStmt = $db->prepare("SELECT id, expires_at FROM subscriptions WHERE user_id = ? AND status = 'active' AND id != ?");
+            $oldSubStmt->execute([$subUserId, $subId]);
+            $oldSubs = $oldSubStmt->fetchAll();
+            
+            $rolloverSeconds = 0;
+            foreach ($oldSubs as $oldSub) {
+                if (strtotime($oldSub['expires_at']) > time()) {
+                    $rolloverSeconds += (strtotime($oldSub['expires_at']) - time());
+                }
+                // Cancel old active subscriptions to enforce the "1 active subscription only" rule
+                $db->prepare("UPDATE subscriptions SET status='cancelled' WHERE id=?")->execute([$oldSub['id']]);
+            }
+            
+            // 3. Calculate new exact expiry: New Plan Days + Rollover Days from old plans
+            $totalSeconds = ($newPlanDays * 86400) + $rolloverSeconds;
+            $expires = date('Y-m-d H:i:s', time() + $totalSeconds);
+            
+            // 4. Activate the new subscription
+            $db->prepare("UPDATE subscriptions SET status='active', starts_at=NOW(), expires_at=?, activated_by=? WHERE id=?")->execute([$expires, $adminId, $subId]);
+            $db->prepare("UPDATE users u JOIN subscriptions s ON u.id=s.user_id SET u.role='subscriber' WHERE s.id=?")->execute([$subId]);
+            
+            log_activity('admin_activate_sub', "Activated sub ID: {$subId} with rollover of " . floor($rolloverSeconds/86400) . " days");
+            flash('success', "Subscription activated! Added " . floor($rolloverSeconds/86400) . " rollover days from previous plan.");
+        }
+
 
     } elseif ($action === 'cancel' && $subId > 0) {
         $db->prepare("UPDATE subscriptions SET status='cancelled' WHERE id=?")->execute([$subId]);
