@@ -101,16 +101,22 @@
       }
     });
 
-    // iOS Safari pinch-to-zoom prevention (fallback for ignored meta tags)
-    document.addEventListener('touchmove', function(e) {
-      if (e.scale !== 1 && e.scale !== undefined) {
+    // Aggressive iOS Safari zoom prevention (matches main app)
+    let lastTouchEnd = 0;
+    
+    document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
+    document.addEventListener('gesturechange', e => e.preventDefault(), { passive: false });
+    
+    document.addEventListener('touchmove', e => {
+      if (e.touches && e.touches.length > 1) e.preventDefault();
+    }, { passive: false });
+    
+    document.addEventListener('touchend', e => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
         e.preventDefault();
       }
+      lastTouchEnd = now;
     }, { passive: false });
-
-    // Block native iOS gesture zoom
-    document.addEventListener('gesturestart', function(e) {
-      e.preventDefault();
-    });
   });
 })();
