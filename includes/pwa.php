@@ -36,3 +36,17 @@ function pwa_head_tags(string $description = 'Evidence-based emergency departmen
 function pwa_script_tag(): string {
     return '<script src="' . pwa_asset_url('/assets/js/pwa.js') . '" defer></script>';
 }
+
+/**
+ * Inline synchronous zoom-lock script for the <head>.
+ * Must run before iOS registers touch handlers — defer/async won't work.
+ */
+function pwa_zoom_lock_script(): string {
+    return '<script>(function(){
+var _lastTouch=0;
+document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
+document.addEventListener("gesturechange",function(e){e.preventDefault();},{passive:false});
+document.addEventListener("touchmove",function(e){if(e.touches&&e.touches.length>1){e.preventDefault();}},{passive:false});
+document.addEventListener("touchend",function(e){var now=Date.now();if(now-_lastTouch<=300){e.preventDefault();}_lastTouch=now;},{passive:false});
+}());</script>';
+}
