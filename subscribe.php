@@ -8,7 +8,6 @@ require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/features.php';
 require_once __DIR__ . '/includes/pwa.php';
 require_login();
-if (has_subscription()) redirect(APP_URL . '/app/ventguide.php');
 
 $user = session_user();
 $db = getDB();
@@ -203,7 +202,11 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <div class="pricing-footer"><p><?= e($pageFooter) ?></p></div>
 <?php endif; ?>
 
-<div class="pricing-footer" style="margin-top:16px">
+<div class="pricing-footer" style="margin-top:16px; margin-bottom:16px; opacity: 0.8;">
+  <p style="font-size: 0.8rem; color: var(--text-2);">⚠️ <strong>No Refunds:</strong> Please note that all subscription purchases and upgrades are final and non-refundable.</p>
+</div>
+
+<div class="pricing-footer" style="margin-top:0">
   <p>Logged in as <strong><?= e($user['name']) ?></strong> · <a href="<?= APP_URL ?>/auth/logout.php">Logout</a></p>
 </div>
 </div>
