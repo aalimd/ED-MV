@@ -199,7 +199,7 @@ img, svg, video, canvas { max-width: 100%; height: auto; }
   border: 2px solid var(--border);
   border-radius: var(--r-sm);
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text);
   background: var(--surface-2);
