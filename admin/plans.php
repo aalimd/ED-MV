@@ -1,6 +1,7 @@
 <?php
 /** Admin — Plan Management (CRUD) */
 require_once __DIR__ . '/layout.php';
+require_once __DIR__ . '/../includes/features.php';
 $db = getDB();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
@@ -24,6 +25,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
         if ($name) {
             $db->prepare("INSERT INTO plans (name,slug,description,features,duration_days,price,currency,badge,is_featured,color,is_active,sort_order) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
                ->execute([$name, $slug, $desc, $features, $days, $price, $currency, $badge, $featured, $color, $active, $sort]);
+            // Save feature assignments
+            $newPlanId = (int)$db->lastInsertId();
+            $featureIds = array_map('intval', $_POST['feature_ids'] ?? []);
+            foreach ($featureIds as $fid) {
+                $db->prepare("INSERT IGNORE INTO plan_features (plan_id, feature_id) VALUES (?, ?)")->execute([$newPlanId, $fid]);
+            }
             log_activity('admin_create_plan', "Created plan: {$name}");
             flash('success', "Plan \"{$name}\" created!");
         }
@@ -43,6 +50,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
         if ($name) {
             $db->prepare("UPDATE plans SET name=?,description=?,features=?,duration_days=?,price=?,currency=?,badge=?,is_featured=?,color=?,is_active=?,sort_order=? WHERE id=?")
                ->execute([$name, $desc, $features, $days, $price, $currency, $badge, $featured, $color, $active, $sort, $planId]);
+            // Update feature assignments
+            $featureIds = array_map('intval', $_POST['feature_ids'] ?? []);
+            $db->prepare("DELETE FROM plan_features WHERE plan_id = ?")->execute([$planId]);
+            foreach ($featureIds as $fid) {
+                $db->prepare("INSERT INTO plan_features (plan_id, feature_id) VALUES (?, ?)")->execute([$planId, $fid]);
+            }
             log_activity('admin_update_plan', "Updated plan ID: {$planId}");
             flash('success', "Plan updated!");
         }
@@ -73,6 +86,22 @@ $editing = null;
 if (isset($_GET['edit'])) {
     $editId = (int)$_GET['edit'];
     foreach ($plans as $p) { if ($p['id'] === $editId) { $editing = $p; break; } }
+}
+
+// Load all active features for the checkbox grid
+$allFeatures = $db->query("SELECT * FROM features WHERE is_active = 1 ORDER BY sort_order")->fetchAll();
+$editingFeatureIds = [];
+if ($editing) {
+    $stmt = $db->prepare("SELECT feature_id FROM plan_features WHERE plan_id = ?");
+    $stmt->execute([$editing['id']]);
+    $editingFeatureIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+}
+
+// Build plan-to-features icon lookup for the table
+$planFeatureLookup = [];
+$pfRows = $db->query("SELECT pf.plan_id, f.icon FROM plan_features pf JOIN features f ON pf.feature_id = f.id WHERE f.is_active = 1 ORDER BY f.sort_order")->fetchAll();
+foreach ($pfRows as $pf) {
+    $planFeatureLookup[$pf['plan_id']][] = $pf['icon'];
 }
 
 admin_header('Plans & Pricing', '🏷️', 'plans');
@@ -139,6 +168,23 @@ admin_header('Plans & Pricing', '🏷️', 'plans');
 <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" name="is_featured" <?= ($editing['is_featured'] ?? 0) ? 'checked' : '' ?> style="width:18px;height:18px;accent-color:var(--theme)"><span style="font-size:.82rem;font-weight:700">⭐ Featured (highlighted card)</span></label>
 </div>
 
+<?php if(!empty($allFeatures)): ?>
+<div style="margin-bottom:16px">
+<label style="font-size:.82rem;font-weight:800;margin-bottom:8px;display:block">🔓 Feature Access</label>
+<p style="font-size:.75rem;color:var(--text-3);margin-bottom:10px">Check which features this plan grants access to.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+<?php foreach($allFeatures as $f):
+    $checked = (!$editing || in_array($f['id'], $editingFeatureIds)) ? 'checked' : '';
+?>
+<label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2)">
+  <input type="checkbox" name="feature_ids[]" value="<?= $f['id'] ?>" <?= $checked ?> style="width:16px;height:16px;accent-color:var(--theme)">
+  <span style="font-size:.8rem;font-weight:700"><?= e($f['icon']) ?> <?= e($f['name']) ?></span>
+</label>
+<?php endforeach; ?>
+</div>
+</div>
+<?php endif; ?>
+
 <div style="display:flex;gap:8px">
 <button type="submit" class="btn btn-primary" style="max-width:200px"><?= $editing ? '💾 Update Plan' : '➕ Create Plan' ?></button>
 <?php if($editing): ?><a href="<?= APP_URL ?>/admin/plans.php" class="btn btn-secondary" style="max-width:120px">Cancel</a><?php endif; ?>
@@ -151,7 +197,7 @@ admin_header('Plans & Pricing', '🏷️', 'plans');
 <div class="dc-header"><div class="dc-title">🏷️ Plans (<?= count($plans) ?>)</div></div>
 <div style="overflow-x:auto">
 <table class="data-table">
-<thead><tr><th>Order</th><th>Name</th><th>Price</th><th>Duration</th><th>Badge</th><th>Status</th><th>Featured</th><th>Actions</th></tr></thead>
+<thead><tr><th>Order</th><th>Name</th><th>Price</th><th>Duration</th><th>Features</th><th>Badge</th><th>Status</th><th>Actions</th></tr></thead>
 <tbody>
 <?php foreach($plans as $p): ?>
 <tr>
@@ -159,9 +205,9 @@ admin_header('Plans & Pricing', '🏷️', 'plans');
 <td><strong style="color:<?= e($p['color']) ?>"><?= e($p['name']) ?></strong><br><span style="font-size:.75rem;color:var(--text-3)"><?= e($p['description'] ?? '') ?></span></td>
 <td style="font-family:'Space Mono',monospace;font-weight:800"><?= e($p['currency']) ?> <?= number_format($p['price'],2) ?></td>
 <td><?= $p['duration_days'] ?> days</td>
+<td style="font-size:1rem;letter-spacing:2px"><?= implode('', $planFeatureLookup[$p['id']] ?? []) ?: '—' ?></td>
 <td><?= $p['badge'] ? '<span class="badge badge-subscriber">' . e($p['badge']) . '</span>' : '—' ?></td>
 <td><span class="badge badge-<?= $p['is_active']?'active':'suspended' ?>"><?= $p['is_active']?'Active':'Hidden' ?></span></td>
-<td><?= $p['is_featured'] ? '⭐' : '' ?></td>
 <td style="white-space:nowrap">
 <a href="?edit=<?= $p['id'] ?>" class="act-btn">✏️ Edit</a>
 <form method="POST" style="display:inline"><?= csrf_field() ?>

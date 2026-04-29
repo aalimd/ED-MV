@@ -4,6 +4,7 @@
  * Auth gate + user menu injection around the original HTML
  */
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/features.php';
 require_login();
 require_subscription();
 
@@ -43,6 +44,6 @@ $userMenu .= '
 </div>';
 
 // Inject after <body> tag
-$html = preg_replace('/<body>/', '<body>' . $userMenu, $html, 1);
+$html = preg_replace('/<body>/', '<body>' . render_feature_script() . $userMenu, $html, 1);
 
 echo $html;

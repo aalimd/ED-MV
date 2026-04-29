@@ -472,6 +472,11 @@
     .cp-fill { height:100%; background:var(--success); border-radius:99px; transition:width .3s ease; }
     .cp-text { font-size:.78rem; font-weight:800; color:var(--text-2); white-space:nowrap; }
 
+    /* ── FEATURE GATING ── */
+    .nav-it.feature-locked { opacity:0.4; position:relative; }
+    .nav-it.feature-locked .lock-badge { position:absolute; top:0; right:2px; font-size:.55rem; line-height:1; }
+    .feature-locked-el { opacity:0.35; filter:grayscale(0.3); pointer-events:none; position:relative; }
+
     /* ── PRINT ── */
     @media print {
       html,body { height:auto; max-width:none; overflow:visible; }
@@ -481,6 +486,7 @@
       .view { display:block!important; animation:none; }
       .view:not(.active) { display:none!important; }
       .pcard,.info-card,.waveform-card { break-inside:avoid; box-shadow:none; border:1px solid #ccc; }
+      .feature-locked-el { display:none!important; }
     }
 
     @media(max-width:640px){
@@ -834,6 +840,17 @@
   </div>
 </div>
 
+<!-- ████ UPGRADE MODAL ████ -->
+<div class="modal-bg" id="upgradeModal" role="dialog" aria-modal="true">
+  <div class="modal" style="text-align:center;">
+    <div style="font-size:2.4rem;margin-bottom:10px;">🔒</div>
+    <h2 style="font-size:1.2rem;font-weight:800;color:var(--theme);margin-bottom:10px;">Premium Feature</h2>
+    <p style="font-size:.87rem;color:var(--text-2);line-height:1.65;margin-bottom:20px;"><strong id="upgradeName">This feature</strong> requires a higher subscription plan.</p>
+    <a href="/ED-MV/subscribe.php" class="ehr-btn" style="margin-bottom:8px;">⬆️ Upgrade Plan</a>
+    <button class="ehr-btn secondary" id="closeUpgrade">✖️ Close</button>
+  </div>
+</div>
+
 <!-- ████ HEADER ████ -->
 <header class="header" id="appHeader">
   <div class="header-inner">
@@ -911,7 +928,7 @@
     <div class="evidence-bar" id="evidenceBar"></div>
 
     <!-- EHR -->
-    <button class="ehr-btn" id="ehrBtn">
+    <button class="ehr-btn" id="ehrBtn" data-feature="ehr_export" data-feature-name="EHR Export">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
       📋 Copy Structured Note to EHR
     </button>
@@ -1645,29 +1662,72 @@
 
 <!-- ████ BOTTOM NAV ████ -->
 <nav class="bottom-nav" role="tablist" aria-label="Main navigation">
-  <button class="nav-it active" data-target="view-scenarios" role="tab" aria-selected="true">
+  <button class="nav-it active" data-target="view-scenarios" data-feature="scenarios" data-feature-name="Ventilation Scenarios" role="tab" aria-selected="true">
     <span class="nav-emoji">🏥</span><span>Scenarios</span>
   </button>
-  <button class="nav-it" data-target="view-abg" role="tab" aria-selected="false">
+  <button class="nav-it" data-target="view-abg" data-feature="abg_calc" data-feature-name="ABG Calculator" role="tab" aria-selected="false">
     <span class="nav-emoji">🧪</span><span>ABG Calc</span>
   </button>
-  <button class="nav-it" data-target="view-compare" role="tab" aria-selected="false">
+  <button class="nav-it" data-target="view-compare" data-feature="compare" data-feature-name="Scenario Comparison" role="tab" aria-selected="false">
     <span class="nav-emoji">📊</span><span>Compare</span>
   </button>
-  <button class="nav-it" data-target="view-guide" role="tab" aria-selected="false">
+  <button class="nav-it" data-target="view-guide" data-feature="guide" data-feature-name="Clinical Guidelines" role="tab" aria-selected="false">
     <span class="nav-emoji">📖</span><span>Guide</span>
   </button>
-  <button class="nav-it" data-target="view-tools" role="tab" aria-selected="false">
+  <button class="nav-it" data-target="view-tools" data-feature="tools" data-feature-name="Clinical Tools" role="tab" aria-selected="false">
     <span class="nav-emoji">🔧</span><span>Tools</span>
   </button>
 </nav>
 
 <!-- ████ FAB ████ -->
-<button class="fab" id="fabCalc" aria-label="Open PBW Calculator" title="PBW Calculator">⚖️</button>
+<button class="fab" id="fabCalc" data-feature="pbw_calc" data-feature-name="PBW Calculator" aria-label="Open PBW Calculator" title="PBW Calculator">⚖️</button>
 
 <!-- ████ SCRIPT ████ -->
 <script>
 'use strict';
+
+// ─── FEATURE GATE ENGINE ─────────────────────────────
+const FG = (() => {
+  const granted = new Set(window.__FEATURES || []);
+
+  function has(key) {
+    if (granted.has(key)) return true;
+    let dot = key.lastIndexOf('.');
+    while (dot > 0) {
+      key = key.substring(0, dot);
+      if (granted.has(key)) return true;
+      dot = key.lastIndexOf('.');
+    }
+    return false;
+  }
+
+  function scan() {
+    document.querySelectorAll('[data-feature]').forEach(el => {
+      const key = el.dataset.feature;
+      if (has(key)) return;
+      if (el.classList.contains('nav-it')) {
+        el.classList.add('feature-locked');
+        const badge = document.createElement('span');
+        badge.className = 'lock-badge';
+        badge.textContent = '🔒';
+        el.appendChild(badge);
+      } else {
+        el.classList.add('feature-locked-el');
+      }
+    });
+  }
+
+  function prompt(key) {
+    const modal = document.getElementById('upgradeModal');
+    if (!modal) return;
+    const el = document.querySelector('[data-feature="' + key + '"]');
+    const name = el ? (el.dataset.featureName || 'This feature') : 'This feature';
+    document.getElementById('upgradeName').textContent = name;
+    modal.classList.add('open');
+  }
+
+  return { has, scan, prompt };
+})();
 
 // ─── STORE (persistent state) ────────────────────────
 const Store = {
@@ -2086,6 +2146,15 @@ const App = {
     this._setupTools();
     this._setupCompareModes();
     this._updateUI();
+
+    // Feature gating — scan and lock UI elements
+    FG.scan();
+    document.getElementById('closeUpgrade')?.addEventListener('click', () => {
+      document.getElementById('upgradeModal').classList.remove('open');
+    });
+    document.getElementById('upgradeModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'upgradeModal') e.target.classList.remove('open');
+    });
 
     Store.sub(() => this._updateUI());
   },
@@ -2829,6 +2898,10 @@ const App = {
   _setupNav() {
     document.querySelectorAll('.nav-it').forEach(btn => {
       btn.addEventListener('click', () => {
+        // Feature gate check
+        const fk = btn.dataset.feature;
+        if (fk && !FG.has(fk)) { FG.prompt(fk); return; }
+        // Original navigation logic
         document.querySelectorAll('.nav-it').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
         btn.classList.add('active'); btn.setAttribute('aria-selected','true');
         const t = btn.dataset.target;
@@ -2861,7 +2934,10 @@ const App = {
     const open  = () => { modal.classList.add('open'); this._trapFocus(modal); setTimeout(()=>hIn.focus(),60); };
     const closeM = () => { modal.classList.remove('open'); this._releaseFocus(); };
 
-    fab.addEventListener('click', open);
+    fab.addEventListener('click', () => {
+      if (fab.dataset.feature && !FG.has(fab.dataset.feature)) { FG.prompt(fab.dataset.feature); return; }
+      open();
+    });
     close.addEventListener('click', closeM);
     apply.addEventListener('click', closeM);
     modal.addEventListener('click', e => { if (e.target === modal) closeM(); });
@@ -3024,6 +3100,9 @@ const App = {
   // ── EHR Copy ───────────────────────────────────────
   _setupEHR() {
     document.getElementById('ehrBtn').addEventListener('click', async () => {
+      // Feature gate check
+      const ehrEl = document.getElementById('ehrBtn');
+      if (ehrEl.dataset.feature && !FG.has(ehrEl.dataset.feature)) { FG.prompt(ehrEl.dataset.feature); return; }
       const s   = SCENARIOS.find(x => x.id === Store.get('scenario'));
       const pbw = Store.get('pbw');
       const now = new Date().toISOString().slice(0,16).replace('T',' ');

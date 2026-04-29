@@ -5,12 +5,20 @@
  */
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/features.php';
 require_login();
 if (has_subscription()) redirect(APP_URL . '/app/ventguide.php');
 
 $user = session_user();
 $db = getDB();
 $plans = $db->query("SELECT * FROM plans WHERE is_active = 1 ORDER BY sort_order, id")->fetchAll();
+
+// Build plan-to-features lookup from the database
+$planFeaturesMap = [];
+$pfq = $db->query("SELECT pf.plan_id, f.icon, f.name FROM plan_features pf JOIN features f ON pf.feature_id = f.id WHERE f.is_active = 1 ORDER BY f.sort_order");
+foreach ($pfq->fetchAll() as $pf) {
+    $planFeaturesMap[$pf['plan_id']][] = $pf['icon'] . ' ' . $pf['name'];
+}
 
 // Page content from admin settings
 $pageTitle = get_setting('sub_page_title', 'Choose Your Plan');
@@ -159,7 +167,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 
 <div class="pricing-grid">
 <?php foreach($plans as $i => $plan):
-  $features = array_filter(array_map('trim', explode('|', $plan['features'] ?? '')));
+  $features = $planFeaturesMap[$plan['id']] ?? [];
   $isFeatured = $plan['is_featured'];
   $cardColor = $plan['color'] ?? '#2563eb';
   $currency = $currencyOverride ?: $plan['currency'];
