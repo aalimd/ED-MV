@@ -1,16 +1,7 @@
--- ═══════════════════════════════════════════════════════
--- ED VentGuide Pro — Database Schema
--- One-time local/manual setup file.
--- Production deployments should use tools/migrate.php instead.
--- ═══════════════════════════════════════════════════════
+-- ED VentGuide Pro initial schema.
+-- Safe to run on an existing database: tables are created only when missing,
+-- and default rows are inserted only when they do not already exist.
 
-CREATE DATABASE IF NOT EXISTS `edmvpro` 
-  CHARACTER SET utf8mb4 
-  COLLATE utf8mb4_unicode_ci;
-
-USE `edmvpro`;
-
--- ── Users ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `users` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(100) NOT NULL,
@@ -26,9 +17,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   INDEX `idx_email` (`email`),
   INDEX `idx_status` (`status`),
   INDEX `idx_role` (`role`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Subscription Plans ────────────────────────────────
 CREATE TABLE IF NOT EXISTS `plans` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(100) NOT NULL,
@@ -44,15 +34,13 @@ CREATE TABLE IF NOT EXISTS `plans` (
   `is_active` TINYINT(1) NOT NULL DEFAULT 1,
   `sort_order` INT NOT NULL DEFAULT 0,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Default Plans ─────────────────────────────────────
 INSERT IGNORE INTO `plans` (`name`, `slug`, `description`, `features`, `duration_days`, `price`, `currency`, `badge`, `is_featured`, `color`, `is_active`, `sort_order`) VALUES
 ('Monthly', 'monthly', 'Full access for 30 days', 'Full ventilation reference|All clinical scenarios|PBW calculator|ABG correction tool', 30, 9.99, 'SAR', NULL, 0, '#2563eb', 1, 1),
 ('Yearly', 'yearly', 'Full access for 365 days', 'Full ventilation reference|All clinical scenarios|PBW calculator|ABG correction tool|Priority support', 365, 49.99, 'SAR', 'Best Value', 1, '#7c3aed', 1, 2),
 ('Lifetime', 'lifetime', 'Unlimited access forever', 'Full ventilation reference|All clinical scenarios|PBW calculator|ABG correction tool|Priority support|Lifetime updates', 36500, 99.99, 'SAR', 'Most Popular', 0, '#059669', 1, 3);
 
--- ── Subscriptions ─────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `subscriptions` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `user_id` INT UNSIGNED NOT NULL,
@@ -69,9 +57,8 @@ CREATE TABLE IF NOT EXISTS `subscriptions` (
   FOREIGN KEY (`activated_by`) REFERENCES `users`(`id`) ON DELETE SET NULL,
   INDEX `idx_user_status` (`user_id`, `status`),
   INDEX `idx_expires` (`expires_at`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Login Attempts (Rate Limiting) ────────────────────
 CREATE TABLE IF NOT EXISTS `login_attempts` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `ip` VARCHAR(45) NOT NULL,
@@ -81,9 +68,8 @@ CREATE TABLE IF NOT EXISTS `login_attempts` (
   `locked_until` DATETIME NULL,
   INDEX `idx_ip` (`ip`),
   INDEX `idx_locked` (`locked_until`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Password Resets ───────────────────────────────────
 CREATE TABLE IF NOT EXISTS `password_resets` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `email` VARCHAR(255) NOT NULL,
@@ -93,9 +79,8 @@ CREATE TABLE IF NOT EXISTS `password_resets` (
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX `idx_email` (`email`),
   INDEX `idx_expires` (`expires_at`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Activity Log ──────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `activity_log` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `user_id` INT UNSIGNED NULL,
@@ -108,16 +93,14 @@ CREATE TABLE IF NOT EXISTS `activity_log` (
   INDEX `idx_action` (`action`),
   INDEX `idx_created` (`created_at`),
   INDEX `idx_user` (`user_id`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── App Settings ──────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `app_settings` (
   `setting_key` VARCHAR(100) PRIMARY KEY,
   `setting_value` TEXT NULL,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ── Default Settings ──────────────────────────────────
 INSERT IGNORE INTO `app_settings` (`setting_key`, `setting_value`) VALUES
 ('app_name', 'ED VentGuide Pro'),
 ('app_tagline', 'Evidence-Based Emergency Ventilation Reference'),
