@@ -61,6 +61,15 @@ This creates all required tables and inserts default plans/settings only if they
 
 If the host does not provide SSH/PHP CLI, use phpMyAdmin and import the SQL files in `migrations/` in filename order. After import, create `schema_migrations` or switch to SSH for future changes. The CLI migration tool is safer because it records what already ran.
 
+If you are upgrading an older live database that already had a `plans` table before migrations were introduced, and `php tools/deployment_check.php` reports missing `plans` columns such as `features`, `badge`, `is_featured`, or `color`, run:
+
+```bash
+php tools/repair_legacy_schema.php
+php tools/deployment_check.php
+```
+
+That repair script upgrades the old `plans` table in place, preserves existing data, inserts any missing default rows, and marks the initial migration as applied.
+
 ## Future SQL Changes
 
 Create a new migration file:
