@@ -847,7 +847,7 @@ require_once __DIR__ . '/../includes/pwa.php';
     <div style="font-size:2.4rem;margin-bottom:10px;">🔒</div>
     <h2 style="font-size:1.2rem;font-weight:800;color:var(--theme);margin-bottom:10px;">Premium Feature</h2>
     <p style="font-size:.87rem;color:var(--text-2);line-height:1.65;margin-bottom:20px;"><strong id="upgradeName">This feature</strong> requires a higher subscription plan.</p>
-    <a href="/ED-MV/subscribe.php" class="ehr-btn" style="margin-bottom:8px;">⬆️ Upgrade Plan</a>
+    <a href="<?= APP_URL ?>/subscribe.php" class="ehr-btn" style="margin-bottom:8px;">⬆️ Upgrade Plan</a>
     <button class="ehr-btn secondary" id="closeUpgrade">✖️ Close</button>
   </div>
 </div>
