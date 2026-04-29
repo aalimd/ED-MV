@@ -22,12 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $expires = date('Y-m-d H:i:s', time() + 3600);
                 $db->prepare('INSERT INTO password_resets (email, token_hash, expires_at) VALUES (?,?,?)')->execute([$email, $hash, $expires]);
                 log_activity('password_reset_request', "Reset requested for: {$email}");
-                // In production, send email. For now, show token for testing.
-                $resetUrl = APP_URL . "/auth/reset.php?token={$token}&email=" . urlencode($email);
-                $msg = "Reset link generated. In production this would be emailed. For testing, use this link:";
-                $_SESSION['reset_link'] = $resetUrl;
+                // In production, send email.
+                // mail($email, 'Password Reset', "Your reset link: " . APP_URL . "/auth/reset.php?token={$token}&email=" . urlencode($email));
+                $msg = 'If an account exists with that email, a reset link has been sent.';
             }
-            // Always show success (prevents email enumeration)
             if (!$msg) $msg = 'If an account exists with that email, a reset link has been sent.';
         }
     }
@@ -48,14 +46,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <h1 class="auth-title">Reset your password</h1>
 <p class="auth-subtitle">Enter your email and we'll send you a reset link.</p>
 <?php if($error): ?><div class="flash flash-danger">❌ <?= e($error) ?></div><?php endif; ?>
-<?php if($msg): ?><div class="flash flash-success">✅ <?= e($msg) ?></div>
-<?php if(isset($_SESSION['reset_link'])): ?>
-<div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:16px;word-break:break-all;">
-<div style="font-size:.72rem;font-weight:800;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;">🔗 Test Reset Link</div>
-<a href="<?= e($_SESSION['reset_link']) ?>" style="font-size:.82rem;color:var(--theme);font-weight:700;"><?= e($_SESSION['reset_link']) ?></a>
-</div>
-<?php unset($_SESSION['reset_link']); endif; ?>
-<?php endif; ?>
+<?php if($msg): ?><div class="flash flash-success">✅ <?= e($msg) ?></div><?php endif; ?>
 <form method="POST"><?= csrf_field() ?>
 <div class="form-group"><label class="form-label" for="email">📧 Email</label>
 <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required autofocus></div>

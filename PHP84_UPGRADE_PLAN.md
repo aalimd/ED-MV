@@ -633,17 +633,17 @@ These must be tracked explicitly as tickets:
 - [ ] Confirm all required PHP extensions
 - [ ] Diff old `php.ini` against PHP 8.4 `php.ini-production` (session, opcache, error settings)
 - [ ] Confirm writable log path
-- [ ] Create `logs/.htaccess` with `Deny from all`
+- [x] Create `logs/.htaccess` with `Deny from all`
 - [ ] Confirm writable session path
-- [ ] Remove or block `setup.php` in production
-- [ ] Remove password-reset test link behavior from production flow
-- [ ] Replace fragile redirect logic in login flow
+- [x] Remove or block `setup.php` in production
+- [x] Remove password-reset test link behavior from production flow
+- [x] Replace fragile redirect logic in login flow
 - [ ] Resolve config-vs-database security setting conflicts
-- [ ] Update `config.example.php` to match final `config.php` structure
-- [ ] Add HTTP security headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy)
-- [ ] Check `PASSWORD_ARGON2ID` availability (optional upgrade from bcrypt)
+- [x] Update `config.example.php` to match final `config.php` structure
+- [x] Add HTTP security headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy)
+- [x] Check `PASSWORD_ARGON2ID` availability (optional upgrade from bcrypt)
 - [ ] Set `opcache.validate_timestamps=1` during validation window
-- [ ] Create git tag `v1.0-pre-php84` before cutover
+- [x] Create git tag `v1.0-pre-php84` before cutover
 - [ ] Complete full staging test matrix
 - [ ] Prepare and test rollback
 - [ ] Perform production cutover and smoke tests

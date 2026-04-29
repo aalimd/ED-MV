@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
                 break;
             case 'reset_password':
                 $newPwd = bin2hex(random_bytes(4)); // 8-char temp password
-                $hash = password_hash($newPwd, PASSWORD_BCRYPT, ['cost' => BCRYPT_COST]);
+                $hash = password_hash($newPwd, defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT, defined('PASSWORD_ARGON2ID') ? [] : ['cost' => BCRYPT_COST]);
                 $db->prepare("UPDATE users SET password_hash=? WHERE id=?")->execute([$hash, $uid]);
                 log_activity('admin_reset_password', "Reset password for user ID: {$uid}");
                 flash('success', "Password reset. Temporary password: <strong>{$newPwd}</strong> — share securely.");

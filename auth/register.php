@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         if (!$errors) {
             $db = getDB();
-            $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => BCRYPT_COST]);
+            $hash = password_hash($password, defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT, defined('PASSWORD_ARGON2ID') ? [] : ['cost' => BCRYPT_COST]);
             $status = REQUIRE_ADMIN_APPROVAL ? 'pending' : 'active';
             $stmt = $db->prepare('INSERT INTO users (name, email, password_hash, role, status) VALUES (?,?,?,?,?)');
             $stmt->execute([$name, $email, $hash, 'user', $status]);

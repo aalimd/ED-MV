@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$resetRow) { $error = 'Invalid or expired reset link.'; }
                 else {
                     $db = getDB();
-                    $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => BCRYPT_COST]);
+                    $hash = password_hash($password, defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT, defined('PASSWORD_ARGON2ID') ? [] : ['cost' => BCRYPT_COST]);
                     $db->prepare('UPDATE users SET password_hash=? WHERE email=?')->execute([$hash, $email]);
                     $db->prepare('UPDATE password_resets SET used=1 WHERE email=? AND token_hash=?')->execute([$email, hash('sha256', $token)]);
                     log_activity('password_reset', "Password reset for: {$email}");
