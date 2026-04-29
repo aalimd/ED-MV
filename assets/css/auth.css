@@ -309,6 +309,7 @@ img, svg, video, canvas { max-width: 100%; height: auto; }
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
+  touch-action: manipulation;
 }
 .btn-primary {
   background: var(--theme);

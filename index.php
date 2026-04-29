@@ -9,7 +9,7 @@ require_once __DIR__ . '/includes/helpers.php';
 // Check maintenance mode
 if (get_setting('maintenance_mode', '0') === '1' && !is_admin()) {
     http_response_code(503);
-    echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Maintenance</title>';
+    echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover"><title>Maintenance</title>';
     echo '<link rel="stylesheet" href="' . APP_URL . '/assets/css/auth.css"></head><body>';
     echo '<div class="auth-wrapper"><div class="auth-card" style="text-align:center"><div style="font-size:3rem;margin-bottom:12px">🔧</div>';
     echo '<h1 class="auth-title">Under Maintenance</h1>';

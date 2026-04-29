@@ -6,7 +6,7 @@ require_once __DIR__ . '/../includes/pwa.php';
 <html lang="en" class="no-js">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
   <?= pwa_head_tags('Evidence-based emergency department ventilation reference.') . "\n" ?>
   <title>🫁 ED VentGuide Pro</title>
 
@@ -87,6 +87,10 @@ require_once __DIR__ . '/../includes/pwa.php';
       max-width:100vw;
       overflow:hidden;
       touch-action:pan-y;
+      -webkit-user-select:none; user-select:none;
+    }
+    input, textarea, [contenteditable] {
+      -webkit-user-select:auto; user-select:auto;
     }
 
     /* ── SCROLLBAR ── */
@@ -96,6 +100,7 @@ require_once __DIR__ . '/../includes/pwa.php';
 
     /* ── ACCESSIBILITY ── */
     .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border-width:0; }
+    button,a { outline:none; text-decoration:none; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
     button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visible { outline:none; box-shadow:var(--focus-ring); border-radius:var(--r-sm); }
 
     /* ── TERM TOOLTIPS ── */

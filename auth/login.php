@@ -59,7 +59,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <!DOCTYPE html>
 <html lang="en" class="<?= $dark?'dark':'' ?>">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
 <title>Login — <?= e(APP_NAME) ?></title>
 <?= pwa_head_tags('Sign in to ED VentGuide Pro.') . "\n" ?>
 <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/auth.css">
