@@ -1,17 +1,13 @@
-<?php if (!defined('VENTGUIDE_INTERNAL')) { http_response_code(404); exit('Not found'); } ?>
+<?php
+if (!defined('VENTGUIDE_INTERNAL')) { http_response_code(404); exit('Not found'); }
+require_once __DIR__ . '/../includes/pwa.php';
+?>
 <!DOCTYPE html>
 <html lang="en" class="no-js">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#2563eb" id="themeColorMeta">
-  <meta name="description" content="Evidence-based emergency department ventilation reference — ED VentGuide Pro">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="VentGuide">
-  <link rel="apple-touch-icon" href="icon.png">
-  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiRUQgVmVudEd1aWRlIiwic2hvcnRfbmFtZSI6IlZlbnRHdWlkZSIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZjFmNWY5IiwidGhlbWVfY29sb3IiOiIjMjU2M2ViIn0=">
+  <?= pwa_head_tags('Evidence-based emergency department ventilation reference.') . "\n" ?>
   <title>🫁 ED VentGuide Pro</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3773,17 +3769,7 @@ const App = {
 // ─── BOOT ─────────────────────────────────────────────
 App.init();
 
-// ─── SERVICE WORKER (offline) ─────────────────────────
-if ('serviceWorker' in navigator) {
-  const sw = `
-    self.addEventListener('install', () => self.skipWaiting());
-    self.addEventListener('activate', () => self.clients.claim());
-    self.addEventListener('fetch', e => {
-      e.respondWith(fetch(e.request).catch(() => new Response('<h1>Offline</h1><p>ED VentGuide is offline. Reload when connected.</p>', {headers:{'Content-Type':'text/html'}})));
-    });
-  `;
-  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw], {type:'application/javascript'}))).catch(()=>{});
-}
 </script>
+<?= pwa_script_tag() . "\n" ?>
 </body>
 </html>

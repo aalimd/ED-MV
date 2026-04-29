@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../includes/pwa.php';
 init_session();
 
 $error = ''; $success = false;
@@ -52,6 +53,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Reset Password — <?= e(APP_NAME) ?></title>
+<?= pwa_head_tags('Set a new ED VentGuide Pro password.') . "\n" ?>
 <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/auth.css">
 </head>
 <body>
@@ -79,4 +81,5 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 function togglePwd(id){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}
 function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}
 </script>
+<?= pwa_script_tag() . "\n" ?>
 </body></html>

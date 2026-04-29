@@ -3,6 +3,7 @@ require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/pwa.php';
 init_session();
 if (is_logged_in()) redirect(APP_URL . '/index.php');
 
@@ -49,6 +50,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Register — <?= e(APP_NAME) ?></title>
+<?= pwa_head_tags('Request access to ED VentGuide Pro.') . "\n" ?>
 <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/auth.css">
 </head>
 <body>
@@ -80,4 +82,5 @@ function togglePwd(id){const i=document.getElementById(id);i.type=i.type==='pass
 function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}
 function checkStrength(p){const b=[document.getElementById('b1'),document.getElementById('b2'),document.getElementById('b3')];const l=document.getElementById('pwdLabel');let s=0;if(p.length>=8)s++;if(/[A-Z]/.test(p)&&/[0-9]/.test(p))s++;if(p.length>=12&&/[^A-Za-z0-9]/.test(p))s++;b.forEach((x,i)=>{x.className='pwd-bar';if(i<s)x.classList.add(s===1?'active-weak':s===2?'active-medium':'active-strong');});l.textContent=s===0?'':s===1?'Weak':s===2?'Medium':'Strong';l.style.color=s===1?'var(--danger)':s===2?'var(--warning)':'var(--success)';}
 </script>
+<?= pwa_script_tag() . "\n" ?>
 </body></html>

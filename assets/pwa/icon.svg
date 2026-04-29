@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="ED VentGuide Pro">
+  <rect width="512" height="512" rx="112" fill="#2563eb"/>
+  <path d="M256 96v134" fill="none" stroke="#ffffff" stroke-width="32" stroke-linecap="round"/>
+  <path d="M256 224c-33-58-94-96-149-70-50 24-72 94-55 178 11 53 37 84 74 84 46 0 62-53 76-103 12-42 24-80 54-89Z" fill="none" stroke="#ffffff" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M256 224c33-58 94-96 149-70 50 24 72 94 55 178-11 53-37 84-74 84-46 0-62-53-76-103-12-42-24-80-54-89Z" fill="none" stroke="#ffffff" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M188 286c-22 19-34 52-36 88M324 286c22 19 34 52 36 88" fill="none" stroke="#bfdbfe" stroke-width="20" stroke-linecap="round"/>
+</svg>

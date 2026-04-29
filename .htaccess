@@ -1,6 +1,9 @@
 DirectoryIndex index.php
 Options -Indexes
 
+AddType application/manifest+json .webmanifest
+AddType application/javascript .js
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteRule ^(\.git|tools|migrations)(/|$) - [F,L]
@@ -13,3 +16,9 @@ Options -Indexes
 <FilesMatch "^(\.env.*|config\.php|db_setup\.sql|.*\.md)$">
     Require all denied
 </FilesMatch>
+
+<IfModule mod_headers.c>
+    <FilesMatch "^(sw\.js|manifest\.webmanifest)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+    </FilesMatch>
+</IfModule>

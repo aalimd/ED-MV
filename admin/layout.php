@@ -5,6 +5,7 @@
  */
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../includes/pwa.php';
 require_admin();
 
 function admin_header(string $title, string $icon = '📊', string $activePage = ''): void {
@@ -24,6 +25,7 @@ function admin_header(string $title, string $icon = '📊', string $activePage =
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title><?= e($title) ?> — Admin</title>
+<?= pwa_head_tags('ED VentGuide Pro admin control panel.') . "\n" ?>
 <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/admin.css">
 </head>
 <body>
@@ -59,5 +61,6 @@ function admin_footer(): void { ?>
 <script>
 function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}
 </script>
+<?= pwa_script_tag() . "\n" ?>
 </body></html>
 <?php } // end admin_footer

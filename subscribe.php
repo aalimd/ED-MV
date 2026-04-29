@@ -6,6 +6,7 @@
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/features.php';
+require_once __DIR__ . '/includes/pwa.php';
 require_login();
 if (has_subscription()) redirect(APP_URL . '/app/ventguide.php');
 
@@ -51,6 +52,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title><?= e($pageTitle) ?> — <?= e(APP_NAME) ?></title>
+<?= pwa_head_tags('Choose your ED VentGuide Pro access plan.') . "\n" ?>
 <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/auth.css">
 <style>
 /* ── Pricing Page Styles ──────────────────────── */
@@ -208,4 +210,5 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <script>
 function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}
 </script>
+<?= pwa_script_tag() . "\n" ?>
 </body></html>
