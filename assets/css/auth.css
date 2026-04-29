@@ -83,11 +83,15 @@ body {
   padding: 24px 16px;
   position: absolute;
   inset: 0;
-  /* Only this element scrolls, only when content is taller than viewport */
+  /* Default: no scroll. JS adds .scrollable only when content overflows. */
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: pan-y;
+}
+/* JS-enabled scroll — only active when card is taller than viewport */
+.auth-wrapper.scrollable {
   overflow-y: auto;
-  overflow-x: hidden;
-  overscroll-behavior-y: none;   /* no rubber-band at top/bottom of wrapper */
-  touch-action: pan-y;           /* allow single-finger vertical pan here only */
+  align-items: flex-start;
 }
 
 /* Animated background blobs */

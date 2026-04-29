@@ -43,10 +43,42 @@ function pwa_script_tag(): string {
  */
 function pwa_zoom_lock_script(): string {
     return '<script>(function(){
+/* ── Zoom prevention (must run synchronously before iOS claims gestures) ── */
 var _lastTouch=0;
 document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
 document.addEventListener("gesturechange",function(e){e.preventDefault();},{passive:false});
-document.addEventListener("touchmove",function(e){if(e.touches&&e.touches.length>1){e.preventDefault();return;}var el=e.target;while(el&&el!==document.body){if(el.id==="pwa-ios-sheet"||el.classList.contains("auth-wrapper")){return;}el=el.parentElement;}e.preventDefault();},{passive:false});
-document.addEventListener("touchend",function(e){var now=Date.now();if(now-_lastTouch<=300){e.preventDefault();}_lastTouch=now;},{passive:false});
+document.addEventListener("touchmove",function(e){
+  /* Always kill multi-touch (pinch) */
+  if(e.touches&&e.touches.length>1){e.preventDefault();return;}
+  /* Allow single-finger scroll ONLY inside .auth-wrapper.scrollable or #pwa-ios-sheet */
+  var el=e.target;
+  while(el&&el!==document.documentElement){
+    if(el.id==="pwa-ios-sheet"){return;}
+    if(el.classList&&el.classList.contains("auth-wrapper")&&el.classList.contains("scrollable")){return;}
+    el=el.parentElement;
+  }
+  e.preventDefault();
+},{passive:false});
+document.addEventListener("touchend",function(e){
+  var now=Date.now();
+  if(now-_lastTouch<=300){e.preventDefault();}
+  _lastTouch=now;
+},{passive:false});
+/* ── Enable scroll only when card overflows viewport ── */
+function checkOverflow(){
+  var w=document.querySelector(".auth-wrapper");
+  var c=document.querySelector(".auth-card");
+  if(!w||!c)return;
+  var needed=c.scrollHeight+(24*2); /* card height + top/bottom padding */
+  if(needed>window.innerHeight){
+    w.classList.add("scrollable");
+  } else {
+    w.classList.remove("scrollable");
+  }
+}
+document.addEventListener("DOMContentLoaded",function(){
+  checkOverflow();
+  window.addEventListener("resize",checkOverflow);
+});
 }());</script>';
 }
