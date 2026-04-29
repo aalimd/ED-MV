@@ -100,5 +100,17 @@
         document.body.style.pointerEvents = 'auto';
       }
     });
+
+    // iOS Safari pinch-to-zoom prevention (fallback for ignored meta tags)
+    document.addEventListener('touchmove', function(e) {
+      if (e.scale !== 1 && e.scale !== undefined) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    // Block native iOS gesture zoom
+    document.addEventListener('gesturestart', function(e) {
+      e.preventDefault();
+    });
   });
 })();

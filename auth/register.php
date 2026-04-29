@@ -62,7 +62,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <?php foreach($errors as $err): ?><div class="flash flash-danger">❌ <?= e($err) ?></div><?php endforeach; ?>
 <form method="POST" autocomplete="on"><?= csrf_field() ?>
 <div class="form-group"><label class="form-label" for="name">👤 Full Name</label>
-<input type="text" id="name" name="name" class="form-input" placeholder="Dr. Jane Smith" value="<?= e($name) ?>" required autofocus></div>
+<input type="text" id="name" name="name" class="form-input" placeholder="Dr. EM Physician" value="<?= e($name) ?>" required autofocus></div>
 <div class="form-group"><label class="form-label" for="email">📧 Email</label>
 <input type="email" id="email" name="email" class="form-input" placeholder="you@hospital.com" value="<?= e($email) ?>" required></div>
 <div class="form-group"><label class="form-label" for="password">🔒 Password</label>
