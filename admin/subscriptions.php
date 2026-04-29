@@ -1,47 +1,76 @@
 <?php
 /** Admin — Subscription Management */
 require_once __DIR__ . '/layout.php';
+require_once __DIR__ . '/../includes/features.php';
 $db = getDB();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
     $action = $_POST['action'] ?? '';
     $subId = (int)($_POST['sub_id'] ?? 0);
     $userId = (int)($_POST['user_id'] ?? 0);
+    $adminId = session_user()['id'];
 
     if ($action === 'activate' && $subId > 0) {
         $planStmt = $db->prepare("SELECT p.duration_days FROM subscriptions s JOIN plans p ON s.plan_id=p.id WHERE s.id=?");
         $planStmt->execute([$subId]); $planRow = $planStmt->fetch();
         $days = $planRow ? $planRow['duration_days'] : 30;
         $expires = date('Y-m-d H:i:s', time() + ($days * 86400));
-        $adminId = session_user()['id'];
         $db->prepare("UPDATE subscriptions SET status='active', starts_at=NOW(), expires_at=?, activated_by=? WHERE id=?")->execute([$expires, $adminId, $subId]);
-        // Also set user role to subscriber
         $db->prepare("UPDATE users u JOIN subscriptions s ON u.id=s.user_id SET u.role='subscriber' WHERE s.id=?")->execute([$subId]);
         log_activity('admin_activate_sub', "Activated subscription ID: {$subId}");
         flash('success', 'Subscription activated!');
+
     } elseif ($action === 'cancel' && $subId > 0) {
         $db->prepare("UPDATE subscriptions SET status='cancelled' WHERE id=?")->execute([$subId]);
         log_activity('admin_cancel_sub', "Cancelled subscription ID: {$subId}");
         flash('warning', 'Subscription cancelled.');
+
     } elseif ($action === 'extend' && $subId > 0) {
-        $extraDays = (int)($_POST['extra_days'] ?? 30);
+        $extraDays = max(1, (int)($_POST['extra_days'] ?? 30));
         $db->prepare("UPDATE subscriptions SET expires_at = DATE_ADD(IFNULL(expires_at, NOW()), INTERVAL ? DAY) WHERE id=?")->execute([$extraDays, $subId]);
         log_activity('admin_extend_sub', "Extended sub ID {$subId} by {$extraDays} days");
         flash('success', "Subscription extended by {$extraDays} days.");
+
+    } elseif ($action === 'change_plan' && $subId > 0) {
+        $newPlanId = (int)($_POST['new_plan_id'] ?? 0);
+        if ($newPlanId > 0) {
+            // Validate plan exists
+            $planCheck = $db->prepare("SELECT id, name, duration_days FROM plans WHERE id = ?");
+            $planCheck->execute([$newPlanId]);
+            $newPlan = $planCheck->fetch();
+            if ($newPlan) {
+                // Get the old plan name for logging
+                $oldStmt = $db->prepare("SELECT p.name FROM subscriptions s JOIN plans p ON s.plan_id=p.id WHERE s.id=?");
+                $oldStmt->execute([$subId]);
+                $oldPlanName = $oldStmt->fetchColumn() ?: 'Unknown';
+
+                // Update the subscription's plan
+                $db->prepare("UPDATE subscriptions SET plan_id = ? WHERE id = ?")->execute([$newPlanId, $subId]);
+
+                // If the subscription is active, recalculate expires_at from starts_at
+                $sub = $db->prepare("SELECT status, starts_at FROM subscriptions WHERE id = ?")->fetch();
+                // Note: we don't recalculate expiry on plan change—admin can extend separately if needed
+
+                log_activity('admin_change_plan', "Changed sub ID {$subId} from \"{$oldPlanName}\" to \"{$newPlan['name']}\"");
+                flash('success', "Plan changed from <strong>{$oldPlanName}</strong> to <strong>" . e($newPlan['name']) . "</strong>.");
+            } else {
+                flash('danger', 'Invalid plan selected.');
+            }
+        }
+
     } elseif ($action === 'grant' && $userId > 0) {
         $planId = (int)($_POST['plan_id'] ?? 1);
         $planStmt = $db->prepare("SELECT duration_days FROM plans WHERE id=?");
         $planStmt->execute([$planId]); $planRow = $planStmt->fetch();
         $days = $planRow ? $planRow['duration_days'] : 30;
         $expires = date('Y-m-d H:i:s', time() + ($days * 86400));
-        $adminId = session_user()['id'];
         $db->prepare("INSERT INTO subscriptions (user_id,plan_id,status,starts_at,expires_at,activated_by) VALUES (?,?,'active',NOW(),?,?)")
            ->execute([$userId, $planId, $expires, $adminId]);
         $db->prepare("UPDATE users SET role='subscriber' WHERE id=?")->execute([$userId]);
         log_activity('admin_grant_sub', "Granted subscription to user ID: {$userId}");
         flash('success', 'Subscription granted!');
     }
-    redirect(APP_URL . '/admin/subscriptions.php');
+    redirect(APP_URL . '/admin/subscriptions.php' . (isset($_GET['filter']) ? '?filter=' . urlencode($_GET['filter']) : ''));
 }
 
 $filter = $_GET['filter'] ?? 'all';
@@ -49,16 +78,17 @@ $where = '';
 if ($filter === 'pending') $where = "WHERE s.status = 'pending'";
 elseif ($filter === 'active') $where = "WHERE s.status = 'active'";
 elseif ($filter === 'expired') $where = "WHERE s.status = 'expired' OR (s.status='active' AND s.expires_at < NOW())";
+elseif ($filter === 'cancelled') $where = "WHERE s.status = 'cancelled'";
 
-$subs = $db->query("SELECT s.*, u.name, u.email, p.name as plan_name, p.duration_days, a.name as activated_by_name FROM subscriptions s JOIN users u ON s.user_id=u.id JOIN plans p ON s.plan_id=p.id LEFT JOIN users a ON s.activated_by=a.id {$where} ORDER BY s.created_at DESC")->fetchAll();
-$plans = $db->query("SELECT * FROM plans ORDER BY sort_order")->fetchAll();
+$subs = $db->query("SELECT s.*, u.name, u.email, u.status as user_status, p.name as plan_name, p.duration_days, a.name as activated_by_name FROM subscriptions s JOIN users u ON s.user_id=u.id JOIN plans p ON s.plan_id=p.id LEFT JOIN users a ON s.activated_by=a.id {$where} ORDER BY s.created_at DESC")->fetchAll();
+$plans = $db->query("SELECT * FROM plans WHERE is_active = 1 ORDER BY sort_order")->fetchAll();
 $usersWithoutSub = $db->query("SELECT u.* FROM users u LEFT JOIN subscriptions s ON u.id=s.user_id AND s.status='active' WHERE s.id IS NULL AND u.status='active' AND u.role != 'admin' ORDER BY u.name")->fetchAll();
 
 admin_header('Subscriptions', '💳', 'subscriptions');
 ?>
 
 <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
-<?php foreach(['all'=>'All','pending'=>'⏳ Pending','active'=>'✅ Active','expired'=>'⌛ Expired'] as $k=>$v): ?>
+<?php foreach(['all'=>'All','pending'=>'⏳ Pending','active'=>'✅ Active','expired'=>'⌛ Expired','cancelled'=>'❌ Cancelled'] as $k=>$v): ?>
 <a href="?filter=<?=$k?>" class="topbar-btn" style="<?=$filter===$k?'background:var(--theme);color:#fff;border-color:var(--theme)':''?>"><?=$v?></a>
 <?php endforeach; ?>
 </div>
@@ -90,25 +120,44 @@ admin_header('Subscriptions', '💳', 'subscriptions');
 <tbody>
 <?php foreach($subs as $s):
   $isExpired = $s['status']==='active' && $s['expires_at'] && strtotime($s['expires_at']) < time();
+  $displayStatus = $isExpired ? 'expired' : $s['status'];
 ?>
 <tr>
 <td style="font-family:'Space Mono',monospace;font-size:.78rem;color:var(--text-3)">#<?= $s['id'] ?></td>
-<td><strong><?= e($s['name']) ?></strong><br><span style="font-size:.75rem;color:var(--text-3)"><?= e($s['email']) ?></span></td>
-<td><?= e($s['plan_name']) ?></td>
-<td><span class="badge badge-<?= $isExpired?'expired':$s['status'] ?>"><?= $isExpired?'expired':$s['status'] ?></span></td>
+<td>
+  <strong><?= e($s['name']) ?></strong>
+  <?php if($s['user_status'] === 'suspended'): ?><span class="badge badge-suspended" style="font-size:.6rem;margin-left:4px">SUSPENDED</span><?php endif; ?>
+  <br><span style="font-size:.75rem;color:var(--text-3)"><?= e($s['email']) ?></span>
+</td>
+<td><strong><?= e($s['plan_name']) ?></strong></td>
+<td><span class="badge badge-<?= $displayStatus ?>"><?= $displayStatus ?></span></td>
 <td style="font-size:.78rem;color:var(--text-3)"><?= fmt_date($s['starts_at']) ?></td>
 <td style="font-size:.78rem;color:var(--text-3)"><?= fmt_date($s['expires_at']) ?></td>
 <td style="font-size:.78rem;color:var(--text-3)"><?= e($s['activated_by_name'] ?? '—') ?></td>
 <td style="white-space:nowrap">
 <form method="POST" style="display:inline"><?= csrf_field() ?><input type="hidden" name="sub_id" value="<?= $s['id'] ?>">
+
 <?php if($s['status']==='pending'): ?>
 <button name="action" value="activate" class="act-btn success">✅ Activate</button>
 <?php endif; ?>
-<?php if($s['status']==='active'): ?>
-<button name="action" value="cancel" class="act-btn danger" onclick="return confirm('Cancel?')">❌</button>
-<input type="number" name="extra_days" value="30" style="width:55px;padding:4px;border:1px solid var(--border);border-radius:4px;font-size:.75rem;text-align:center">
-<button name="action" value="extend" class="act-btn">📅 Extend</button>
+
+<?php if($s['status']==='active' || $isExpired): ?>
+<!-- Change Plan -->
+<select name="new_plan_id" style="width:90px;padding:4px;border:1px solid var(--border);border-radius:4px;font-size:.75rem;font-weight:600;background:var(--surface-2);color:var(--text)">
+<?php foreach($plans as $p): ?>
+<option value="<?= $p['id'] ?>" <?= $p['id'] == $s['plan_id'] ? 'selected' : '' ?>><?= e($p['name']) ?></option>
+<?php endforeach; ?>
+</select>
+<button name="action" value="change_plan" class="act-btn" title="Change plan">🔄</button>
+
+<!-- Extend -->
+<input type="number" name="extra_days" value="30" min="1" max="3650" style="width:55px;padding:4px;border:1px solid var(--border);border-radius:4px;font-size:.75rem;text-align:center">
+<button name="action" value="extend" class="act-btn" title="Extend subscription">📅</button>
+
+<!-- Cancel -->
+<button name="action" value="cancel" class="act-btn danger" onclick="return confirm('Cancel this subscription?')" title="Cancel subscription">❌</button>
 <?php endif; ?>
+
 </form>
 </td>
 </tr>
