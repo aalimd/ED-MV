@@ -44,6 +44,12 @@ $stmt = $db->prepare("SELECT s.*, p.name as plan_name FROM subscriptions s JOIN 
 $stmt->execute([$user['id']]);
 $pending = $stmt->fetch();
 
+// Check for current active plan to prevent re-requesting it
+$stmt = $db->prepare("SELECT plan_id FROM subscriptions WHERE user_id=? AND status='active' AND (expires_at IS NULL OR expires_at > NOW()) ORDER BY id DESC LIMIT 1");
+$stmt->execute([$user['id']]);
+$activePlanId = $stmt->fetchColumn() ?: 0;
+
+$hasSub = has_subscription();
 $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 ?>
 <!DOCTYPE html>
@@ -155,7 +161,12 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
   <div class="pending-icon">⏳</div>
   <div class="pending-title">Request Pending</div>
   <div class="pending-sub">Your subscription request for <strong><?= e($pending['plan_name'] ?? 'a plan') ?></strong> is awaiting admin approval. You'll get full access as soon as it's approved.</div>
-  <a href="<?= APP_URL ?>/auth/logout.php" class="btn btn-secondary" style="max-width:200px;margin:0 auto">🚪 Logout</a>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px;">
+    <?php if($hasSub): ?>
+      <a href="<?= APP_URL ?>/app/ventguide.php" class="btn btn-primary" style="flex:1;min-width:140px;">📱 Open App</a>
+    <?php endif; ?>
+    <a href="<?= APP_URL ?>/auth/logout.php" class="btn btn-secondary" style="flex:1;min-width:140px;">🚪 Logout</a>
+  </div>
 </div>
 </div>
 
@@ -193,7 +204,11 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
     <?php foreach($features as $f): ?><li><?= e($f) ?></li><?php endforeach; ?>
   </ul>
   <?php endif; ?>
-  <button type="submit" class="card-btn">📩 Request This Plan</button>
+  <?php if ($plan['id'] == $activePlanId): ?>
+    <button type="button" class="card-btn" style="background:var(--border);color:var(--text-3);cursor:not-allowed;box-shadow:none;" disabled>✅ Current Plan</button>
+  <?php else: ?>
+    <button type="submit" class="card-btn">📩 Request This Plan</button>
+  <?php endif; ?>
 </form>
 <?php endforeach; ?>
 </div>
@@ -206,7 +221,10 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
   <p style="font-size: 0.8rem; color: var(--text-2);">⚠️ <strong>No Refunds:</strong> Please note that all subscription purchases and upgrades are final and non-refundable.</p>
 </div>
 
-<div class="pricing-footer" style="margin-top:0">
+<div class="pricing-footer" style="margin-top:0;display:flex;flex-direction:column;gap:12px;align-items:center;">
+  <?php if($hasSub): ?>
+    <a href="<?= APP_URL ?>/app/ventguide.php" class="btn btn-primary" style="max-width:260px;width:100%;font-size:1rem;padding:12px;border-radius:12px;">📱 Return to App</a>
+  <?php endif; ?>
   <p>Logged in as <strong><?= e($user['name']) ?></strong> · <a href="<?= APP_URL ?>/auth/logout.php">Logout</a></p>
 </div>
 </div>
