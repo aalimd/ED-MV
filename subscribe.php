@@ -193,7 +193,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
   $priceInt = floor($plan['price']);
   $priceDec = round(($plan['price'] - $priceInt) * 100);
 ?>
-<form method="POST" class="price-card <?= $isFeatured ? 'featured' : '' ?>" style="--card-accent:<?= e($cardColor) ?>;animation-delay:<?= $i * 0.1 ?>s">
+<form method="POST" class="price-card <?= $isFeatured ? 'featured' : '' ?>" style="--card-accent:<?= e($cardColor) ?>;animation-delay:<?= $i * 0.1 ?>s" onsubmit="return confirm('Just a gentle reminder:\n\nTo help us maintain a high-quality service, please note that all subscription purchases and upgrades are final and non-refundable once approved.\n\nWould you like to proceed with requesting this plan?');">
   <?= csrf_field() ?>
   <input type="hidden" name="plan_id" value="<?= $plan['id'] ?>">
   <?php if($plan['badge']): ?>
