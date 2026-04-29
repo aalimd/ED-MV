@@ -133,8 +133,8 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
   max-width:500px;
 }
 .pricing-footer p {font-size:.84rem;color:var(--text-3);font-weight:500;line-height:1.6;}
-.pricing-footer a {color:var(--theme);font-weight:700;text-decoration:none;}
-.pricing-footer a:hover {text-decoration:underline;}
+.pricing-footer a:not(.btn) {color:var(--theme);font-weight:700;text-decoration:none;}
+.pricing-footer a:not(.btn):hover {text-decoration:underline;}
 
 .pending-card {
   background:var(--surface);border:2px solid var(--border);border-radius:20px;
