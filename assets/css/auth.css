@@ -54,32 +54,40 @@
 /* Reset */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body {
-  min-height: 100vh;
-  width: 100%;
-  max-width: 100vw;
-  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
-  touch-action: pan-x pan-y;
+html {
+  /* Lock the document root — nothing scrolls here */
   position: fixed;
   inset: 0;
   overflow: hidden;
   overscroll-behavior: none;
 }
 
+body {
+  width: 100%;
+  max-width: 100vw;
+  height: 100%;
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  overscroll-behavior: none;
+  /* touch-action intentionally omitted on body so wrapper can pan */
+}
+
 /* ── Auth Layout ─────────────────────────────── */
 .auth-wrapper {
-  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px 16px;
   position: absolute;
   inset: 0;
+  /* Only this element scrolls, only when content is taller than viewport */
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior-y: none;   /* no rubber-band at top/bottom of wrapper */
+  touch-action: pan-y;           /* allow single-finger vertical pan here only */
 }
 
 /* Animated background blobs */

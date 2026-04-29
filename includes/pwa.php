@@ -46,7 +46,7 @@ function pwa_zoom_lock_script(): string {
 var _lastTouch=0;
 document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});
 document.addEventListener("gesturechange",function(e){e.preventDefault();},{passive:false});
-document.addEventListener("touchmove",function(e){if(e.touches&&e.touches.length>1){e.preventDefault();}},{passive:false});
+document.addEventListener("touchmove",function(e){if(e.touches&&e.touches.length>1){e.preventDefault();return;}var el=e.target;while(el&&el!==document.body){if(el.id==="pwa-ios-sheet"||el.classList.contains("auth-wrapper")){return;}el=el.parentElement;}e.preventDefault();},{passive:false});
 document.addEventListener("touchend",function(e){var now=Date.now();if(now-_lastTouch<=300){e.preventDefault();}_lastTouch=now;},{passive:false});
 }());</script>';
 }
