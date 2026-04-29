@@ -65,9 +65,7 @@
   window.addEventListener('load', function () {
     if (!isIos || isInStandaloneMode) return;
 
-    var DISMISS_KEY = 'pwa_ios_guide_dismissed';
-    var lastDismiss = parseInt(localStorage.getItem(DISMISS_KEY) || '0', 10);
-    if (Date.now() - lastDismiss < 86400000) return; // once per 24h
+    if (sessionStorage.getItem('pwa_ios_guide_dismissed')) return;
 
     setTimeout(function () {
       injectAnimations();
@@ -115,15 +113,16 @@
       function closeSheet() { overlay.remove(); sheet.remove(); }
 
       document.getElementById('pwa-ios-close').addEventListener('click', function () {
-        localStorage.setItem(DISMISS_KEY, Date.now().toString());
+        sessionStorage.setItem('pwa_ios_guide_dismissed', '1');
         closeSheet();
       });
       document.getElementById('pwa-ios-never').addEventListener('click', function () {
-        localStorage.setItem(DISMISS_KEY, (Date.now() + 365 * 86400000).toString());
+        localStorage.setItem('pwa_ios_guide_dismissed', '1'); // If they click 'never', we can respect it permanently via localstorage if you prefer, but let's just make it session to be extremely aggressive like you want:
+        sessionStorage.setItem('pwa_ios_guide_dismissed', '1');
         closeSheet();
       });
       overlay.addEventListener('click', function () {
-        localStorage.setItem(DISMISS_KEY, Date.now().toString());
+        sessionStorage.setItem('pwa_ios_guide_dismissed', '1');
         closeSheet();
       });
     }, 2500);
