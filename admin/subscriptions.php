@@ -52,11 +52,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
         log_activity('admin_cancel_sub', "Cancelled subscription ID: {$subId}");
         flash('warning', 'Subscription cancelled.');
 
-    } elseif ($action === 'extend' && $subId > 0) {
-        $extraDays = max(1, (int)($_POST['extra_days'] ?? 30));
-        $db->prepare("UPDATE subscriptions SET expires_at = DATE_ADD(IFNULL(expires_at, NOW()), INTERVAL ? DAY) WHERE id=?")->execute([$extraDays, $subId]);
-        log_activity('admin_extend_sub', "Extended sub ID {$subId} by {$extraDays} days");
-        flash('success', "Subscription extended by {$extraDays} days.");
+    } elseif ($action === 'modify_days' && $subId > 0) {
+        $days = (int)($_POST['extra_days'] ?? 0);
+        if ($days !== 0) {
+            $db->prepare("UPDATE subscriptions SET expires_at = DATE_ADD(IFNULL(expires_at, NOW()), INTERVAL ? DAY) WHERE id=?")->execute([$days, $subId]);
+            $actionWord = $days > 0 ? "Extended" : "Reduced";
+            log_activity('admin_modify_sub_days', "{$actionWord} sub ID {$subId} by " . abs($days) . " days");
+            flash('success', "Subscription " . strtolower($actionWord) . " by " . abs($days) . " days.");
+        }
 
     } elseif ($action === 'change_plan' && $subId > 0) {
         $newPlanId = (int)($_POST['new_plan_id'] ?? 0);
@@ -177,9 +180,9 @@ admin_header('Subscriptions', '💳', 'subscriptions');
 </select>
 <button name="action" value="change_plan" class="act-btn" title="Change plan">🔄</button>
 
-<!-- Extend -->
-<input type="number" name="extra_days" value="30" min="1" max="3650" style="width:55px;padding:4px;border:1px solid var(--border);border-radius:4px;font-size:.75rem;text-align:center">
-<button name="action" value="extend" class="act-btn" title="Extend subscription">📅</button>
+<!-- Modify Days -->
+<input type="number" name="extra_days" value="30" min="-3650" max="3650" placeholder="+/-" style="width:60px;padding:4px;border:1px solid var(--border);border-radius:4px;font-size:.75rem;text-align:center">
+<button name="action" value="modify_days" class="act-btn" title="Add or remove days (+/-)">⏳</button>
 
 <!-- Cancel -->
 <button name="action" value="cancel" class="act-btn danger" onclick="return confirm('Cancel this subscription?')" title="Cancel subscription">❌</button>
