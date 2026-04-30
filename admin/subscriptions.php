@@ -77,12 +77,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
                 // Update the subscription's plan
                 $db->prepare("UPDATE subscriptions SET plan_id = ? WHERE id = ?")->execute([$newPlanId, $subId]);
 
-                // If the subscription is active, recalculate expires_at from starts_at
-                $sub = $db->prepare("SELECT status, starts_at FROM subscriptions WHERE id = ?")->fetch();
-                // Note: we don't recalculate expiry on plan change—admin can extend separately if needed
+                // Recalculate expires_at based on the new plan's duration
+                $subStmt = $db->prepare("SELECT status, starts_at, expires_at FROM subscriptions WHERE id = ?");
+                $subStmt->execute([$subId]);
+                $sub = $subStmt->fetch();
+                
+                $dayDifference = 0;
+                if ($sub && $sub['status'] === 'active' && !empty($sub['starts_at'])) {
+                    $newDuration = $newPlan['duration_days'] ?: 30; // default 30 if 0
+                    
+                    // Fetch old plan duration
+                    $oldPlanStmt = $db->prepare("SELECT duration_days FROM plans WHERE name = ? LIMIT 1");
+                    $oldPlanStmt->execute([$oldPlanName]);
+                    $oldPlanDays = $oldPlanStmt->fetchColumn() ?: 30;
+                    
+                    $dayDifference = $newDuration - $oldPlanDays;
+                    
+                    if ($dayDifference !== 0) {
+                        $db->prepare("UPDATE subscriptions SET expires_at = DATE_ADD(IFNULL(expires_at, NOW()), INTERVAL ? DAY) WHERE id=?")->execute([$dayDifference, $subId]);
+                    }
+                }
 
-                log_activity('admin_change_plan', "Changed sub ID {$subId} from \"{$oldPlanName}\" to \"{$newPlan['name']}\"");
-                flash('success', "Plan changed from <strong>{$oldPlanName}</strong> to <strong>" . e($newPlan['name']) . "</strong>.");
+                log_activity('admin_change_plan', "Changed sub ID {$subId} from \"{$oldPlanName}\" to \"{$newPlan['name']}\" (adjusted expiry by {$dayDifference} days)");
+                flash('success', "Plan changed from <strong>{$oldPlanName}</strong> to <strong>" . e($newPlan['name']) . "</strong>. Expiry date automatically adjusted.");
             } else {
                 flash('danger', 'Invalid plan selected.');
             }
