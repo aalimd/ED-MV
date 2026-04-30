@@ -34,30 +34,42 @@ if ($user['role'] !== 'admin') {
 }
 
 // Inject a user menu bar right after <body>
+$rolePill = '';
+if ($user['role'] === 'admin') {
+    $rolePill = '<span class="vg-pill">ADMIN</span>';
+}
+
 $userMenu = '
 <style>
-  #vg-user-bar{background:var(--surface,#fff);border-bottom:1px solid var(--border,#e2e8f0);padding:7px max(12px,env(safe-area-inset-right)) 7px max(12px,env(safe-area-inset-left));display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:\'DM Sans\',sans-serif;font-size:.8rem;z-index:999;position:relative;max-width:100vw}
-  #vg-user-bar .vg-user-meta,#vg-user-bar .vg-user-actions{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap;}
-  #vg-user-bar .vg-user-name{font-weight:800;color:var(--theme,#2563eb);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:40vw}
-  #vg-user-bar .vg-pill{font-size:.65rem;padding:3px 8px;border-radius:9999px;background:rgba(37,99,235,0.1);color:var(--theme,#2563eb);font-weight:800;text-transform:uppercase;white-space:nowrap;line-height:1}
+  #vg-user-bar{background:var(--surface,#fff);border-bottom:1px solid var(--border,#e2e8f0);padding:6px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:\'DM Sans\',sans-serif;font-size:.8rem;z-index:999;position:relative;}
+  #vg-user-bar .vg-user-meta{display:flex;align-items:center;gap:6px;min-width:0;}
+  #vg-user-bar .vg-user-name{font-weight:800;color:var(--theme,#2563eb);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:35vw;font-size:.85rem;}
+  #vg-user-bar .vg-pill{font-size:.65rem;padding:3px 6px;border-radius:6px;background:rgba(37,99,235,0.1);color:var(--theme,#2563eb);font-weight:800;text-transform:uppercase;white-space:nowrap;line-height:1;}
   #vg-user-bar .vg-pill.time{background:rgba(16,185,129,0.1);color:#059669;}
-  #vg-user-bar a{font-size:.78rem;font-weight:700;text-decoration:none;padding:7px 10px;border-radius:8px;white-space:nowrap;min-height:34px;display:inline-flex;align-items:center}
-  @media (max-width:480px){#vg-user-bar{font-size:.76rem;align-items:flex-start}#vg-user-bar .vg-user-meta{flex-direction:column;align-items:flex-start;gap:4px}#vg-user-bar .vg-user-name{max-width:48vw}#vg-user-bar a{padding:6px 8px;font-size:.74rem}}
+  #vg-user-bar .vg-user-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+  #vg-user-bar a{font-size:.75rem;font-weight:700;text-decoration:none;padding:5px 8px;border-radius:6px;white-space:nowrap;display:inline-flex;align-items:center;line-height:1;}
+  @media (max-width:480px){
+    #vg-user-bar{padding:5px 8px;gap:4px;}
+    #vg-user-bar .vg-user-name{max-width:28vw;font-size:.8rem;}
+    #vg-user-bar .vg-pill{padding:3px 5px;font-size:.6rem;}
+    #vg-user-bar a span {display:none;}
+    #vg-user-bar a {padding:5px;font-size:.9rem;border-radius:4px;}
+  }
 </style>
 <div id="vg-user-bar">
   <div class="vg-user-meta">
     <span class="vg-user-name">👤 ' . htmlspecialchars($user['name']) . '</span>
-    <span class="vg-pill">' . htmlspecialchars($user['role']) . '</span>
+    ' . $rolePill . '
     ' . ($daysLeftText ? '<span class="vg-pill time">⏳ ' . $daysLeftText . '</span>' : '') . '
   </div>
   <div class="vg-user-actions">';
 
 if ($isAdmin) {
-    $userMenu .= '<a href="' . APP_URL . '/admin/" style="color:var(--theme,#2563eb);background:rgba(37,99,235,0.08);">⚙️ Admin</a>';
+    $userMenu .= '<a href="' . APP_URL . '/admin/" style="color:var(--theme,#2563eb);background:rgba(37,99,235,0.08);">⚙️ <span>Admin</span></a>';
 }
 
 $userMenu .= '
-    <a href="' . APP_URL . '/auth/logout.php" style="color:var(--danger,#dc2626);background:rgba(220,38,38,0.08);">🚪 Logout</a>
+    <a href="' . APP_URL . '/auth/logout.php" style="color:var(--danger,#dc2626);background:rgba(220,38,38,0.08);">🚪 <span>Logout</span></a>
   </div>
 </div>';
 
