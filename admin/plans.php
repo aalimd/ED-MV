@@ -111,57 +111,75 @@ admin_header('Plans & Pricing', '🏷️', 'plans');
 <div class="data-card" style="padding:20px;margin-bottom:20px">
 <h3 style="font-size:.88rem;font-weight:800;color:var(--theme);margin-bottom:14px">📝 Subscription Page Content</h3>
 <p style="font-size:.78rem;color:var(--text-3);margin-bottom:14px">These texts appear on the page your users see when they need to subscribe.</p>
-<form method="POST"><?= csrf_field() ?>
+<form method="POST" class="admin-form" style="max-width:none"><?= csrf_field() ?>
 <input type="hidden" name="action" value="save_page_settings">
-<div class="form-group"><label>Page Title</label>
-<input type="text" name="sub_page_title" value="<?= e(get_setting('sub_page_title','Choose Your Plan')) ?>" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
-<div class="form-group"><label>Subtitle / Description</label>
-<textarea name="sub_page_subtitle" rows="2" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text);resize:vertical"><?= e(get_setting('sub_page_subtitle','')) ?></textarea></div>
-<div class="form-group"><label>Footer Note</label>
-<textarea name="sub_page_footer" rows="2" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text);resize:vertical"><?= e(get_setting('sub_page_footer','')) ?></textarea></div>
-<div class="form-group"><label>Currency Code (shown on plans)</label>
-<input type="text" name="sub_currency_symbol" value="<?= e(get_setting('sub_currency_symbol','SAR')) ?>" maxlength="5" style="width:100px;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
-<button type="submit" class="btn btn-primary" style="max-width:200px">💾 Save Page Settings</button>
+<div class="form-group">
+  <label>Page Title</label>
+  <input type="text" name="sub_page_title" value="<?= e(get_setting('sub_page_title','Choose Your Plan')) ?>">
+</div>
+<div class="form-group">
+  <label>Subtitle / Description</label>
+  <textarea name="sub_page_subtitle" rows="2"><?= e(get_setting('sub_page_subtitle','')) ?></textarea>
+</div>
+<div class="form-group">
+  <label>Footer Note</label>
+  <textarea name="sub_page_footer" rows="2"><?= e(get_setting('sub_page_footer','')) ?></textarea>
+</div>
+<div class="form-group">
+  <label>Currency Code (shown on plans)</label>
+  <input type="text" name="sub_currency_symbol" value="<?= e(get_setting('sub_currency_symbol','SAR')) ?>" maxlength="5" style="width:100px">
+</div>
+<button type="submit" class="btn btn-primary" style="max-width:240px">💾 Save Page Settings</button>
 </form>
 </div>
 
 <!-- ── Create / Edit Plan Card ────────────────── -->
 <div class="data-card" style="padding:20px;margin-bottom:20px">
 <h3 style="font-size:.88rem;font-weight:800;color:var(--theme);margin-bottom:14px"><?= $editing ? '✏️ Edit Plan' : '➕ Create New Plan' ?></h3>
-<form method="POST"><?= csrf_field() ?>
+<form method="POST" class="admin-form" style="max-width:none"><?= csrf_field() ?>
 <input type="hidden" name="action" value="<?= $editing ? 'update' : 'create' ?>">
 <?php if($editing): ?><input type="hidden" name="plan_id" value="<?= $editing['id'] ?>"><?php endif; ?>
 
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
-
-<div class="form-group"><label>Plan Name *</label>
-<input type="text" name="name" value="<?= e($editing['name'] ?? '') ?>" required placeholder="e.g. Monthly" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
-
-<div class="form-group"><label>Price</label>
-<input type="number" name="price" value="<?= e($editing['price'] ?? '0') ?>" step="0.01" min="0" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
-
-<div class="form-group"><label>Currency</label>
-<input type="text" name="currency" value="<?= e($editing['currency'] ?? 'SAR') ?>" maxlength="5" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
-
-<div class="form-group"><label>Duration (days)</label>
-<input type="number" name="duration_days" value="<?= e($editing['duration_days'] ?? '30') ?>" min="1" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
-
-<div class="form-group"><label>Badge Text <span style="font-size:.72rem;color:var(--text-3)">(optional — e.g. "Best Value")</span></label>
-<input type="text" name="badge" value="<?= e($editing['badge'] ?? '') ?>" placeholder="Leave blank for none" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
-
-<div class="form-group"><label>Card Color</label>
-<input type="color" name="color" value="<?= e($editing['color'] ?? '#2563eb') ?>" style="width:60px;height:38px;padding:2px;border:2px solid var(--border);border-radius:8px;cursor:pointer"></div>
-
-<div class="form-group"><label>Sort Order</label>
-<input type="number" name="sort_order" value="<?= e($editing['sort_order'] ?? '0') ?>" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
-
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+  <div class="form-group">
+    <label>Plan Name *</label>
+    <input type="text" name="name" value="<?= e($editing['name'] ?? '') ?>" required placeholder="e.g. Monthly">
+  </div>
+  <div class="form-group">
+    <label>Price</label>
+    <input type="number" name="price" value="<?= e($editing['price'] ?? '0') ?>" step="0.01" min="0">
+  </div>
+  <div class="form-group">
+    <label>Currency</label>
+    <input type="text" name="currency" value="<?= e($editing['currency'] ?? 'SAR') ?>" maxlength="5">
+  </div>
+  <div class="form-group">
+    <label>Duration (days)</label>
+    <input type="number" name="duration_days" value="<?= e($editing['duration_days'] ?? '30') ?>" min="1">
+  </div>
+  <div class="form-group">
+    <label>Badge Text <span style="font-size:.72rem;color:var(--text-3)">(optional)</span></label>
+    <input type="text" name="badge" value="<?= e($editing['badge'] ?? '') ?>" placeholder="Leave blank for none">
+  </div>
+  <div class="form-group">
+    <label>Card Color</label>
+    <input type="color" name="color" value="<?= e($editing['color'] ?? '#2563eb') ?>" style="height:44px;padding:4px;cursor:pointer">
+  </div>
+  <div class="form-group">
+    <label>Sort Order</label>
+    <input type="number" name="sort_order" value="<?= e($editing['sort_order'] ?? '0') ?>">
+  </div>
 </div>
 
-<div class="form-group"><label>Short Description <span style="font-size:.72rem;color:var(--text-3)">(shown under price)</span></label>
-<input type="text" name="description" value="<?= e($editing['description'] ?? '') ?>" placeholder="e.g. Full access for 30 days" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text)"></div>
+<div class="form-group">
+  <label>Short Description</label>
+  <input type="text" name="description" value="<?= e($editing['description'] ?? '') ?>" placeholder="e.g. Full access for 30 days">
+</div>
 
-<div class="form-group"><label>Features <span style="font-size:.72rem;color:var(--text-3)">(one per line — shown as checklist on pricing card)</span></label>
-<textarea name="features" rows="4" placeholder="Full ventilation reference&#10;All clinical scenarios&#10;PBW calculator" style="width:100%;padding:9px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;background:var(--surface-2);color:var(--text);resize:vertical"><?= e(str_replace('|', "\n", $editing['features'] ?? '')) ?></textarea></div>
+<div class="form-group">
+  <label>Features <span style="font-size:.72rem;color:var(--text-3)">(one per line)</span></label>
+  <textarea name="features" rows="4" placeholder="Full ventilation reference&#10;All clinical scenarios&#10;PBW calculator"><?= e(str_replace('|', "\n", $editing['features'] ?? '')) ?></textarea>
+</div>
 
 <div style="display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap">
 <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" name="is_active" <?= ($editing['is_active'] ?? 1) ? 'checked' : '' ?> style="width:18px;height:18px;accent-color:var(--theme)"><span style="font-size:.82rem;font-weight:700">Active (visible to users)</span></label>
@@ -185,9 +203,9 @@ admin_header('Plans & Pricing', '🏷️', 'plans');
 </div>
 <?php endif; ?>
 
-<div style="display:flex;gap:8px">
-<button type="submit" class="btn btn-primary" style="max-width:200px"><?= $editing ? '💾 Update Plan' : '➕ Create Plan' ?></button>
-<?php if($editing): ?><a href="<?= APP_URL ?>/admin/plans.php" class="btn btn-secondary" style="max-width:120px">Cancel</a><?php endif; ?>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+  <button type="submit" class="btn btn-primary" style="max-width:240px"><?= $editing ? '💾 Update Plan' : '➕ Create Plan' ?></button>
+  <?php if($editing): ?><a href="<?= APP_URL ?>/admin/plans.php" class="btn btn-secondary" style="max-width:140px">Cancel</a><?php endif; ?>
 </div>
 </form>
 </div>
