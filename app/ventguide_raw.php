@@ -1079,6 +1079,21 @@ require_once __DIR__ . '/../includes/pwa.php';
       </ul>
     </div>
 
+    <div class="info-card" style="border-left:4px solid #dc2626;">
+      <h3 style="color:#dc2626;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        🔥 Refractory Hypoxemia Rescue Ladder
+      </h3>
+      <p style="font-size:0.84rem;color:var(--text-2);margin-bottom:8px;">When SpO₂ remains &lt;88% despite 100% FiO₂ and optimal PEEP, escalate rapidly:</p>
+      <ol style="font-size:0.85rem;color:var(--text-1);padding-left:20px;line-height:1.5;">
+        <li style="margin-bottom:6px;"><strong>Rule out DOPE:</strong> Disconnect vent, bag manually. Is it hard to bag? Consider tension pneumo (decompress).</li>
+        <li style="margin-bottom:6px;"><strong>Deep Sedation &amp; Paralysis:</strong> Give a bolus of Rocuronium/Cisatracurium. This stops muscular O₂ consumption and vent dyssynchrony.</li>
+        <li style="margin-bottom:6px;"><strong>Recruitment Maneuvers:</strong> e.g., 40 cmH₂O for 40 seconds (if hemodynamically stable).</li>
+        <li style="margin-bottom:6px;"><strong>Prone Positioning:</strong> Perform early in the ED if boarding. Highly effective for dependent atelectasis in ARDS.</li>
+        <li><strong>ECMO / iNO:</strong> Consult for venovenous ECMO or start inhaled pulmonary vasodilators (Flolan/Nitric Oxide).</li>
+      </ol>
+    </div>
+
     <div class="info-card">
       <h3>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10"/><path d="M9 4v5a3 3 0 0 0 6 0V4"/><path d="M6 14a6 6 0 0 1 12 0"/></svg>
@@ -1154,6 +1169,11 @@ require_once __DIR__ . '/../includes/pwa.php';
         <div class="dope-item"><div class="dope-letter">P</div><div class="dope-word">Pneumothorax</div><div class="dope-desc">Tension — needle decompress immediately</div></div>
         <div class="dope-item"><div class="dope-letter">E</div><div class="dope-word">Equipment</div><div class="dope-desc"><span class="term" tabindex="0" onclick="App.toast('💨 Auto-PEEP = breath stacking from incomplete exhalation. Disconnect circuit and allow passive exhalation.')">Auto-PEEP</span> or machine failure</div></div>
       </div>
+      <div class="mini-card" style="margin-top:12px;background:rgba(220,38,38,.05);border-left:3px solid #dc2626;">
+        <h4 style="color:#dc2626;margin-bottom:4px;">High Pressure Alarm? Press "Inspiratory Hold"</h4>
+        <p style="font-size:0.8rem;margin:4px 0;"><strong>Is Plateau High (&gt;30)?</strong> Problem is in the lungs (Pneumothorax, ARDS, Right Mainstem).</p>
+        <p style="font-size:0.8rem;margin:0;"><strong>Is Plateau Normal?</strong> Problem is resistance (Biting tube, mucus plug, asthma, kinked circuit).</p>
+      </div>
     </div>
 
     <div class="info-card">
@@ -1220,21 +1240,7 @@ require_once __DIR__ . '/../includes/pwa.php';
         <li>Current SCCM guidance allows either a <strong>fixed-dose</strong> strategy or a <strong>monitoring-based</strong> strategy for blockade depth.</li>
         <li>Train-of-four can be used when the team follows a titration approach, but guideline certainty for the best monitoring strategy remains low.</li>
         <li>Stop as soon as oxygenation/synchrony goals can be maintained without it; do not paralyze by inertia.</li>
-      </ul>
-    </div>
-
-    <div class="info-card">
-      <h3>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        💊 RSI Drug Reference
-      </h3>
-      <ul>
-        <li>🟡 <strong>Ketamine 1–2 mg/kg IV</strong> — bronchodilatory and often useful when hypotension or severe bronchospasm is present.</li>
-        <li>🔵 <strong>Etomidate 0.3 mg/kg IV</strong> — hemodynamically stable option; consider transient adrenal suppression in the wider clinical context rather than treating it as an absolute contraindication.</li>
-        <li>⚡ <strong>Succinylcholine 1.5 mg/kg IV</strong> — fastest onset. Avoid in crush injury, burns, hyperkalemia, myopathy.</li>
-        <li>🟢 <strong>Rocuronium 1.2 mg/kg IV</strong> — preferred paralytic when succinylcholine is contraindicated or longer paralysis is acceptable.</li>
-        <li>😴 <strong>Post-intubation:</strong> Start analgesia promptly, set a RASS target, and titrate short-acting sedation to the minimum depth needed for synchrony.</li>
-      </ul>
+    </ul>
     </div>
 
     <div class="info-card">
@@ -1246,11 +1252,8 @@ require_once __DIR__ . '/../includes/pwa.php';
         <li>📐 <strong>PBW Male:</strong> 50 + 0.91 × (height cm − 152.4) kg</li>
         <li>📐 <strong>PBW Female:</strong> 45.5 + 0.91 × (height cm − 152.4) kg</li>
         <li>🌬️ <strong>Minute Ventilation:</strong> VE = VT × RR (Normal ≈ 5–8 L/min)</li>
-        <li>💧 <strong>P/F Ratio:</strong> PaO₂ ÷ FiO₂ on PEEP/CPAP ≥ 5 cmH₂O — Mild ARDS: &lt;300 | Mod: &lt;200 | Severe: &lt;100</li>
-        <li>🩸 <strong>S/F Ratio:</strong> SpO₂ ÷ FiO₂ — thresholds about 315, 235, and 148 roughly track P/F of 300, 200, and 100.</li>
-        <li>📊 <strong>Driving Pressure:</strong> ΔP = Pplat − PEEP (Target &lt; 15 cmH₂O)</li>
-        <li>🔄 <strong>RR Correction:</strong> New RR = Current RR × (Current PaCO₂ ÷ Target PaCO₂)</li>
-        <li>🩺 <strong>Compliance:</strong> Crs = VT ÷ (Pplat − PEEP) — Normal ≥ 50 mL/cmH₂O</li>
+        <li>💧 <strong>P/F Ratio:</strong> PaO₂ ÷ FiO₂ — Mild &lt;300 | Mod &lt;200 | Severe &lt;100</li>
+        <li>📊 <strong>Driving Pressure:</strong> ΔP = Pplat − PEEP (Target &lt; 15)</li>
       </ul>
     </div>
 
@@ -1264,264 +1267,11 @@ require_once __DIR__ . '/../includes/pwa.php';
 
   </section>
 
-  <!-- ── TOOLS ── -->
+  <!-- ── TOOLS TAB ── -->
   <section id="view-tools" class="view" aria-label="Clinical tools">
 
-    <!-- ── DRIVING PRESSURE CALCULATOR ── -->
-    <div class="info-card mt-4" style="border-left:4px solid var(--theme);">
-      <h3>📐 Driving Pressure Calculator</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">ΔP = Pplat − PEEP &nbsp;|&nbsp; Target: <strong>&lt; 15 cmH₂O</strong>. Best independent predictor of ARDS mortality.</p>
-      <div class="tools-row">
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">Pplat (cmH₂O)</label>
-          <input type="number" id="dpPplat" class="calc-input" placeholder="e.g. 24" inputmode="decimal">
-        </div>
-        <div style="font-size:1.5rem;font-weight:900;color:var(--text-3);align-self:flex-end;padding-bottom:14px;">−</div>
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">PEEP (cmH₂O)</label>
-          <input type="number" id="dpPeep" class="calc-input" placeholder="e.g. 8" inputmode="decimal">
-        </div>
-      </div>
-      <div class="tool-result" id="dpResult">
-        <div class="tr-label">Driving Pressure (ΔP)</div>
-        <div class="tr-val" id="dpVal">--</div>
-        <div class="tr-unit">cmH₂O</div>
-        <div class="tr-badge hidden" id="dpBadge"></div>
-      </div>
-    </div>
-
-    <!-- ── COMPLIANCE CALCULATOR ── -->
-    <div class="info-card" style="border-left:4px solid #7c3aed;">
-      <h3 style="color:#7c3aed;">📊 Static Compliance Calculator</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Crs = VT ÷ (Pplat − PEEP) &nbsp;|&nbsp; Normal ≥ 50 mL/cmH₂O. ARDS often 20–40.</p>
-      <div class="tools-row">
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">VT (mL)</label>
-          <input type="number" id="crsVt" class="calc-input" placeholder="e.g. 420" inputmode="decimal">
-        </div>
-        <div style="font-size:1.2rem;font-weight:900;color:var(--text-3);align-self:flex-end;padding-bottom:14px;">÷</div>
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">Pplat (cmH₂O)</label>
-          <input type="number" id="crsPplat" class="calc-input" placeholder="e.g. 24" inputmode="decimal">
-        </div>
-        <div style="font-size:1.2rem;font-weight:900;color:var(--text-3);align-self:flex-end;padding-bottom:14px;">−</div>
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">PEEP (cmH₂O)</label>
-          <input type="number" id="crsPeep" class="calc-input" placeholder="e.g. 8" inputmode="decimal">
-        </div>
-      </div>
-      <div class="tool-result" style="border-color:rgba(124,58,237,.2);background:rgba(124,58,237,.07);" id="crsResult">
-        <div class="tr-label" style="color:#7c3aed;">Static Compliance (Crs)</div>
-        <div class="tr-val" id="crsVal">--</div>
-        <div class="tr-unit">mL / cmH₂O</div>
-        <div class="tr-badge hidden" id="crsBadge"></div>
-      </div>
-    </div>
-
-    <!-- ── P/F RATIO + ARDS SEVERITY ── -->
-    <div class="info-card" style="border-left:4px solid #dc2626;">
-      <h3 style="color:#dc2626;">💧 P/F Ratio & ARDS Severity</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">PaO₂ ÷ FiO₂ — this calculator uses Berlin thresholds for ventilated patients, while the 2024 global definition broadens ARDS recognition outside this setting.</p>
-      <div class="tools-row">
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">PaO₂ (mmHg)</label>
-          <input type="number" id="pfPao2" class="calc-input" placeholder="e.g. 80" inputmode="decimal">
-        </div>
-        <div style="font-size:1.2rem;font-weight:900;color:var(--text-3);align-self:flex-end;padding-bottom:14px;">÷</div>
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">FiO₂ (0–1 or %)</label>
-          <input type="number" id="pfFio2" class="calc-input" placeholder="e.g. 0.6" step="0.01" inputmode="decimal">
-        </div>
-      </div>
-      <div class="tool-result" style="border-color:rgba(220,38,38,.2);background:rgba(220,38,38,.06);" id="pfResult">
-        <div class="tr-label" style="color:#dc2626;">P/F Ratio</div>
-        <div class="tr-val" id="pfVal">--</div>
-        <div class="tr-unit">mmHg</div>
-        <div class="tr-badge hidden" id="pfBadge"></div>
-      </div>
-      <!-- Berlin severity visual -->
-      <div class="berlin-bar" id="berlinBar" style="display:none;margin-top:14px;">
-        <div class="berlin-track">
-          <div class="berlin-seg" style="background:#dc2626;flex:1;" data-label="Severe &lt;100"></div>
-          <div class="berlin-seg" style="background:#d97706;flex:1;" data-label="Mod &lt;200"></div>
-          <div class="berlin-seg" style="background:#ca8a04;flex:1;" data-label="Mild &lt;300"></div>
-          <div class="berlin-seg" style="background:#16a34a;flex:1;" data-label="Normal ≥300"></div>
-        </div>
-        <div class="berlin-arrow" id="berlinArrow"></div>
-        <div class="berlin-labels">
-          <span>Severe</span><span>Moderate</span><span>Mild</span><span>Normal</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="info-card" style="border-left:4px solid #0f766e;">
-      <h3 style="color:#0f766e;">🩸 S/F Ratio (SpO₂ / FiO₂)</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Useful before the ABG returns. Best interpreted when SpO₂ is roughly 80–97%; above that, the oxyhemoglobin curve flattens and the estimate becomes less reliable.</p>
-      <div class="tools-row">
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">SpO₂ (%)</label>
-          <input type="number" id="sfSpo2" class="calc-input" placeholder="e.g. 92" inputmode="decimal">
-        </div>
-        <div style="font-size:1.2rem;font-weight:900;color:var(--text-3);align-self:flex-end;padding-bottom:14px;">÷</div>
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">FiO₂ (0–1 or %)</label>
-          <input type="number" id="sfFio2" class="calc-input" placeholder="e.g. 0.4" step="0.01" inputmode="decimal">
-        </div>
-      </div>
-      <div class="tool-result" style="border-color:rgba(15,118,110,.2);background:rgba(15,118,110,.06);">
-        <div class="tr-label" style="color:#0f766e;">S/F Ratio</div>
-        <div class="tr-val" id="sfVal">--</div>
-        <div class="tr-unit">unitless</div>
-        <div class="tr-badge hidden" id="sfBadge"></div>
-      </div>
-    </div>
-
-    <div class="info-card" style="border-left:4px solid #9333ea;">
-      <h3 style="color:#9333ea;">⚙️ Minute Ventilation Matcher</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">For DKA or severe metabolic acidosis. Measure what the patient is doing now, then set the vent to preserve that compensatory minute ventilation instead of guessing.</p>
-      <div class="tools-row">
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">Observed RR (/min)</label>
-          <input type="number" id="mvObsRr" class="calc-input" placeholder="e.g. 32" inputmode="decimal">
-        </div>
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">Observed VT (mL)</label>
-          <input type="number" id="mvObsVt" class="calc-input" placeholder="e.g. 650" inputmode="decimal">
-        </div>
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">Target Vent VT (mL)</label>
-          <input type="number" id="mvTargetVt" class="calc-input" placeholder="auto from PBW if blank" inputmode="decimal">
-        </div>
-      </div>
-      <div class="simple-grid">
-        <div class="tool-result" style="margin-top:0;border-color:rgba(147,51,234,.2);background:rgba(147,51,234,.06);">
-          <div class="tr-label" style="color:#9333ea;">Current VE</div>
-          <div class="tr-val" id="mvVal">--</div>
-          <div class="tr-unit">L / min</div>
-        </div>
-        <div class="tool-result" style="margin-top:0;border-color:rgba(147,51,234,.2);background:rgba(147,51,234,.06);">
-          <div class="tr-label" style="color:#9333ea;">Matched RR</div>
-          <div class="tr-val" id="mvNeedRr">--</div>
-          <div class="tr-unit">breaths / min</div>
-        </div>
-      </div>
-      <div class="mini-card" style="margin-top:12px;">
-        <h4>PBW-based alternatives</h4>
-        <p id="mvAlt">Set PBW in the calculator or enter a target VT to generate alternative low-VT options.</p>
-      </div>
-    </div>
-
-    <div class="info-card" style="border-left:4px solid #d97706;">
-      <h3 style="color:#d97706;">💨 Auto-PEEP Detector / Calculator</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Numeric method: intrinsic PEEP = total PEEP measured during expiratory hold − external PEEP set on the ventilator.</p>
-      <div class="tools-row">
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">Total PEEP (cmH₂O)</label>
-          <input type="number" id="autoPeepTotal" class="calc-input" placeholder="e.g. 12" inputmode="decimal">
-        </div>
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">Set PEEP (cmH₂O)</label>
-          <input type="number" id="autoPeepSet" class="calc-input" placeholder="e.g. 5" inputmode="decimal">
-        </div>
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">Flow Returns to Zero?</label>
-          <select id="autoPeepFlow" class="calc-input">
-            <option value="">Select</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </select>
-        </div>
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">Trigger Burden?</label>
-          <select id="autoPeepTrigger" class="calc-input">
-            <option value="">Select</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </select>
-        </div>
-      </div>
-      <div class="simple-grid">
-        <div class="tool-result" style="margin-top:0;border-color:rgba(217,119,6,.2);background:rgba(217,119,6,.08);">
-          <div class="tr-label" style="color:#d97706;">Intrinsic PEEP</div>
-          <div class="tr-val" id="autoPeepVal">--</div>
-          <div class="tr-unit">cmH₂O</div>
-          <div class="tr-badge hidden" id="autoPeepBadge"></div>
-        </div>
-        <div class="mini-card">
-          <h4>External PEEP Strategy</h4>
-          <p id="autoPeepExt">If intrinsic PEEP is confirmed and trigger work is high, consider carefully titrating external PEEP to about 70–80% of intrinsic PEEP while watching hemodynamics and exhalation.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="info-card" style="border-left:4px solid #dc2626;">
-      <h3 style="color:#dc2626;">🫀 Peri-Intubation Hemodynamic Risk Screen</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Evidence-informed bedside screen, not a validated score. It is designed to force early resuscitation planning before induction.</p>
-      <div class="tools-row">
-        <div class="calc-field" style="flex:1"><label class="calc-label">HR (/min)</label><input type="number" id="riskHr" class="calc-input" placeholder="e.g. 128" inputmode="decimal"></div>
-        <div class="calc-field" style="flex:1"><label class="calc-label">SBP (mmHg)</label><input type="number" id="riskSbp" class="calc-input" placeholder="e.g. 86" inputmode="decimal"></div>
-        <div class="calc-field" style="flex:1"><label class="calc-label">DBP (mmHg)</label><input type="number" id="riskDbp" class="calc-input" placeholder="e.g. 48" inputmode="decimal"></div>
-        <div class="calc-field" style="flex:1">
-          <label class="calc-label">Likely Physiology</label>
-          <select id="riskDx" class="calc-input">
-            <option value="">Select</option>
-            <option value="sepsis">Sepsis / distributive shock</option>
-            <option value="pe">Massive / submassive PE</option>
-            <option value="cardiogenic">Cardiogenic edema / shock</option>
-            <option value="hypovolemia">Hypovolemia / hemorrhage</option>
-            <option value="dka">DKA / severe acidosis</option>
-            <option value="neuro">Neurocritical / TBI</option>
-            <option value="other">Other / unclear</option>
-          </select>
-        </div>
-        <div class="calc-field" style="flex:1"><label class="calc-label">Hb (g/dL)</label><input type="number" id="riskHb" class="calc-input" placeholder="e.g. 7.8" step="0.1" inputmode="decimal"></div>
-      </div>
-      <div class="simple-grid">
-        <div class="tool-result" style="margin-top:0;border-color:rgba(220,38,38,.2);background:rgba(220,38,38,.06);">
-          <div class="tr-label" style="color:#dc2626;">Risk Score</div>
-          <div class="tr-val" id="riskVal">--</div>
-          <div class="tr-unit">points</div>
-          <div class="tr-badge hidden" id="riskBadge"></div>
-        </div>
-        <div class="mini-card">
-          <h4>Recommended Prep</h4>
-          <p id="riskPlan">Enter hemodynamics and physiology to generate a pre-induction plan.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="info-card" style="border-left:4px solid #2563eb;">
-      <h3 style="color:#2563eb;">📊 SOFA Severity Context</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Select the current organ dysfunction category for each system. This is a quick severity context tool, not a substitute for full ICU prognostication.</p>
-      <div class="score-grid">
-        <div class="calc-field"><label class="calc-label">Respiratory</label><select id="sofaResp" class="calc-input"><option value="0">0: P/F >400 or mild oxygen need</option><option value="1">1: P/F ≤400</option><option value="2">2: P/F ≤300</option><option value="3">3: P/F ≤200 on vent</option><option value="4">4: P/F ≤100 on vent</option></select></div>
-        <div class="calc-field"><label class="calc-label">Coagulation</label><select id="sofaCoag" class="calc-input"><option value="0">0: Platelets ≥150</option><option value="1">1: Platelets &lt;150</option><option value="2">2: Platelets &lt;100</option><option value="3">3: Platelets &lt;50</option><option value="4">4: Platelets &lt;20</option></select></div>
-        <div class="calc-field"><label class="calc-label">Liver</label><select id="sofaLiver" class="calc-input"><option value="0">0: Bilirubin &lt;1.2</option><option value="1">1: Bilirubin 1.2–1.9</option><option value="2">2: Bilirubin 2.0–5.9</option><option value="3">3: Bilirubin 6.0–11.9</option><option value="4">4: Bilirubin ≥12</option></select></div>
-        <div class="calc-field"><label class="calc-label">Cardiovascular</label><select id="sofaCv" class="calc-input"><option value="0">0: MAP ≥70 without pressor</option><option value="1">1: MAP &lt;70</option><option value="2">2: Low-dose vasopressor</option><option value="3">3: Higher-dose vasopressor</option><option value="4">4: Very high-dose vasopressor</option></select></div>
-        <div class="calc-field"><label class="calc-label">CNS</label><select id="sofaCns" class="calc-input"><option value="0">0: GCS 15</option><option value="1">1: GCS 13–14</option><option value="2">2: GCS 10–12</option><option value="3">3: GCS 6–9</option><option value="4">4: GCS &lt;6</option></select></div>
-        <div class="calc-field"><label class="calc-label">Renal</label><select id="sofaRenal" class="calc-input"><option value="0">0: Cr &lt;1.2</option><option value="1">1: Cr 1.2–1.9</option><option value="2">2: Cr 2.0–3.4</option><option value="3">3: Cr 3.5–4.9 or UO low</option><option value="4">4: Cr ≥5 or severe oliguria</option></select></div>
-      </div>
-      <div class="tool-result" style="border-color:rgba(37,99,235,.2);background:rgba(37,99,235,.07);">
-        <div class="tr-label">SOFA Total</div>
-        <div class="tr-val" id="sofaTotal">0</div>
-        <div class="tr-unit">0–24</div>
-        <div class="tr-badge hidden" id="sofaBadge"></div>
-      </div>
-    </div>
-
-    <div class="info-card" style="border-left:4px solid #1d4ed8;">
-      <h3 style="color:#1d4ed8;">🚨 Rapid Deterioration Troubleshooter</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Choose the problem you are seeing right now. The output prioritizes actions that matter in the first minute at 3 AM.</p>
-      <div class="pill-row" id="deteriorationButtons">
-        <button class="pill-btn active" data-problem="desat">Desaturation</button>
-        <button class="pill-btn" data-problem="high-pressure">High Pressure Alarm</button>
-        <button class="pill-btn" data-problem="hypotension">Hypotension</button>
-        <button class="pill-btn" data-problem="fighting">Patient Fighting Vent</button>
-      </div>
-      <div class="stack-list" id="deteriorationOutput"></div>
-    </div>
-
-    <div class="info-card" style="border-left:4px solid #7c2d12;">
+    <!-- ── 1. ASSESSMENT: Difficult Airway Predictor (LEMON) ── -->
+    <div class="info-card mt-4" style="border-left:4px solid #7c2d12;">
       <h3 style="color:#7c2d12;">🧱 Difficult Airway Predictor (LEMON)</h3>
       <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Each positive item adds one point. Obstruction or severe external distortion should override the total and escalate the plan.</p>
       <div class="simple-grid">
@@ -1540,29 +1290,214 @@ require_once __DIR__ . '/../includes/pwa.php';
         </div>
         <div class="mini-card">
           <h4>Suggested Approach</h4>
-          <p id="lemonPlan">Low score supports a standard RSI pathway if physiology allows. Recalculate if the airway picture changes.</p>
+          <p id="lemonPlan">Low score supports a standard RSI pathway if physiology allows.</p>
         </div>
       </div>
     </div>
 
+    <!-- ── 2. PREPARATION: Peri-Intubation Hemodynamic Risk Screen ── -->
+    <div class="info-card" style="border-left:4px solid #dc2626;">
+      <h3 style="color:#dc2626;">🫀 Peri-Intubation Hemodynamic Risk Screen</h3>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);"> बेडसाइड स्क्रीन to force early resuscitation planning before induction.</p>
+      <div class="tools-row">
+        <div class="calc-field" style="flex:1"><label class="calc-label">HR (/min)</label><input type="number" id="riskHr" class="calc-input" placeholder="e.g. 128" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">SBP (mmHg)</label><input type="number" id="riskSbp" class="calc-input" placeholder="e.g. 86" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">Likely Physiology</label><select id="riskDx" class="calc-input"><option value="">Select</option><option value="sepsis">Sepsis</option><option value="hypovolemia">Hypovolemia</option><option value="dka">DKA/Acidosis</option></select></div>
+      </div>
+      <div class="tool-result" style="margin-top:0;border-color:rgba(220,38,38,.2);background:rgba(220,38,38,.06);">
+        <div class="tr-label" style="color:#dc2626;">Risk Score</div><div class="tr-val" id="riskVal">--</div>
+      </div>
+    </div>
+
+    <!-- ── 3. INTUBATION: RSI & Push-Dose Pressor Calculator ── -->
+    <div class="info-card" style="border-left:4px solid #dc2626;">
+      <h3 style="color:#dc2626;">💉 RSI &amp; Push-Dose Pressor Calculator</h3>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Calculates induction, paralysis, and rescue pressor doses.</p>
+      <div class="calc-field">
+        <label class="calc-label">Total Body Weight (kg)</label>
+        <input type="number" id="rsiTbw" class="calc-input" placeholder="e.g. 80" inputmode="decimal">
+      </div>
+      <div class="stack-list" id="rsiOutput">
+        <div style="padding:10px;text-align:center;color:var(--text-3);font-size:.8rem;font-weight:600;">Enter weight to calculate doses</div>
+      </div>
+    </div>
+
+    <!-- ── 4. IMMEDIATE POST-INTUBATION: Post-Intubation Checklist ── -->
+    <div class="info-card" style="border-left:4px solid var(--warning);">
+      <h3 style="color:var(--warning);">✅ Post-Intubation Checklist</h3>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Confirm placement, settings, and sedation immediately after tube is secured.</p>
+      <div id="checklistWrap"></div>
+      <div style="display:flex;gap:10px;margin-top:12px;">
+        <button class="ehr-btn secondary" id="resetChecklist" style="margin-top:0;flex:1;">🔄 Reset</button>
+        <button class="ehr-btn" id="copyChecklist" style="margin-top:0;flex:2;">📋 Copy</button>
+      </div>
+    </div>
+
+    <!-- ── 5. EMERGENCY TROUBLESHOOTING: Rapid Deterioration Troubleshooter ── -->
+    <div class="info-card" style="border-left:4px solid #1d4ed8;">
+      <h3 style="color:#1d4ed8;">🚨 Rapid Deterioration Troubleshooter</h3>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Choose the acute problem. Prioritizes actions for high-pressure or desaturation.</p>
+      <div class="pill-row" id="deteriorationButtons">
+        <button class="pill-btn active" data-problem="desat">Desaturation</button>
+        <button class="pill-btn" data-problem="high-pressure">High Pressure Alarm</button>
+        <button class="pill-btn" data-problem="hypotension">Hypotension</button>
+      </div>
+      <div class="stack-list" id="deteriorationOutput"></div>
+    </div>
+
+    <!-- ── 6. VENT MANAGEMENT: Ventilator Dyssynchrony Guide ── -->
     <div class="info-card" style="border-left:4px solid #475569;">
       <h3 style="color:#475569;">📈 Ventilator Dyssynchrony Guide</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Waveform pattern plus one actionable bedside move. Tap a pattern to switch.</p>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Waveform patterns and actionable bedside moves.</p>
       <div class="pill-row" id="dyssyncButtons">
         <button class="pill-btn active" data-dyssync="flow">Flow Starvation</button>
         <button class="pill-btn" data-dyssync="double">Double Triggering</button>
-        <button class="pill-btn" data-dyssync="reverse">Reverse Triggering</button>
-        <button class="pill-btn" data-dyssync="auto">Auto-Triggering</button>
       </div>
       <svg id="dyssyncWave" class="flow-svg" viewBox="0 0 400 86" preserveAspectRatio="none"></svg>
       <div class="stack-list" id="dyssyncOutput"></div>
     </div>
 
+    <!-- ── 7. METABOLIC: Minute Ventilation Matcher ── -->
+    <div class="info-card" style="border-left:4px solid #9333ea;">
+      <h3 style="color:#9333ea;">⚙️ Minute Ventilation Matcher</h3>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">For DKA/Acidosis. Preserve compensatory minute ventilation.</p>
+      <div class="tools-row">
+        <div class="calc-field" style="flex:1"><label class="calc-label">Obs RR</label><input type="number" id="mvObsRr" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">Obs VT</label><input type="number" id="mvObsVt" class="calc-input" inputmode="decimal"></div>
+      </div>
+      <div class="tool-result" style="margin-top:0;border-color:rgba(147,51,234,.2);background:rgba(147,51,234,.06);">
+        <div class="tr-label" style="color:#9333ea;">Matched RR</div><div class="tr-val" id="mvNeedRr">--</div>
+      </div>
+    </div>
+
+    <!-- ── 8. METABOLIC: Acidosis Rescue (Bicarb Deficit) ── -->
+    <div class="info-card" style="border-left:4px solid #ec4899;">
+      <h3 style="color:#ec4899;">🧪 Acidosis Rescue (Bicarb Deficit)</h3>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Temporizing measure for profound acidosis (pH &lt; 6.9).</p>
+      <div class="tools-row">
+        <div class="calc-field" style="flex:1"><label class="calc-label">Weight (kg)</label><input type="number" id="bicarbTbw" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">HCO₃</label><input type="number" id="bicarbCurr" class="calc-input" inputmode="decimal"></div>
+      </div>
+      <div class="tool-result" style="margin-top:0;border-color:rgba(236,72,153,.2);background:rgba(236,72,153,.06);">
+        <div class="tr-label" style="color:#ec4899;">Safe Dose (Amps)</div><div class="tr-val" id="bicarbDoseVal">--</div>
+      </div>
+    </div>
+
+    <!-- ── 9. OBSTRUCTIVE: Auto-PEEP Detector ── -->
+    <div class="info-card" style="border-left:4px solid #d97706;">
+      <h3 style="color:#d97706;">💨 Auto-PEEP Detector / Calculator</h3>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Intrinsic PEEP measurement via expiratory hold.</p>
+      <div class="tools-row">
+        <div class="calc-field" style="flex:1"><label class="calc-label">Total PEEP</label><input type="number" id="autoPeepTotal" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">Set PEEP</label><input type="number" id="autoPeepSet" class="calc-input" inputmode="decimal"></div>
+      </div>
+      <div class="tool-result" style="margin-top:0;border-color:rgba(217,119,6,.2);background:rgba(217,119,6,.08);">
+        <div class="tr-label" style="color:#d97706;">Intrinsic PEEP</div><div class="tr-val" id="autoPeepVal">--</div>
+      </div>
+    </div>
+
+    <!-- ── 10. OXYGENATION: S/F Ratio (SpO₂ / FiO₂) ── -->
+    <div class="info-card" style="border-left:4px solid #0f766e;">
+      <h3 style="color:#0f766e;">🩸 S/F Ratio (SpO₂ / FiO₂)</h3>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Quick estimate of oxygenation before ABG results.</p>
+      <div class="tools-row">
+        <div class="calc-field" style="flex:1"><label class="calc-label">SpO₂ (%)</label><input type="number" id="sfSpo2" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">FiO₂ (%)</label><input type="number" id="sfFio2" class="calc-input" inputmode="decimal"></div>
+      </div>
+      <div class="tool-result" style="border-color:rgba(15,118,110,.2);background:rgba(15,118,110,.06);">
+        <div class="tr-label" style="color:#0f766e;">S/F Ratio</div><div class="tr-val" id="sfVal">--</div>
+      </div>
+    </div>
+
+    <!-- ── 11. OXYGENATION: P/F Ratio & ARDS Severity ── -->
+    <div class="info-card" style="border-left:4px solid #dc2626;">
+      <h3 style="color:#dc2626;">💧 P/F Ratio & ARDS Severity</h3>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Berlin criteria for ventilated ARDS patients.</p>
+      <div class="tools-row">
+        <div class="calc-field" style="flex:1"><label class="calc-label">PaO₂</label><input type="number" id="pfPao2" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">FiO₂ (%)</label><input type="number" id="pfFio2" class="calc-input" inputmode="decimal"></div>
+      </div>
+      <div class="tool-result" style="border-color:rgba(220,38,38,.2);background:rgba(220,38,38,.06);">
+        <div class="tr-label" style="color:#dc2626;">P/F Ratio</div><div class="tr-val" id="pfVal">--</div>
+      </div>
+    </div>
+
+    <!-- ── 12. LUNG PROTECTION: Driving Pressure Calculator ── -->
+    <div class="info-card" style="border-left:4px solid var(--theme);">
+      <h3>📐 Driving Pressure Calculator</h3>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">ΔP = Pplat − PEEP. Target: &lt; 15 cmH₂O.</p>
+      <div class="tools-row">
+        <div class="calc-field" style="flex:1"><label class="calc-label">Pplat</label><input type="number" id="dpPplat" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">PEEP</label><input type="number" id="dpPeep" class="calc-input" inputmode="decimal"></div>
+      </div>
+      <div class="tool-result" style="border-color:rgba(var(--theme-rgb),.2);background:rgba(var(--theme-rgb),.06);">
+        <div class="tr-label">Driving Pressure</div><div class="tr-val" id="dpVal">--</div>
+      </div>
+    </div>
+
+    <!-- ── 13. LUNG PROTECTION: Static Compliance ── -->
+    <div class="info-card" style="border-left:4px solid #7c3aed;">
+      <h3 style="color:#7c3aed;">📊 Static Compliance Calculator</h3>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Crs = VT ÷ (Pplat − PEEP). Normal ≥ 50.</p>
+      <div class="tools-row">
+        <div class="calc-field" style="flex:1"><label class="calc-label">VT (mL)</label><input type="number" id="crsVt" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">Pplat</label><input type="number" id="crsPplat" class="calc-input" inputmode="decimal"></div>
+      </div>
+      <div class="tool-result" style="border-color:rgba(124,58,237,.2);background:rgba(124,58,237,.07);">
+        <div class="tr-label" style="color:#7c3aed;">Compliance</div><div class="tr-val" id="crsVal">--</div>
+      </div>
+    </div>
+
+    <!-- ── 14. ADVANCED: Mean Airway Pressure (Paw) ── -->
+    <div class="info-card" style="border-left:4px solid #059669;">
+      <h3 style="color:#059669;">🌡️ Mean Airway Pressure (Paw)</h3>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Averaged pressure across the respiratory cycle.</p>
+      <div class="tool-result" style="border-color:rgba(5,150,105,.2);background:rgba(5,150,105,.07);">
+        <div class="tr-label" style="color:#059669;">Mean Paw</div><div class="tr-val" id="pawVal">--</div>
+      </div>
+    </div>
+
+    <!-- ── 15. BOARDING: Drug Infusion Quick Reference ── -->
+    <div class="info-card" style="border-left:4px solid #0f766e;">
+      <h3 style="color:#0f766e;">💉 Drug Infusion Quick Reference</h3>
+      <div class="alert-box">Verify local protocols before starting infusions.</div>
+      <div class="drug-grid">
+        <div class="drug-card"><h4>Norepinephrine</h4><p>0.02–0.05 mcg/kg/min.</p></div>
+        <div class="drug-card"><h4>Propofol</h4><p>5–50 mcg/kg/min.</p></div>
+        <div class="drug-card"><h4>Fentanyl</h4><p>25–200 mcg/h.</p></div>
+      </div>
+    </div>
+
+    <!-- ── 16. BOARDING: RASS Sedation Target ── -->
+    <div class="info-card" style="border-left:4px solid #0284c7;">
+      <h3 style="color:#0284c7;">😴 RASS Sedation Target</h3>
+      <p style="margin-bottom:10px;font-size:.84rem;color:var(--text-2);">Richmond Agitation-Sedation Scale. Tap a level to see non-prescriptive management guidance.</p>
+      <div class="rass-grid" id="rassGrid"></div>
+    </div>
+
+    <!-- ── 17. BOARDING: SOFA Severity Context ── -->
+    <div class="info-card" style="border-left:4px solid #2563eb;">
+      <h3 style="color:#2563eb;">📊 SOFA Severity Context</h3>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Select organ dysfunction category. Quick severity context tool.</p>
+      <div class="tool-result" style="border-color:rgba(37,99,235,.2);background:rgba(37,99,235,.07);">
+        <div class="tr-label">SOFA Total</div>
+        <div class="tr-val" id="sofaTotal">0</div>
+        <div class="tr-unit">0–24</div>
+      </div>
+    </div>
+
+    <!-- ── 18. LIBERATION: Weaning & Extubation Readiness ── -->
     <div class="info-card" style="border-left:4px solid #16a34a;">
       <h3 style="color:#16a34a;">🫁 Weaning &amp; Extubation Readiness</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">RSBI = RR ÷ VT (in liters). Use it only after the patient is otherwise clinically ready for a spontaneous breathing trial.</p>
-      <div class="tools-row">
-        <div class="calc-field" style="flex:1">
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">RSBI = RR ÷ VT (in liters). Target &lt; 105 breaths/min/L.</p>
+      <div class="tool-result" style="border-color:rgba(22,163,74,.2);background:rgba(22,163,74,.06);">
+        <div class="tr-label" style="color:#16a34a;">RSBI</div>
+        <div class="tr-val" id="rsbiVal">--</div>
+        <div class="tr-unit">breaths / min / L</div>
+      </div>
+    </div>
+
+  </section>x:1">
           <label class="calc-label">Spontaneous RR (/min)</label>
           <input type="number" id="rsbiRr" class="calc-input" placeholder="e.g. 24" inputmode="decimal">
         </div>
@@ -1581,80 +1516,6 @@ require_once __DIR__ . '/../includes/pwa.php';
         <div class="stack-item"><strong>SAT / analgesia review</strong><p>Continuous sedatives lightened, pain controlled, and no compelling reason for deep sedation.</p></div>
         <div class="stack-item"><strong>Respiratory readiness</strong><p>FiO₂ and PEEP modest, secretions manageable, cough present, and no uncontrolled acidosis.</p></div>
         <div class="stack-item"><strong>Airway / extubation risk</strong><p>Cuff leak considered when edema is a concern; high-risk patients may need NIV or HFNC immediately after extubation.</p></div>
-      </div>
-    </div>
-
-    <!-- ── MEAN AIRWAY PRESSURE ── -->
-    <div class="info-card" style="border-left:4px solid #059669;">
-      <h3 style="color:#059669;">🌡️ Mean Airway Pressure (Paw)</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Simplified: Paw ≈ PEEP + (PIP − PEEP) × (Ti / (Ti + Te)). Higher Paw improves oxygenation but risks hemodynamic compromise.</p>
-      <div class="tools-row">
-        <div class="calc-field" style="flex:1"><label class="calc-label">PIP (cmH₂O)</label><input type="number" id="pawPip" class="calc-input" placeholder="e.g. 28" inputmode="decimal"></div>
-        <div class="calc-field" style="flex:1"><label class="calc-label">PEEP (cmH₂O)</label><input type="number" id="pawPeep" class="calc-input" placeholder="e.g. 8" inputmode="decimal"></div>
-        <div class="calc-field" style="flex:1"><label class="calc-label">I-time (s)</label><input type="number" id="pawItime" class="calc-input" placeholder="e.g. 0.8" step="0.1" inputmode="decimal"></div>
-        <div class="calc-field" style="flex:1"><label class="calc-label">RR (/min)</label><input type="number" id="pawRr" class="calc-input" placeholder="e.g. 16" inputmode="decimal"></div>
-      </div>
-      <div class="tool-result" style="border-color:rgba(5,150,105,.2);background:rgba(5,150,105,.07);">
-        <div class="tr-label" style="color:#059669;">Mean Airway Pressure</div>
-        <div class="tr-val" id="pawVal">--</div>
-        <div class="tr-unit">cmH₂O</div>
-      </div>
-    </div>
-
-    <div class="info-card" style="border-left:4px solid #0f766e;">
-      <h3 style="color:#0f766e;">💉 Drug Infusion Quick Reference</h3>
-      <div class="alert-box">Verify your local formulary, pump library, line access, and concentration before starting any infusion. Concentrations below are common examples only and are not universal.</div>
-      <div class="drug-grid">
-        <div class="drug-card">
-          <h4>Norepinephrine</h4>
-          <p>Common adult start <strong>0.02–0.05 mcg/kg/min</strong>, titrate to MAP. Many hospitals stock 4 mg/250 mL or 8 mg/250 mL bags. First-line vasopressor in septic or distributive shock.</p>
-        </div>
-        <div class="drug-card">
-          <h4>Vasopressin</h4>
-          <p>Typically <strong>0.03 units/min</strong> fixed dose. Use as adjunct rather than primary titratable pressor in refractory vasodilatory shock.</p>
-        </div>
-        <div class="drug-card">
-          <h4>Propofol</h4>
-          <p>Commercial concentration usually <strong>10 mg/mL</strong>. Common ICU infusion range <strong>5–50 mcg/kg/min</strong>. Watch for hypotension, especially in shock.</p>
-        </div>
-        <div class="drug-card">
-          <h4>Midazolam</h4>
-          <p>Common range <strong>1–10 mg/h</strong> or weight-based equivalent. Useful when propofol is limited by hemodynamics, but accumulation and delirium matter.</p>
-        </div>
-        <div class="drug-card">
-          <h4>Fentanyl</h4>
-          <p>Common infusion range <strong>25–200 mcg/h</strong> after bolus or loading strategy per local practice. Analgesia-first sedation remains preferred.</p>
-        </div>
-        <div class="drug-card">
-          <h4>Ketamine</h4>
-          <p>Analgo-sedative infusion commonly <strong>0.3–1 mg/kg/h</strong>; some units use higher ranges. Helpful when bronchospasm or hypotension makes propofol less attractive.</p>
-        </div>
-        <div class="drug-card">
-          <h4>Cisatracurium</h4>
-          <p>ARDS paralysis often begins with a bolus followed by infusion per protocol; many ICUs titrate around <strong>1–3 mcg/kg/min</strong> equivalent, using fixed-dose or monitoring-based strategies.</p>
-        </div>
-        <div class="drug-card">
-          <h4>General Rule</h4>
-          <p>Every infusion needs a stated goal: MAP target, RASS target, pain target, or ventilator target. Reassess the indication hourly, not just the number on the pump.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── SEDATION RASS SCALE ── -->
-    <div class="info-card" style="border-left:4px solid #0284c7;">
-      <h3 style="color:#0284c7;">😴 RASS Sedation Target</h3>
-      <p style="margin-bottom:10px;font-size:.84rem;color:var(--text-2);">Richmond Agitation-Sedation Scale. Tap a level to see non-prescriptive management guidance.</p>
-      <div class="rass-grid" id="rassGrid"></div>
-    </div>
-
-    <!-- ── POST-INTUBATION CHECKLIST ── -->
-    <div class="info-card" style="border-left:4px solid var(--warning);">
-      <h3 style="color:var(--warning);">✅ Post-Intubation Checklist</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Run through this within 10 minutes of every intubation. Tap each item to confirm.</p>
-      <div id="checklistWrap"></div>
-      <div style="display:flex;gap:10px;margin-top:12px;">
-        <button class="ehr-btn secondary" id="resetChecklist" style="margin-top:0;flex:1;">🔄 Reset</button>
-        <button class="ehr-btn" id="copyChecklist" style="margin-top:0;flex:2;">📋 Copy to Notes</button>
       </div>
     </div>
 
@@ -1773,114 +1634,14 @@ const SCENARIOS = [
     waveform:'normal',
     evidence:['ARDSNet NEJM 2000','SCCM/ATS Guidelines'],
     params:[
-      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Reliable volume delivery with mandatory backup.'},
+      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'The universally recommended ED default mode (Rosen’s / EMCrit). Reliable volume delivery.'},
       {key:'Tidal Volume', icon:'🫁', val:'8 mL/kg PBW', base:{min:6,max:8,target:8}, note:'Conventional default. Reduce if Pplat > 30 cmH₂O.'},
       {key:'Resp Rate',    icon:'⏱️', val:'10–12 breaths/min',     note:'Moderate starting rate. Adjust after ABG in 30–60 min.'},
       {key:'FiO₂',        icon:'💨', val:'1.0 → titrate',         note:'Start 100%. Titrate rapidly to SpO₂ 92–96%. Avoid O₂ toxicity.'},
       {key:'PEEP',         icon:'🔒', val:'5 cmH₂O',              note:'Physiologic baseline. Counteracts post-intubation atelectasis.'},
       {key:'I:E Ratio',    icon:'↔️', val:'1:2',                   note:'Standard timing — adequate expiration, no stacking.'}
     ]
-  },
-  {
-    id:'asthma-copd', name:'Asthma/COPD', emoji:'🌬️',
-    theme:'#d97706', rgb:'217,119,6',
-    title:'Obstructive Disease', sub:'High Resistance / Air Trapping', badge:'⚠️ AIR TRAPPING RISK',
-    protocol:'Obstructive Strategy',
-    oxygenTarget:'Asthma 93–95%; COPD 88–92%',
-    co2Target:'Permissive hypercapnia',
-    safetyTitle:'Watch for Auto-PEEP',
-    safetyNote:'Prioritize long expiratory time and permissive hypercapnia; treat auto-PEEP and dynamic hyperinflation before chasing a normal PaCO₂.',
-    waveform:'obstructive',
-    evidence:['GINA 2025','GOLD 2026','ATS Acute Asthma / ERS-ATS NIV'],
-    params:[
-      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Use a mode that allows close monitoring and avoids breath stacking.'},
-      {key:'Tidal Volume', icon:'🫁', val:'6 mL/kg PBW', base:{min:6,max:8,target:6}, note:'Lung-protective. Allows lower peak pressures.'},
-      {key:'Resp Rate',    icon:'⏱️', val:'8–12 breaths/min',      note:'🔑 Start low and titrate to pH and auto-PEEP; permissive hypercapnia is often safer than dynamic hyperinflation.'},
-      {key:'FiO₂',        icon:'💨', val:'1.0 → titrate',         note:'Start 100%, then titrate to the lowest FiO₂ that maintains adequate saturation; asthma often targets 93–95%, COPD 88–92%.'},
-      {key:'PEEP',         icon:'🔒', val:'0–5 cmH₂O',            note:'Start low; if trigger effort is high, external PEEP can be titrated cautiously against measured auto-PEEP.'},
-      {key:'I:E Ratio',    icon:'↔️', val:'1:4 to 1:5',           note:'🔑 Maximize expiratory time. Critical for complete exhalation.'}
-    ]
-  },
-  {
-    id:'ards', name:'ARDS', emoji:'🫁',
-    theme:'#7c3aed', rgb:'124,58,237',
-    title:'ARDS Protocol', sub:'Poor Compliance / Stiff Lungs', badge:'⚠️ ARDS — STRICT PROTOCOL',
-    protocol:'ARDSNet / Prone Early',
-    oxygenTarget:'SpO₂ 88–95%',
-    co2Target:'pH ≥ 7.20 usually',
-    safetyTitle:'Keep Pplat ≤ 30 cmH₂O',
-    safetyNote:'Use lung-protective ventilation, keep Pplat ≤ 30 cmH₂O, follow driving pressure closely, and consider early proning when P/F ≤ 150.',
-    waveform:'ards',
-    evidence:['ATS/ESICM/SCCM ARDS','Global ARDS Definition 2024','ARDSNet / PROSEVA'],
-    params:[
-      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Use a mode that reliably delivers lung-protective VT and permits plateau pressure checks.'},
-      {key:'Tidal Volume', icon:'🫁', val:'6 mL/kg PBW', base:{min:4,max:8,target:6}, note:'🔑 Start at 6. Can reduce to 4 mL/kg if Pplat > 30 cmH₂O.'},
-      {key:'Resp Rate',    icon:'⏱️', val:'18–30 breaths/min',     note:'Often needs a higher RR to support pH with low VT; max about 35 in ARDSNet while tolerating permissive hypercapnia if needed.'},
-      {key:'FiO₂',        icon:'💨', val:'1.0 → per table',       note:'Use ARDSNet PEEP/FiO₂ table. Target SpO₂ 88–95%.'},
-      {key:'PEEP',         icon:'🔒', val:'PEEP/FiO₂ table',      note:'Use an ARDSNet low-PEEP/high-FiO₂ or higher-PEEP strategy; avoid PEEP < 5 and reassess hemodynamics.'},
-      {key:'I:E Ratio',    icon:'↔️', val:'1:2',                   note:'Standard. Monitor for auto-PEEP if RR is high.'}
-    ]
-  },
-  {
-    id:'hypovolemia', name:'Hypovolemia', emoji:'🩸',
-    theme:'#be123c', rgb:'190,18,60',
-    title:'Hemodynamic Instability', sub:'Volume-Depleted Patient', badge:'🩸 LOW PRELOAD — CAUTION',
-    protocol:'Preload-Protective',
-    oxygenTarget:'SpO₂ 92–96%',
-    co2Target:'Match pre-tube drive',
-    safetyTitle:'Maintain Adequate Preload',
-    safetyNote:'Positive pressure can reduce venous return and precipitate collapse. Resuscitate first with blood products or balanced crystalloid when indicated, and keep vasopressors ready.',
-    waveform:'normal',
-    evidence:['Peri-intubation Shock Literature','Hemodynamic Ventilation Physiology'],
-    params:[
-      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Standard start. Have vasopressors and resuscitation products ready at bedside.'},
-      {key:'Tidal Volume', icon:'🫁', val:'8 mL/kg PBW', base:{min:6,max:8,target:8}, note:'Standard volume. Reassess if Pplat elevated.'},
-      {key:'Resp Rate',    icon:'⏱️', val:'10–12 breaths/min',     note:'Monitor acid-base status closely. Compensatory tachypnea common.'},
-      {key:'FiO₂',        icon:'💨', val:'1.0 → titrate',         note:'Start high. Titrate as hemodynamics and oxygenation improve.'},
-      {key:'PEEP',         icon:'🔒', val:'0–5 cmH₂O',            note:'🔑 Low PEEP protects venous return. Raise only after preload and blood pressure are supported.'},
-      {key:'I:E Ratio',    icon:'↔️', val:'1:2',                   note:'Default. Reassess after fluid resuscitation.'}
-    ]
-  },
-  {
-    id:'pregnancy', name:'Pregnancy', emoji:'🤰',
-    theme:'#db2777', rgb:'219,39,119',
-    title:'Obstetric Patient', sub:'Altered Physiology — Dual Priority', badge:'🤰 OB — DUAL PRIORITIES',
-    protocol:'Maternal-Fetal Oxygenation',
-    oxygenTarget:'SpO₂ ≥ 95%',
-    co2Target:'PaCO₂ about 28–32',
-    safetyTitle:'Dual Priority: Mother & Fetus',
-    safetyNote:'Maternal SpO₂ > 95% is critical for fetal oxygenation. Left lateral tilt. Use pre-pregnancy height for PBW.',
-    waveform:'restrictive',
-    evidence:['ACOG Critical Care in Pregnancy','Adult ICU principles','ARDSNet PBW'],
-    params:[
-      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Reliable volume. Monitor for dyssynchrony.'},
-      {key:'Tidal Volume', icon:'🫁', val:'6 mL/kg PBW', base:{min:6,max:8,target:6}, note:'🔑 Use PRE-PREGNANCY height. FRC is reduced by gravid uterus.'},
-      {key:'Resp Rate',    icon:'⏱️', val:'14–18 breaths/min',     note:'Matches physiologic hyperventilation (baseline CO₂ ≈ 32 mmHg in pregnancy).'},
-      {key:'FiO₂',        icon:'💨', val:'1.0 → target ≥95%',    note:'🔑 Target SpO₂ ≥ 95% — fetal O₂ delivery depends on maternal sat.'},
-      {key:'PEEP',         icon:'🔒', val:'5–8 cmH₂O',            note:'Higher PEEP needed — gravid uterus compresses diaphragm (↓ FRC).'},
-      {key:'I:E Ratio',    icon:'↔️', val:'1:2',                   note:'Standard. Involve OB team and consider fetal monitoring.'}
-    ]
-  },
-  {
-    id:'niv', name:'BiPAP / NIV', emoji:'😷',
-    theme:'#06b6d4', rgb:'6,182,212',
-    title:'Non-Invasive Ventilation', sub:'Best supported for COPD or cardiogenic pulmonary edema', badge:'😷 NIV — SELECT THE RIGHT PATIENT',
-    protocol:'ERS/ATS NIV',
-    oxygenTarget:'COPD 88–92% or scenario target',
-    co2Target:'Relieve work of breathing',
-    safetyTitle:'Monitor Airway Protection',
-    safetyNote:'Best-supported for hypercapnic COPD exacerbation or cardiogenic pulmonary edema. Do not use as default therapy for de novo hypoxemic ARF/ARDS without expert monitoring.',
-    waveform:'niv',
-    requiresGate:true,
-    evidence:['ERS/ATS NIV Guideline','GOLD 2026','ERS/ATS acute respiratory failure'],
-    params:[
-      {key:'Mode',         icon:'🎛️', val:'BiPAP (S/T)',           note:'Spontaneous/Timed mode — patient triggers with backup rate.'},
-      {key:'IPAP',         icon:'⬆️', val:'10–15 cmH₂O',          note:'🔑 Drives ventilation and CO₂ clearance. Titrate +2 cmH₂O for CO₂ retention.'},
-      {key:'EPAP',         icon:'⬇️', val:'5–8 cmH₂O',            note:'Oxygenation support. Splints airway open. Min 5 to prevent CO₂ rebreathing.'},
-      {key:'FiO₂',        icon:'💨', val:'Titrate to target',      note:'COPD: often 88–92%. Cardiogenic edema or other causes usually target higher saturations if tolerated.'},
-      {key:'Backup Rate',  icon:'⏱️', val:'12–16 breaths/min',     note:'Delivers breath if patient becomes apneic or rate drops below threshold.'},
-      {key:'Max I-Time',   icon:'⌛', val:'1.0–1.2 sec',           note:'Prevents excessively long inspirations causing discomfort/dyssynchrony.'}
-    ]
+
   },
   {
     id:'sepsis', name:'Sepsis / Septic Shock', emoji:'🦠',
@@ -1901,6 +1662,49 @@ const SCENARIOS = [
       {key:'PEEP',         icon:'🔒', val:'5–8 cmH₂O',            note:'Enough to prevent derecruitment, but reassess blood pressure after every increase.'},
       {key:'I:E Ratio',    icon:'↔️', val:'1:2',                   note:'Standard timing unless obstructive physiology coexists.'}
     ]
+
+  },
+  {
+    id:'asthma-copd', name:'Asthma/COPD', emoji:'🌬️',
+    theme:'#d97706', rgb:'217,119,6',
+    title:'Obstructive Disease', sub:'High Resistance / Air Trapping', badge:'⚠️ AIR TRAPPING RISK',
+    protocol:'Obstructive Strategy',
+    oxygenTarget:'Asthma 93–95%; COPD 88–92%',
+    co2Target:'Permissive hypercapnia',
+    safetyTitle:'Watch for Auto-PEEP',
+    safetyNote:'Prioritize long expiratory time and permissive hypercapnia; treat auto-PEEP and dynamic hyperinflation before chasing a normal PaCO₂.',
+    waveform:'obstructive',
+    evidence:['GINA 2025','GOLD 2026','ATS Acute Asthma / ERS-ATS NIV'],
+    params:[
+      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Use a mode that allows close monitoring and avoids breath stacking.'},
+      {key:'Tidal Volume', icon:'🫁', val:'6 mL/kg PBW', base:{min:6,max:8,target:6}, note:'Lung-protective. Expect high Peak Pressures (PIP) due to resistance; monitor Pplat instead.'},
+      {key:'Resp Rate',    icon:'⏱️', val:'8–12 breaths/min',      note:'🔑 Start low and titrate to pH and auto-PEEP; permissive hypercapnia is often safer than dynamic hyperinflation.'},
+      {key:'FiO₂',        icon:'💨', val:'1.0 → titrate',         note:'Start 100%, then titrate to the lowest FiO₂ that maintains adequate saturation; asthma often targets 93–95%, COPD 88–92%.'},
+      {key:'PEEP',         icon:'🔒', val:'0–5 cmH₂O',            note:'Start low; if trigger effort is high, external PEEP can be titrated cautiously against measured auto-PEEP.'},
+      {key:'I:E Ratio',    icon:'↔️', val:'1:4 to 1:5',           note:'🔑 Increase Inspiratory Flow (e.g., 60–80+ L/min) to deliver breath faster and maximize expiratory time.'}
+    ]
+
+  },
+  {
+    id:'ards', name:'ARDS', emoji:'🫁',
+    theme:'#7c3aed', rgb:'124,58,237',
+    title:'ARDS Protocol', sub:'Poor Compliance / Stiff Lungs', badge:'⚠️ ARDS — STRICT PROTOCOL',
+    protocol:'ARDSNet / Prone Early',
+    oxygenTarget:'SpO₂ 88–95%',
+    co2Target:'pH ≥ 7.20 usually',
+    safetyTitle:'Keep Pplat ≤ 30 cmH₂O',
+    safetyNote:'Use lung-protective ventilation, keep Pplat ≤ 30 cmH₂O, follow driving pressure closely, and consider early proning when P/F ≤ 150.',
+    waveform:'ards',
+    evidence:['ATS/ESICM/SCCM ARDS','Global ARDS Definition 2024','ARDSNet / PROSEVA'],
+    params:[
+      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Use a mode that reliably delivers lung-protective VT and permits plateau pressure checks.'},
+      {key:'Tidal Volume', icon:'🫁', val:'6 mL/kg PBW', base:{min:4,max:8,target:6}, note:'🔑 Start at 6. Can reduce to 4 mL/kg if Pplat > 30 cmH₂O.'},
+      {key:'Resp Rate',    icon:'⏱️', val:'18–30 breaths/min',     note:'Often needs a higher RR to support pH with low VT; max about 35 in ARDSNet while tolerating permissive hypercapnia if needed.'},
+      {key:'FiO₂',        icon:'💨', val:'1.0 → per table',       note:'Use ARDSNet PEEP/FiO₂ table. Target SpO₂ 88–95%.'},
+      {key:'PEEP',         icon:'🔒', val:'PEEP/FiO₂ table',      note:'Use an ARDSNet low-PEEP/high-FiO₂ or higher-PEEP strategy; avoid PEEP < 5 and reassess hemodynamics.'},
+      {key:'I:E Ratio',    icon:'↔️', val:'1:2',                   note:'Standard. Monitor for auto-PEEP if RR is high.'}
+    ]
+
   },
   {
     id:'neuro', name:'Neuro / TBI / Stroke', emoji:'🧠',
@@ -1921,106 +1725,7 @@ const SCENARIOS = [
       {key:'PEEP',         icon:'🔒', val:'5–8 cmH₂O',            note:'Moderate PEEP is often tolerated; if you need >10, reassess ICP/CPP or clinical brain perfusion.'},
       {key:'I:E Ratio',    icon:'↔️', val:'1:2',                   note:'Standard timing. Avoid unnecessary air trapping that may worsen venous return.'}
     ]
-  },
-  {
-    id:'pe', name:'Massive / Submassive PE', emoji:'🫀',
-    theme:'#7c2d12', rgb:'124,45,18',
-    title:'Pulmonary Embolism', sub:'RV Failure / Mean Airway Pressure Sensitive', badge:'🚨 HIGHEST-RISK INTUBATION',
-    protocol:'Low-Pressure RV Strategy',
-    oxygenTarget:'SpO₂ > 92%',
-    co2Target:'Avoid severe acidaemia',
-    safetyTitle:'Avoid the Intubation Spiral',
-    safetyNote:'If the patient can tolerate it, prefer HFNC or NIV while reperfusion therapy is organized. If intubation is unavoidable, minimize PEEP and mean airway pressure, preload carefully, start vasopressors early, and keep thrombolysis/catheter/surgical reperfusion decisions moving.',
-    waveform:'normal',
-    evidence:['ESC/ERS PE 2019','INTUBE 2022','Peri-intubation Review 2025'],
-    params:[
-      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Use a simple controlled mode and avoid prolonged inspiratory times.'},
-      {key:'Tidal Volume', icon:'🫁', val:'6 mL/kg PBW',            base:{min:6,max:8,target:6}, note:'Limit plateau and mean airway pressure to protect the failing RV.'},
-      {key:'Resp Rate',    icon:'⏱️', val:'10–14 breaths/min',     note:'Enough to prevent worsening acidosis, but not so high that expiratory time shortens or mean pressure rises.'},
-      {key:'FiO₂',         icon:'💨', val:'1.0 → titrate',         note:'Correct hypoxemia quickly, but avoid long periods of unnecessary hyperoxia once stable.'},
-      {key:'PEEP',         icon:'🔒', val:'0–5 cmH₂O',            note:'PEEP can collapse preload in high-risk PE; use the minimum needed for oxygenation.'},
-      {key:'I:E Ratio',    icon:'↔️', val:'1:2',                   note:'Shorter inspiratory time helps keep mean airway pressure down.'}
-    ]
-  },
-  {
-    id:'dka', name:'DKA / Metabolic Acidosis', emoji:'🧪',
-    theme:'#c026d3', rgb:'192,38,211',
-    title:'Metabolic Acidosis Rescue', sub:'Kussmaul Compensation Must Be Preserved', badge:'⚠️ MATCH THE MINUTE VENTILATION',
-    protocol:'Compensation-Preserving',
-    oxygenTarget:'SpO₂ 92–96%',
-    co2Target:'Preserve compensation',
-    safetyTitle:'Match Minute Ventilation Immediately',
-    safetyNote:'Do not intubate unless absolutely necessary. If you must intubate, preoxygenate without losing compensation when possible and set the vent to match or exceed the pre-intubation minute ventilation from the first breath.',
-    waveform:'normal',
-    evidence:['DKA Consensus 2024','NAEMSP Ventilation 2022','High-Risk Airway Review 2020'],
-    params:[
-      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Controlled ventilation lets you deliberately preserve high minute ventilation.'},
-      {key:'Tidal Volume', icon:'🫁', val:'6–8 mL/kg PBW',         base:{min:6,max:8,target:8}, note:'Use PBW-based VT; the usual compensatory need is met mostly by RR, not huge VT.'},
-      {key:'Resp Rate',    icon:'⏱️', val:'24–35 breaths/min',     note:'Often much higher than “usual” ED starts. Match the patient, then down-titrate only as the acidosis corrects.'},
-      {key:'FiO₂',         icon:'💨', val:'1.0 → titrate',         note:'Start high during the procedure, then titrate once the patient is stable.'},
-      {key:'PEEP',         icon:'🔒', val:'5 cmH₂O',              note:'Low baseline PEEP is usually adequate unless another oxygenation problem coexists.'},
-      {key:'I:E Ratio',    icon:'↔️', val:'1:1.5 to 1:2',         note:'No obstructive physiology here; the priority is raw minute ventilation.'}
-    ]
-  },
-  {
-    id:'cpe', name:'Cardiogenic Edema', emoji:'🌊',
-    theme:'#dc2626', rgb:'220,38,38',
-    title:'Cardiogenic Pulmonary Edema', sub:'Failed NIV / Wet Restrictive Lungs', badge:'💧 POSITIVE PRESSURE IS THERAPY',
-    protocol:'Recruit and Offload',
-    oxygenTarget:'SpO₂ 92–96%',
-    co2Target:'Treat work of breathing',
-    safetyTitle:'NIV First, But Recruit When Tubed',
-    safetyNote:'If NIV fails, the invasive vent should preserve the physiologic benefit of positive pressure: lung-protective VT, higher PEEP than a normal lung, and ongoing afterload/preload management.',
-    waveform:'restrictive',
-    evidence:['ESC HF 2021','ERS/ATS NIV','Acute Pulmonary Oedema Algorithms'],
-    params:[
-      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'A controlled mode provides reliable oxygenation while the heart failure therapy works.'},
-      {key:'Tidal Volume', icon:'🫁', val:'6–8 mL/kg PBW',         base:{min:6,max:8,target:6}, note:'Treat as a stiff-lung physiology rather than a healthy-lung intubation.'},
-      {key:'Resp Rate',    icon:'⏱️', val:'18–24 breaths/min',     note:'Helps unload work of breathing without driving excessive mean pressure.'},
-      {key:'FiO₂',         icon:'💨', val:'1.0 → titrate',         note:'Start high, then step down once oxygenation and afterload improve.'},
-      {key:'PEEP',         icon:'🔒', val:'8–12 cmH₂O',           note:'Recruit flooded alveoli and support preload/afterload reduction if blood pressure tolerates it.'},
-      {key:'I:E Ratio',    icon:'↔️', val:'1:1.5 to 1:2',         note:'Short inspiratory times are reasonable; avoid stacking in mixed obstructive disease.'}
-    ]
-  },
-  {
-    id:'anaphylaxis', name:'Anaphylaxis / Airway Edema', emoji:'🐝',
-    theme:'#b45309', rgb:'180,83,9',
-    title:'Anaphylaxis / Edematous Airway', sub:'Difficult Airway + Residual Bronchospasm', badge:'⚠️ AIRWAY CAN DISAPPEAR',
-    protocol:'Early Epi + Obstructive Vent',
-    oxygenTarget:'SpO₂ ≥ 94%',
-    co2Target:'Avoid breath stacking',
-    safetyTitle:'Airway Can Disappear',
-    safetyNote:'Prioritize epinephrine and expert airway backup. After intubation, expect a smaller tube and manage residual lower-airway obstruction with an obstructive-style ventilator strategy.',
-    waveform:'obstructive',
-    evidence:['Anaphylaxis 2023 Practice Parameter','Obstructive Vent Principles','Difficult Airway Guidelines'],
-    params:[
-      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Provides controlled ventilation while edema and bronchospasm are treated.'},
-      {key:'Tidal Volume', icon:'🫁', val:'6–8 mL/kg PBW',         base:{min:6,max:8,target:6}, note:'Keep VT modest if bronchospasm is still active.'},
-      {key:'Resp Rate',    icon:'⏱️', val:'10–14 breaths/min',     note:'Lower rates protect expiratory time if wheeze and dynamic obstruction persist.'},
-      {key:'FiO₂',         icon:'💨', val:'1.0 → titrate',         note:'Start high during the airway phase, then titrate once edema and bronchospasm improve.'},
-      {key:'PEEP',         icon:'🔒', val:'0–5 cmH₂O',            note:'Use low PEEP if severe obstruction dominates; if edema/recruitment dominates, modest PEEP may help.'},
-      {key:'I:E Ratio',    icon:'↔️', val:'1:3 to 1:4',           note:'Bias toward longer exhalation until airway resistance normalizes.'}
-    ]
-  },
-  {
-    id:'obesity', name:'Obesity (BMI >35)', emoji:'⚖️',
-    theme:'#475569', rgb:'71,85,105',
-    title:'Obesity Ventilation', sub:'Low FRC / Fast Derecruitment', badge:'🪜 PBW + POSITION + PEEP',
-    protocol:'Head-Up Recruitment',
-    oxygenTarget:'SpO₂ 92–96%',
-    co2Target:'Keep VE adequate',
-    safetyTitle:'PBW, PEEP, Position',
-    safetyNote:'Dose VT to PBW, not actual body weight. Expect rapid derecruitment and difficult mask ventilation; start head-up or reverse Trendelenburg and use more PEEP than a non-obese lung if tolerated.',
-    waveform:'restrictive',
-    evidence:['Obese ICU Ventilation Review 2020','How I Ventilate Obese Patient 2019','Protective Ventilation Reviews'],
-    params:[
-      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Simple controlled ventilation is usually easiest while recruitment and positioning are optimized.'},
-      {key:'Tidal Volume', icon:'🫁', val:'6–8 mL/kg PBW',         base:{min:6,max:8,target:6}, note:'PBW is critical here because actual body weight grossly overestimates safe VT.'},
-      {key:'Resp Rate',    icon:'⏱️', val:'16–22 breaths/min',     note:'Higher RR may be needed because chest wall load increases work of breathing and CO₂ retention risk.'},
-      {key:'FiO₂',         icon:'💨', val:'1.0 → titrate',         note:'Start high during the peri-intubation phase; derecruitment is common if you under-support early.'},
-      {key:'PEEP',         icon:'🔒', val:'8–12 cmH₂O',           note:'Many obese patients need moderate PEEP to stay open, but aggressive PEEP can worsen hypotension. Titrate to oxygenation, driving pressure, and blood pressure.'},
-      {key:'I:E Ratio',    icon:'↔️', val:'1:2',                   note:'Standard timing unless obstructive physiology coexists.'}
-    ]
+
   },
   {
     id:'rosc', name:'Post-ROSC', emoji:'⚡',
@@ -2041,6 +1746,175 @@ const SCENARIOS = [
       {key:'PEEP',         icon:'🔒', val:'5–8 cmH₂O',            note:'Reasonable baseline unless pulmonary edema or aspiration require more recruitment.'},
       {key:'I:E Ratio',    icon:'↔️', val:'1:2',                   note:'Standard timing with frequent ABG confirmation.'}
     ]
+  },
+  {
+    id:'niv', name:'BiPAP / NIV', emoji:'😷',
+    theme:'#06b6d4', rgb:'6,182,212',
+    title:'Non-Invasive Ventilation', sub:'Best supported for COPD or cardiogenic pulmonary edema', badge:'😷 NIV — SELECT THE RIGHT PATIENT',
+    protocol:'ERS/ATS NIV',
+    oxygenTarget:'COPD 88–92% or scenario target',
+    co2Target:'Relieve work of breathing',
+    safetyTitle:'Monitor Airway Protection',
+    safetyNote:'Best-supported for hypercapnic COPD exacerbation or cardiogenic pulmonary edema. Do not use as default therapy for de novo hypoxemic ARF/ARDS without expert monitoring.',
+    waveform:'niv',
+    requiresGate:true,
+    evidence:['ERS/ATS NIV Guideline','GOLD 2026','ERS/ATS acute respiratory failure'],
+    params:[
+      {key:'Mode',         icon:'🎛️', val:'BiPAP (S/T)',           note:'Spontaneous/Timed mode — patient triggers with backup rate.'},
+      {key:'IPAP',         icon:'⬆️', val:'10–15 cmH₂O',          note:'🔑 Drives ventilation and CO₂ clearance. Titrate +2 cmH₂O for CO₂ retention.'},
+      {key:'EPAP',         icon:'⬇️', val:'5–8 cmH₂O',            note:'For CPE, do not hesitate to titrate EPAP up to 10–12 cmH₂O to aggressively reduce LV preload and afterload.'},
+      {key:'FiO₂',        icon:'💨', val:'Titrate to target',      note:'COPD: often 88–92%. Cardiogenic edema or other causes usually target higher saturations if tolerated.'},
+      {key:'Backup Rate',  icon:'⏱️', val:'12–16 breaths/min',     note:'Delivers breath if patient becomes apneic or rate drops below threshold.'},
+      {key:'Max I-Time',   icon:'⌛', val:'1.0–1.2 sec',           note:'Prevents excessively long inspirations causing discomfort/dyssynchrony.'}
+    ]
+
+  },
+  {
+    id:'cpe', name:'Cardiogenic Edema', emoji:'🌊',
+    theme:'#dc2626', rgb:'220,38,38',
+    title:'Cardiogenic Pulmonary Edema', sub:'Failed NIV / Wet Restrictive Lungs', badge:'💧 POSITIVE PRESSURE IS THERAPY',
+    protocol:'Recruit and Offload',
+    oxygenTarget:'SpO₂ 92–96%',
+    co2Target:'Treat work of breathing',
+    safetyTitle:'NIV First, But Recruit When Tubed',
+    safetyNote:'If NIV fails, the invasive vent should preserve the physiologic benefit of positive pressure: lung-protective VT, higher PEEP than a normal lung, and ongoing afterload/preload management.',
+    waveform:'restrictive',
+    evidence:['ESC HF 2021','ERS/ATS NIV','Acute Pulmonary Oedema Algorithms'],
+    params:[
+      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'A controlled mode provides reliable oxygenation while the heart failure therapy works.'},
+      {key:'Tidal Volume', icon:'🫁', val:'6–8 mL/kg PBW',         base:{min:6,max:8,target:6}, note:'Treat as a stiff-lung physiology rather than a healthy-lung intubation.'},
+      {key:'Resp Rate',    icon:'⏱️', val:'18–24 breaths/min',     note:'Helps unload work of breathing without driving excessive mean pressure.'},
+      {key:'FiO₂',         icon:'💨', val:'1.0 → titrate',         note:'Start high, then step down once oxygenation and afterload improve.'},
+      {key:'PEEP',         icon:'🔒', val:'8–12 cmH₂O',           note:'Recruit flooded alveoli and support preload/afterload reduction if blood pressure tolerates it.'},
+      {key:'I:E Ratio',    icon:'↔️', val:'1:1.5 to 1:2',         note:'Short inspiratory times are reasonable; avoid stacking in mixed obstructive disease.'}
+    ]
+
+  },
+  {
+    id:'hypovolemia', name:'Hypovolemia', emoji:'🩸',
+    theme:'#be123c', rgb:'190,18,60',
+    title:'Hemodynamic Instability', sub:'Volume-Depleted Patient', badge:'🩸 LOW PRELOAD — CAUTION',
+    protocol:'Preload-Protective',
+    oxygenTarget:'SpO₂ 92–96%',
+    co2Target:'Match pre-tube drive',
+    safetyTitle:'Maintain Adequate Preload',
+    safetyNote:'Positive pressure can reduce venous return and precipitate collapse. Resuscitate first with blood products or balanced crystalloid when indicated, and keep vasopressors ready.',
+    waveform:'normal',
+    evidence:['Peri-intubation Shock Literature','Hemodynamic Ventilation Physiology'],
+    params:[
+      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Standard start. Have vasopressors and resuscitation products ready at bedside.'},
+      {key:'Tidal Volume', icon:'🫁', val:'8 mL/kg PBW', base:{min:6,max:8,target:8}, note:'Standard volume. Reassess if Pplat elevated.'},
+      {key:'Resp Rate',    icon:'⏱️', val:'10–12 breaths/min',     note:'Monitor acid-base status closely. Compensatory tachypnea common.'},
+      {key:'FiO₂',        icon:'💨', val:'1.0 → titrate',         note:'Start high. Titrate as hemodynamics and oxygenation improve.'},
+      {key:'PEEP',         icon:'🔒', val:'0–5 cmH₂O',            note:'🔑 Low PEEP protects venous return. Raise only after preload and blood pressure are supported.'},
+      {key:'I:E Ratio',    icon:'↔️', val:'1:2',                   note:'Default. Reassess after fluid resuscitation.'}
+    ]
+
+  },
+  {
+    id:'dka', name:'DKA / Metabolic Acidosis', emoji:'🧪',
+    theme:'#c026d3', rgb:'192,38,211',
+    title:'Metabolic Acidosis Rescue', sub:'Kussmaul Compensation Must Be Preserved', badge:'⚠️ MATCH THE MINUTE VENTILATION',
+    protocol:'Compensation-Preserving',
+    oxygenTarget:'SpO₂ 92–96%',
+    co2Target:'Preserve compensation',
+    safetyTitle:'Match Minute Ventilation Immediately',
+    safetyNote:'Do not intubate unless absolutely necessary. If you must intubate, preoxygenate without losing compensation when possible and set the vent to match or exceed the pre-intubation minute ventilation from the first breath.',
+    waveform:'normal',
+    evidence:['DKA Consensus 2024','NAEMSP Ventilation 2022','High-Risk Airway Review 2020'],
+    params:[
+      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Controlled ventilation lets you deliberately preserve high minute ventilation.'},
+      {key:'Tidal Volume', icon:'🫁', val:'6–8 mL/kg PBW',         base:{min:6,max:8,target:8}, note:'Use PBW-based VT; the usual compensatory need is met mostly by RR, not huge VT.'},
+      {key:'Resp Rate',    icon:'⏱️', val:'24–35 breaths/min',     note:'Often much higher than “usual” ED starts. Match the patient, then down-titrate only as the acidosis corrects.'},
+      {key:'FiO₂',         icon:'💨', val:'1.0 → titrate',         note:'Start high during the procedure, then titrate once the patient is stable.'},
+      {key:'PEEP',         icon:'🔒', val:'5 cmH₂O',              note:'Low baseline PEEP is usually adequate unless another oxygenation problem coexists.'},
+      {key:'I:E Ratio',    icon:'↔️', val:'1:1.5 to 1:2',         note:'No obstructive physiology here; the priority is raw minute ventilation.'}
+    ]
+
+  },
+  {
+    id:'pe', name:'Massive / Submassive PE', emoji:'🫀',
+    theme:'#7c2d12', rgb:'124,45,18',
+    title:'Pulmonary Embolism', sub:'RV Failure / Mean Airway Pressure Sensitive', badge:'🚨 HIGHEST-RISK INTUBATION',
+    protocol:'Low-Pressure RV Strategy',
+    oxygenTarget:'SpO₂ > 92%',
+    co2Target:'Avoid severe acidaemia',
+    safetyTitle:'Avoid the Intubation Spiral',
+    safetyNote:'If the patient can tolerate it, prefer HFNC or NIV while reperfusion therapy is organized. If intubation is unavoidable, minimize PEEP and mean airway pressure, preload carefully, start vasopressors early, and keep thrombolysis/catheter/surgical reperfusion decisions moving.',
+    waveform:'normal',
+    evidence:['ESC/ERS PE 2019','INTUBE 2022','Peri-intubation Review 2025'],
+    params:[
+      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Use a simple controlled mode and avoid prolonged inspiratory times.'},
+      {key:'Tidal Volume', icon:'🫁', val:'6 mL/kg PBW',            base:{min:6,max:8,target:6}, note:'Limit plateau and mean airway pressure to protect the failing RV.'},
+      {key:'Resp Rate',    icon:'⏱️', val:'10–14 breaths/min',     note:'Enough to prevent worsening acidosis, but not so high that expiratory time shortens or mean pressure rises.'},
+      {key:'FiO₂',         icon:'💨', val:'1.0 → titrate',         note:'Correct hypoxemia quickly, but avoid long periods of unnecessary hyperoxia once stable.'},
+      {key:'PEEP',         icon:'🔒', val:'0–5 cmH₂O',            note:'PEEP can collapse preload in high-risk PE; use the minimum needed for oxygenation.'},
+      {key:'I:E Ratio',    icon:'↔️', val:'1:2',                   note:'Shorter inspiratory time helps keep mean airway pressure down.'}
+    ]
+
+  },
+  {
+    id:'anaphylaxis', name:'Anaphylaxis / Airway Edema', emoji:'🐝',
+    theme:'#b45309', rgb:'180,83,9',
+    title:'Anaphylaxis / Edematous Airway', sub:'Difficult Airway + Residual Bronchospasm', badge:'⚠️ AIRWAY CAN DISAPPEAR',
+    protocol:'Early Epi + Obstructive Vent',
+    oxygenTarget:'SpO₂ ≥ 94%',
+    co2Target:'Avoid breath stacking',
+    safetyTitle:'Airway Can Disappear',
+    safetyNote:'Prioritize epinephrine and expert airway backup. After intubation, expect a smaller tube and manage residual lower-airway obstruction with an obstructive-style ventilator strategy.',
+    waveform:'obstructive',
+    evidence:['Anaphylaxis 2023 Practice Parameter','Obstructive Vent Principles','Difficult Airway Guidelines'],
+    params:[
+      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Provides controlled ventilation while edema and bronchospasm are treated.'},
+      {key:'Tidal Volume', icon:'🫁', val:'6–8 mL/kg PBW',         base:{min:6,max:8,target:6}, note:'Keep VT modest if bronchospasm is still active.'},
+      {key:'Resp Rate',    icon:'⏱️', val:'10–14 breaths/min',     note:'Lower rates protect expiratory time if wheeze and dynamic obstruction persist.'},
+      {key:'FiO₂',         icon:'💨', val:'1.0 → titrate',         note:'Start high during the airway phase, then titrate once edema and bronchospasm improve.'},
+      {key:'PEEP',         icon:'🔒', val:'0–5 cmH₂O',            note:'Use low PEEP if severe obstruction dominates; if edema/recruitment dominates, modest PEEP may help.'},
+      {key:'I:E Ratio',    icon:'↔️', val:'1:3 to 1:4',           note:'Bias toward longer exhalation until airway resistance normalizes.'}
+    ]
+
+  },
+  {
+    id:'obesity', name:'Obesity (BMI >35)', emoji:'⚖️',
+    theme:'#475569', rgb:'71,85,105',
+    title:'Obesity Ventilation', sub:'Low FRC / Fast Derecruitment', badge:'🪜 PBW + POSITION + PEEP',
+    protocol:'Head-Up Recruitment',
+    oxygenTarget:'SpO₂ 92–96%',
+    co2Target:'Keep VE adequate',
+    safetyTitle:'PBW, PEEP, Position',
+    safetyNote:'Dose VT to PBW, not actual body weight. Expect rapid derecruitment and difficult mask ventilation; start head-up or reverse Trendelenburg and use more PEEP than a non-obese lung if tolerated.',
+    waveform:'restrictive',
+    evidence:['Obese ICU Ventilation Review 2020','How I Ventilate Obese Patient 2019','Protective Ventilation Reviews'],
+    params:[
+      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Simple controlled ventilation is usually easiest while recruitment and positioning are optimized.'},
+      {key:'Tidal Volume', icon:'🫁', val:'6–8 mL/kg PBW',         base:{min:6,max:8,target:6}, note:'PBW is critical here because actual body weight grossly overestimates safe VT.'},
+      {key:'Resp Rate',    icon:'⏱️', val:'16–22 breaths/min',     note:'Higher RR may be needed because chest wall load increases work of breathing and CO₂ retention risk.'},
+      {key:'FiO₂',         icon:'💨', val:'1.0 → titrate',         note:'Start high during the peri-intubation phase; derecruitment is common if you under-support early.'},
+      {key:'PEEP',         icon:'🔒', val:'8–12 cmH₂O',           note:'Many obese patients need moderate PEEP to stay open, but aggressive PEEP can worsen hypotension. Titrate to oxygenation, driving pressure, and blood pressure.'},
+      {key:'I:E Ratio',    icon:'↔️', val:'1:2',                   note:'Standard timing unless obstructive physiology coexists.'}
+    ]
+
+  },
+  {
+    id:'pregnancy', name:'Pregnancy', emoji:'🤰',
+    theme:'#db2777', rgb:'219,39,119',
+    title:'Obstetric Patient', sub:'Altered Physiology — Dual Priority', badge:'🤰 OB — DUAL PRIORITIES',
+    protocol:'Maternal-Fetal Oxygenation',
+    oxygenTarget:'SpO₂ ≥ 95%',
+    co2Target:'PaCO₂ about 28–32',
+    safetyTitle:'Dual Priority: Mother & Fetus',
+    safetyNote:'Maternal SpO₂ > 95% is critical for fetal oxygenation. Left lateral tilt. Use pre-pregnancy height for PBW.',
+    waveform:'restrictive',
+    evidence:['ACOG Critical Care in Pregnancy','Adult ICU principles','ARDSNet PBW'],
+    params:[
+      {key:'Mode',         icon:'🎛️', val:'Assist-Control (VC)',   note:'Reliable volume. Monitor for dyssynchrony.'},
+      {key:'Tidal Volume', icon:'🫁', val:'6 mL/kg PBW', base:{min:6,max:8,target:6}, note:'🔑 Use PRE-PREGNANCY height. FRC is reduced by gravid uterus.'},
+      {key:'Resp Rate',    icon:'⏱️', val:'14–18 breaths/min',     note:'Matches physiologic hyperventilation (baseline CO₂ ≈ 32 mmHg in pregnancy).'},
+      {key:'FiO₂',        icon:'💨', val:'1.0 → target ≥95%',    note:'🔑 Target SpO₂ ≥ 95% — fetal O₂ delivery depends on maternal sat.'},
+      {key:'PEEP',         icon:'🔒', val:'5–8 cmH₂O',            note:'Higher PEEP needed — gravid uterus compresses diaphragm (↓ FRC).'},
+      {key:'I:E Ratio',    icon:'↔️', val:'1:2',                   note:'Standard. Involve OB team and consider fetal monitoring.'}
+    ]
+
   }
 ];
 
@@ -2049,24 +1923,52 @@ function renderWaveform(type) {
   const svg = document.getElementById('waveformSvg');
   const cap = document.getElementById('waveCaption');
   const PATHS = {
-    normal:      { p:'M0,95 Q50,20 100,60 T200,50 T300,58 T400,50', txt:'Normal compliance — gradual pressure rise, complete exhalation' },
-    obstructive: { p:'M0,95 Q45,30 95,72 T185,85 T270,91 T355,96 T400,98', txt:'Obstructive — incomplete exhalation, auto-PEEP risk (shark-fin pattern)' },
-    ards:        { p:'M0,98 L42,96 L50,28 L105,32 L158,28 L212,31 L265,28 L318,32 L370,28 L400,31', txt:'ARDS — stiff lungs, rapid pressure rise, low compliance' },
-    restrictive: { p:'M0,98 Q28,38 58,54 T118,50 T178,51 T238,50 T298,51 T358,50 T400,50', txt:'Restrictive — reduced FRC, elevated baseline pressure' },
-    niv:         { p:'M0,78 Q22,20 44,78 T88,78 T132,78 T176,78 T220,78 T264,78 T308,78 T352,78 T400,78', txt:'NIV — patient-triggered pressure-support breaths with backup' }
+    normal: {
+      pressure: 'M0,70 L20,70 L60,20 L80,20 L90,70 L180,70 L200,70 L240,20 L260,20 L270,70 L360,70',
+      flow:     'M0,120 L20,120 L25,85 L80,85 L85,120 C100,160 140,140 180,120 L200,120 L205,85 L260,85 L265,120 C280,160 320,140 360,120',
+      txt: 'Normal Mechanics — Square flow, normal peak/plateau pressure, flow returns to baseline.'
+    },
+    obstructive: {
+      pressure: 'M0,70 L20,70 L40,10 L50,40 L90,40 L100,70 L250,70 L270,70 L290,10 L300,40 L340,40 L350,70 L400,70',
+      flow:     'M0,120 L20,120 L25,85 L90,85 L95,120 C110,160 180,150 250,130 L270,130 L275,85 L340,85 L345,120 C360,160 400,150 400,145',
+      txt: 'Obstructive — High peak pressure, prolonged expiratory flow failing to reach zero (Auto-PEEP).'
+    },
+    ards: {
+      pressure: 'M0,60 L20,60 L50,20 L80,20 L90,60 L160,60 L180,60 L210,20 L240,20 L250,60 L320,60 L340,60 L370,20 L400,20',
+      flow:     'M0,120 L20,120 L25,85 L80,85 L85,120 C100,150 120,130 160,120 L180,120 L185,85 L240,85 L245,120 C260,150 280,130 320,120 L340,120 L345,85 L400,85',
+      txt: 'ARDS (Stiff Lungs) — High PEEP (baseline), rapid pressure rise to high plateau, rapid exhalation.'
+    },
+    restrictive: {
+      pressure: 'M0,60 L20,60 L25,25 L80,25 L90,60 L160,60 L180,60 L185,25 L240,25 L250,60 L320,60',
+      flow:     'M0,120 L20,120 L25,80 L80,120 L85,120 C100,150 130,130 160,120 L180,120 L185,80 L240,120 L245,120 C260,150 290,130 320,120',
+      txt: 'Restrictive (Pressure Control) — Decelerating flow, square pressure wave, elevated PEEP.'
+    },
+    niv: {
+      pressure: 'M0,65 L20,65 L30,30 L60,30 L70,65 L120,65 L130,30 L160,30 L170,65 L220,65 L230,30 L260,30 L270,65 L320,65',
+      flow:     'M0,120 L20,120 L25,85 Q40,100 60,120 L65,120 C75,140 90,130 120,120 L125,85 Q140,100 160,120 L165,120 C175,140 190,130 220,120 L225,85 Q240,100 260,120 L265,120 C275,140 290,130 320,120',
+      txt: 'BiPAP (NIV) — Spontaneous flow patterns, cycling between EPAP and IPAP.'
+    }
   };
   const d = PATHS[type] || PATHS.normal;
+  
+  svg.setAttribute('viewBox', '0 0 400 160');
+  svg.style.minHeight = '140px';
+  
   svg.innerHTML = `
-    <defs>
-      <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="var(--theme)" stop-opacity=".28"/>
-        <stop offset="100%" stop-color="var(--theme)" stop-opacity="0"/>
-      </linearGradient>
-    </defs>
-    <path d="${d.p}" fill="none" stroke="var(--theme)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="${d.p} V110 H0 Z" fill="url(#wg)" stroke="none"/>
-    <text x="10" y="18" fill="var(--text-3)" font-size="9" font-weight="700" font-family="DM Sans,sans-serif">cmH₂O ↑</text>
-    <text x="348" y="108" fill="var(--text-3)" font-size="9" font-weight="700" font-family="DM Sans,sans-serif">Time →</text>
+    <!-- Grid -->
+    <g stroke="var(--border)" stroke-width="1" stroke-dasharray="4 4">
+      <line x1="0" y1="35" x2="400" y2="35"/>
+      <line x1="0" y1="70" x2="400" y2="70"/>
+      <line x1="0" y1="120" x2="400" y2="120"/>
+    </g>
+    
+    <!-- Pressure Waveform (Yellow) -->
+    <path d="${d.pressure}" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="10" y="20" fill="#f59e0b" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">Pressure (cmH₂O)</text>
+    
+    <!-- Flow Waveform (Green) -->
+    <path d="${d.flow}" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="10" y="105" fill="#10b981" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">Flow (L/min)</text>
   `;
   cap.textContent = d.txt;
 }
@@ -2439,13 +2341,13 @@ const App = {
       keyRule:    'Slow down, accept CO₂',
       grade:      'A',
       dangers:    ['Fast RR causes dynamic hyperinflation and cardiac arrest','High PEEP worsens air trapping','Chasing normal PaCO₂ in COPD is harmful'],
-      pearls:     ['Disconnect from vent if acute deterioration — allow passive exhalation','Target I:E 1:4–1:5 — the most critical setting','pH >7.20 is acceptable; do not increase RR to normalise CO₂'],
+      pearls:     ['Disconnect from vent if acute deterioration — allow passive exhalation','Increase inspiratory flow (>60 L/min) to achieve I:E 1:4–1:5','pH >7.20 is acceptable; do not increase RR to normalise CO₂'],
     },
     'ards': {
       keyRule:    'Low volume, low pressure',
       grade:      'A',
       dangers:    ['VT >8 mL/kg PBW independently increases mortality','Driving pressure >15 cmH₂O — reduce VT first','Ignoring plateau pressure until crisis is a common fatal error'],
-      pearls:     ['Proning: ≥12–16 h/day if P/F ≤150 reduces mortality (PROSEVA)','Check Pplat AND driving pressure every 4 h','PEEP/FiO₂ table is the bedside tool — use it every time you adjust FiO₂'],
+      pearls:     ['Proning: ≥12–16 h/day if P/F ≤150 reduces mortality (PROSEVA)','Check Pplat AND driving pressure every 4 h','While PEEP/FiO₂ table is a safe start, consider Driving Pressure-guided PEEP titration'],
     },
     'hypovolemia': {
       keyRule:    'Protect the preload',
@@ -2469,7 +2371,7 @@ const App = {
       keyRule:    'Resuscitate before tube',
       grade:      'B',
       dangers:    ['Inducing apnea before preload/pressor support is ready can precipitate arrest','Treating septic shock like simple hypovolemia underestimates vasoplegia','Ignoring evolving ARDS leads to over-large VT'],
-      pearls:     ['Have norepinephrine connected before induction in the crashing patient','Preserve minute ventilation if severe lactic acidosis is driving tachypnea','If oxygenation worsens after intubation, reclassify quickly toward ARDS'],
+      pearls:     ['Have norepinephrine connected before induction in the crashing patient','In profound shock, consider deep sedation and paralysis early to divert cardiac output back to vital organs','Preserve minute ventilation if severe lactic acidosis is driving tachypnea'],
     },
     'neuro': {
       keyRule:    'Normocapnia protects brain',
@@ -2559,7 +2461,7 @@ const App = {
     },
     'I:E Ratio': {
       'healthy':      '1:2 provides adequate exhalation time for normal airways. Standard starting point.',
-      'asthma-copd':  '1:4–1:5 is the defining obstructive setting. Inadequate expiratory time leads to progressive air trapping, auto-PEEP, and haemodynamic collapse.',
+      'asthma-copd':  '1:4–1:5 is the defining obstructive setting. Achieve this by increasing Inspiratory Flow. Inadequate expiratory time leads to progressive air trapping, auto-PEEP, and haemodynamic collapse.',
       'ards':         '1:2 is standard. Inverse ratio ventilation (I:E >1) is occasionally used in refractory ARDS but requires expert supervision.',
       'hypovolemia':  '1:2 default. No specific I:E manipulation needed unless underlying obstructive disease is present.',
       'pregnancy':    '1:2 standard. The elevated diaphragm slightly shortens effective exhalation but 1:2 remains adequate.',
@@ -2601,7 +2503,7 @@ const App = {
     'PEEP':        'ARDS often needs higher PEEP titrated to the PEEP/FiO₂ table and hemodynamics. Hypovolaemia usually needs the least (0–5 initially) because intrathoracic pressure can impair venous return. COPD: external PEEP only if auto-PEEP is confirmed.',
     'I:E Ratio':   'The signature obstructive setting is 1:4–1:5 — inadequate expiratory time causes progressive air trapping and cardiac arrest. All other scenarios use standard 1:2.',
     'IPAP':        'IPAP drives tidal volume and CO₂ clearance in NIV. Start 10–15, titrate +2 cmH₂O for persistent hypercapnia. IPAP–EPAP gap = ventilatory support level.',
-    'EPAP':        'EPAP = functional PEEP in NIV. Minimum 5 to prevent CO₂ rebreathing. In cardiogenic oedema, EPAP 8–10 splints open flooded alveoli, reducing preload and afterload simultaneously.',
+    'EPAP':        'EPAP = functional PEEP in NIV. Minimum 5 to prevent CO₂ rebreathing. For CPE, do not hesitate to titrate EPAP up to 10–12 cmH₂O to aggressively reduce LV preload and afterload simultaneously.',
     'Backup Rate': 'Safety net for NIV — fires only if the patient becomes apnoeic. If backup is activating frequently, airway protection is failing → proceed to intubation.',
     'Max I-Time':  'Prevents machine breaths from being excessively prolonged in NIV, which causes discomfort and dyssynchrony. Typically 1.0–1.2 s.',
   },
@@ -3372,6 +3274,31 @@ const App = {
     ['autoPeepTotal','autoPeepSet'].forEach(id => document.getElementById(id)?.addEventListener('input', autoPeepCalc));
     ['autoPeepFlow','autoPeepTrigger'].forEach(id => document.getElementById(id)?.addEventListener('change', autoPeepCalc));
 
+    // Bicarb Calculator
+    const bicarbCalc = () => {
+      const tbw = parseFloat(document.getElementById('bicarbTbw')?.value);
+      const curr = parseFloat(document.getElementById('bicarbCurr')?.value);
+      const target = parseFloat(document.getElementById('bicarbTarget')?.value);
+      const defEl = document.getElementById('bicarbDeficitVal');
+      const doseEl = document.getElementById('bicarbDoseVal');
+      
+      if (!defEl || !doseEl) return;
+      if (!isNaN(tbw) && !isNaN(curr) && !isNaN(target) && tbw > 0 && target > curr) {
+        // Simple bicarb deficit formula: 0.5 * weight(kg) * (target_HCO3 - current_HCO3)
+        const deficit = 0.5 * tbw * (target - curr);
+        defEl.textContent = Math.round(deficit);
+        
+        // 1 amp = 50 mEq. Suggest giving 1/3 to 1/2 of deficit safely
+        const safePush = Math.min(Math.round((deficit * 0.33) / 50), 3) || 1; 
+        const safeDoseAmps = safePush === 1 ? '1 Amp' : `${safePush} Amps`;
+        doseEl.textContent = safeDoseAmps;
+      } else {
+        defEl.textContent = '--';
+        doseEl.textContent = '--';
+      }
+    };
+    ['bicarbTbw','bicarbCurr','bicarbTarget'].forEach(id => document.getElementById(id)?.addEventListener('input', bicarbCalc));
+
     // Peri-intubation hemodynamic risk screen
     const riskCalc = () => {
       const hr = parseFloat(document.getElementById('riskHr')?.value);
@@ -3545,35 +3472,39 @@ const App = {
     // Dyssynchrony guide
     const DYSSYNC = {
       flow: {
-        path:'M0,68 C28,68 34,18 72,18 C110,18 140,44 180,44 C230,44 242,20 280,20 C318,20 348,44 400,44',
+        pressure: 'M0,70 L20,70 L30,20 Q60,50 90,20 L100,70 L200,70 L220,70 L230,20 Q260,50 290,20 L300,70 L400,70',
+        flow:     'M0,120 L20,120 L25,85 L40,105 Q60,80 90,115 L100,120 C120,150 150,140 200,120 L220,120 L225,85 L240,105 Q260,80 290,115 L300,120 C320,150 350,140 400,120',
         steps:[
-          'Waveform clue: scooped or concave pressure curve with the patient pulling flow harder than the vent delivers.',
-          'First move: increase inspiratory flow, choose a decelerating flow pattern, or consider a pressure-targeted mode.',
-          'Also treat pain, acidosis, anxiety, and fever because high drive can mimic a “sedation problem”.'
+          'Waveform clue: Scooped (concave) pressure curve, while the flow curve shows a "bump" or failure to decelerate smoothly because the patient is pulling for more air.',
+          'First move: Increase inspiratory flow (e.g., >60 L/min), choose a decelerating flow pattern, or switch to a pressure-targeted mode.',
+          'Also treat pain, acidosis, anxiety, and fever because high respiratory drive can mimic a “sedation problem”.'
         ]
       },
       double: {
-        path:'M0,68 L28,68 L42,20 L90,20 L104,56 L112,22 L170,22 L184,68 L400,68',
+        pressure: 'M0,70 L20,70 L30,20 L70,20 L80,50 L90,10 L130,10 L140,70 L280,70',
+        flow:     'M0,120 L20,120 L25,85 L70,115 L75,125 L85,80 L130,115 L135,120 C150,160 190,140 280,120',
         steps:[
-          'Waveform clue: two breaths with little or no exhalation between them, often stacking tidal volumes.',
-          'First move: reduce respiratory drive if appropriate and lengthen inspiratory support or cycling time when that is the mismatch.',
-          'In ARDS, double triggering can cause breath stacking and occult over-distension even when set VT looks protective.'
+          'Waveform clue: Two breaths stacked with little or no exhalation between them. The second breath often hits higher peak pressures.',
+          'First move: Match the vent to the patient. Lengthen inspiratory time if the patient wants a longer breath, or increase sedation if drive is excessively high.',
+          'In ARDS, double triggering causes "occult over-distension" (delivering 12+ mL/kg instead of 6 mL/kg), driving lung injury.'
         ]
       },
       reverse: {
-        path:'M0,68 L42,68 L56,22 L112,22 L126,68 L178,68 L192,28 L240,28 L254,68 L400,68',
+        pressure: 'M0,70 L20,70 L30,20 L70,20 L80,70 C90,70 100,80 105,75 L115,20 L155,20 L165,70 L320,70',
+        flow:     'M0,120 L20,120 L25,85 L70,115 L75,120 C85,150 95,140 100,125 L110,85 L155,115 L160,120 C190,160 250,140 320,120',
         steps:[
-          'Waveform clue: a patient effort appears after a mandatory breath, often in a deeply sedated patient with a repeating entrainment pattern.',
-          'First move: lighten oversedation if safe and reassess set RR / mode before simply giving more sedative.',
-          'Reverse triggering matters because it can become double triggering and breath stacking without obvious patient “fighting”.'
+          'Waveform clue: A mandatory machine breath is delivered, and as it ends, the diaphragm reflexively contracts (negative pressure deflection, positive flow), triggering a second breath.',
+          'First move: This is often an issue of oversedation or specific paralytic washout. Reassess the mode and consider lightening sedation if safe.',
+          'Reverse triggering is dangerous because it looks like the patient is "breathing along" but actually causes breath stacking and diaphragm injury.'
         ]
       },
       auto: {
-        path:'M0,68 L20,68 L34,20 L80,20 L94,68 L118,68 L132,20 L178,20 L192,68 L216,68 L230,20 L276,20 L290,68 L400,68',
+        pressure: 'M0,70 Q10,68 20,70 Q30,68 40,70 Q50,66 60,70 L70,20 L110,20 L120,70 Q130,68 140,70 Q150,68 160,70 L170,20 L210,20 L220,70',
+        flow:     'M0,120 Q10,118 20,120 Q30,118 40,120 Q50,115 60,120 L65,85 L110,115 L115,120 C120,140 125,130 130,120 Q140,118 150,120 Q160,118 170,120 L175,85 L210,115 L215,120',
         steps:[
-          'Waveform clue: extra breaths fire without patient effort, often from water in tubing, leaks, or an over-sensitive trigger.',
-          'First move: drain condensate, fix leaks, and reduce trigger sensitivity until false breaths stop.',
-          'Cardiogenic oscillation can also auto-trigger, especially in hyperdynamic or low-volume states.'
+          'Waveform clue: Extra breaths fire without true patient effort. Baseline flow or pressure shows tiny rhythmic ripples (cardiac oscillations) or jagged noise (water in tube).',
+          'First move: Drain condensate from the circuit, fix leaks, and slightly reduce trigger sensitivity (make it harder to trigger) until the false breaths stop.',
+          'Cardiogenic oscillation easily auto-triggers the vent in hyperdynamic states. Ensure you are treating the patient, not the heartbeat.'
         ]
       }
     };
@@ -3583,13 +3514,29 @@ const App = {
       const out = document.getElementById('dyssyncOutput');
       if (!wave || !out || !data) return;
       document.querySelectorAll('#dyssyncButtons .pill-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.dyssync === key));
+      
+      wave.setAttribute('viewBox', '0 0 400 160');
+      wave.style.minHeight = '140px';
+      
       wave.innerHTML = `
-        <path d="${data.path}" fill="none" stroke="var(--theme)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        <text x="10" y="16" fill="var(--text-3)" font-size="9" font-weight="700" font-family="DM Sans,sans-serif">Pressure / Flow clue</text>
+        <!-- Grid -->
+        <g stroke="var(--border)" stroke-width="1" stroke-dasharray="4 4">
+          <line x1="0" y1="35" x2="400" y2="35"/>
+          <line x1="0" y1="70" x2="400" y2="70"/>
+          <line x1="0" y1="120" x2="400" y2="120"/>
+        </g>
+        
+        <!-- Pressure Waveform (Yellow) -->
+        <path d="${data.pressure}" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="10" y="20" fill="#f59e0b" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">Pressure (cmH₂O)</text>
+        
+        <!-- Flow Waveform (Green) -->
+        <path d="${data.flow}" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="10" y="105" fill="#10b981" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">Flow (L/min)</text>
       `;
       out.innerHTML = data.steps.map((txt, idx) => `
         <div class="stack-item">
-          <strong>${idx === 0 ? 'Recognition' : idx === 1 ? 'First move' : 'Why it matters'}</strong>
+          <strong>${idx === 0 ? 'Recognition' : idx === 1 ? 'First Move' : 'Why it Matters'}</strong>
           <p>${txt}</p>
         </div>
       `).join('');
@@ -3646,10 +3593,59 @@ const App = {
     };
     ['pawPip','pawPeep','pawItime','pawRr'].forEach(id=>document.getElementById(id)?.addEventListener('input',pawCalc));
 
+    // RSI & Push-Dose Pressor Calculator
+    const rsiCalc = () => {
+      const tbwRaw = document.getElementById('rsiTbw')?.value;
+      const tbw = parseFloat(tbwRaw);
+      const pbw = Store.get('pbw'); // Get PBW if available
+      const out = document.getElementById('rsiOutput');
+      const hint = document.getElementById('rsiPbwHint');
+      if (!out) return;
+
+      if (hint) {
+        if (pbw) hint.textContent = `PBW detected: ${pbw.toFixed(1)} kg. (Used for Rocuronium if obese).`;
+        else hint.textContent = 'Set Height in PBW calculator above to use PBW for paralytics if indicated.';
+      }
+
+      if (isNaN(tbw) || tbw <= 0) {
+        out.innerHTML = '<div style="padding:10px;text-align:center;color:var(--text-3);font-size:.8rem;font-weight:600;">Enter Total Body Weight to calculate doses</div>';
+        return;
+      }
+
+      const rocWeight = pbw ? pbw : tbw;
+      const rocPrefix = pbw ? 'PBW' : 'TBW';
+
+      const drugs = [
+        { class: 'Induction', name: 'Ketamine', dose: '1.5 – 2.0 mg/kg', calc: `${(tbw * 1.5).toFixed(0)} – ${(tbw * 2.0).toFixed(0)} mg`, note: 'Bronchodilator, preserves drive. Avoid if catecholamine depleted.' },
+        { class: 'Induction', name: 'Etomidate', dose: '0.3 mg/kg', calc: `${(tbw * 0.3).toFixed(0)} mg`, note: 'Hemodynamically neutral. Avoid in sepsis if possible (adrenal suppression).' },
+        { class: 'Paralytic', name: 'Rocuronium', dose: `1.0 – 1.2 mg/kg (${rocPrefix})`, calc: `${(rocWeight * 1.0).toFixed(0)} – ${(rocWeight * 1.2).toFixed(0)} mg`, note: 'Safe in hyperkalemia. Lasts 45-60 min (ensure post-intubation sedation!).' },
+        { class: 'Paralytic', name: 'Succinylcholine', dose: '1.5 mg/kg (TBW)', calc: `${(tbw * 1.5).toFixed(0)} mg`, note: 'Avoid in crush, burns >48h, denervation, severe hyperkalemia.' },
+        { class: 'Maintenance Drip', name: 'Propofol', dose: '10 – 50 mcg/kg/min', calc: `${(tbw * 10).toFixed(0)} – ${(tbw * 50).toFixed(0)} mcg/min`, note: 'Fast on/off. Risk of hypotension. Avoid if hemodynamically unstable.' },
+        { class: 'Maintenance Drip', name: 'Fentanyl', dose: '50 – 150 mcg/hr', calc: '50 – 150 mcg/hr', note: 'Start analgesia FIRST. Does not provide amnesia alone.' },
+        { class: 'Rescue Pressor', name: 'Push-Dose Epinephrine', dose: '10 – 20 mcg', calc: '1 – 2 mL', note: 'Mix 1 mL of cardiac Epi (1:10,000) in 9 mL saline = 10 mcg/mL.' }
+      ];
+
+      out.innerHTML = drugs.map(d => `
+        <div class="stack-item" style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--theme);font-weight:700;">${d.class}</div>
+            <strong style="font-size:1.1rem;">${d.name}</strong>
+            <p style="margin-top:2px;font-size:0.85rem;color:var(--text-2);">${d.note}</p>
+          </div>
+          <div style="text-align:right;min-width:90px;">
+            <div style="font-weight:900;font-size:1.2rem;color:var(--text-1);">${d.calc}</div>
+            <div style="font-size:0.75rem;color:var(--text-3);">${d.dose}</div>
+          </div>
+        </div>
+      `).join('');
+    };
+    document.getElementById('rsiTbw')?.addEventListener('input', rsiCalc);
+
     this._refreshToolSummaries = () => {
       mvCalc();
       sfCalc();
       rsbiCalc();
+      rsiCalc();
     };
     this._refreshToolSummaries();
 
@@ -3700,7 +3696,7 @@ const App = {
         { text:'🫁 Set ventilator settings',         sub:'Mode, VT (6–8 mL/kg PBW), RR, FiO₂ 1.0, PEEP 5 per scenario.',                 key:'settings' },
         { text:'📊 Check first Pplat & PEEP',        sub:'Within 15 min. Target Pplat ≤ 30, ΔP < 15. Adjust VT if needed.',               key:'pplat' },
         { text:'💊 Post-intubation sedation',         sub:'Use analgesia-first, goal-directed sedation. Set a RASS target and document drips/boluses.', key:'sed' },
-        { text:'🩸 Order ABG/VBG in 30 min',         sub:'Confirm ventilation adequacy. Adjust based on pH, PaCO₂, PaO₂.',                 key:'abg' },
+        { text:'🩸 Order ABG/VBG in 30 min',         sub:'ABG preferred for PaO₂ severity; VBG adequate for pH/pCO₂ clearance.',                 key:'abg' },
         { text:'📸 Review CXR when available',       sub:'ETT tip 2–4 cm above carina. Exclude pneumothorax. Note any new infiltrates.',   key:'cxr' },
         { text:'🧠 Reassess underlying cause',       sub:'Treat the indication: pneumonia, PE, sepsis, overdose, etc.',                    key:'cause' },
         { text:'📋 Document & handoff',              sub:'Time, drug doses, ETT size, depth, complications. SBAR handoff to ICU.',         key:'doc' },
