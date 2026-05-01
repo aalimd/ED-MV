@@ -46,6 +46,11 @@ function send_app_email(string $to, string $subject, string $htmlBody, ?string $
         $mail->isHTML(true);
         $mail->setFrom(MAIL_FROM, defined('MAIL_FROM_NAME') ? MAIL_FROM_NAME : APP_NAME);
         $mail->addAddress($to);
+
+        // Add List-Unsubscribe header for better deliverability score
+        $unsubscribeUrl = rtrim(APP_URL, '/') . '/auth/login.php'; // Fallback for transactional mail
+        $mail->addCustomHeader('List-Unsubscribe', '<' . $unsubscribeUrl . '>');
+
         $mail->Subject = $subject;
         $mail->Body = $htmlBody;
         $mail->AltBody = $textBody ?: trim(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $htmlBody)));
@@ -65,13 +70,16 @@ function send_password_reset_email(string $to, string $resetUrl): bool
     $html = <<<HTML
 <!doctype html>
 <html>
-<body style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.6;">
-  <h2 style="margin:0 0 12px;">Reset your {$appName} password</h2>
-  <p>We received a request to reset your password. This link expires in 1 hour.</p>
-  <p><a href="{$safeUrl}" style="display:inline-block;background:#2563eb;color:#fff;text-decoration:none;padding:12px 16px;border-radius:8px;font-weight:700;">Reset password</a></p>
-  <p>If the button does not work, copy and paste this link into your browser:</p>
-  <p style="word-break:break-all;"><a href="{$safeUrl}">{$safeUrl}</a></p>
-  <p>If you did not request this, you can ignore this email.</p>
+<body style="font-family:Arial,sans-serif;background-color:#ffffff;color:#000000;line-height:1.6;margin:0;padding:20px;">
+  <div style="max-width:600px;margin:0 auto;background-color:#ffffff;padding:20px;border:1px solid #e2e8f0;border-radius:12px;">
+    <h2 style="margin:0 0 16px;color:#000000;font-size:24px;font-weight:bold;">Reset your {$appName} password</h2>
+    <p style="margin:0 0 20px;color:#333333;font-size:16px;">We received a request to reset your password. This link expires in 1 hour.</p>
+    <p style="margin:0 0 24px;"><a href="{$safeUrl}" style="display:inline-block;background-color:#2563eb;color:#ffffff;text-decoration:none;padding:14px 24px;border-radius:8px;font-weight:bold;font-size:16px;">Reset password</a></p>
+    <hr style="border:0;border-top:1px solid #e2e8f0;margin:24px 0;">
+    <p style="margin:0 0 10px;color:#666666;font-size:14px;">If the button does not work, copy and paste this link into your browser:</p>
+    <p style="word-break:break-all;margin:0;font-size:14px;"><a href="{$safeUrl}" style="color:#2563eb;">{$safeUrl}</a></p>
+    <p style="margin:20px 0 0;color:#999999;font-size:12px;">If you did not request this, you can safely ignore this email.</p>
+  </div>
 </body>
 </html>
 HTML;
