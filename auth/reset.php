@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/pwa.php';
 init_session();
 
@@ -33,12 +34,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$resetRow) { $error = 'Invalid or expired reset link.'; }
                 else {
                     $db = getDB();
-                    $hash = password_hash($password, defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT, defined('PASSWORD_ARGON2ID') ? [] : ['cost' => BCRYPT_COST]);
-                    $db->prepare('UPDATE users SET password_hash=? WHERE email=?')->execute([$hash, $email]);
-                    $db->prepare('UPDATE password_resets SET used=1 WHERE email=? AND token_hash=?')->execute([$email, hash('sha256', $token)]);
-                    log_activity('password_reset', "Password reset for: {$email}");
-                    flash('success', 'Password reset successfully. Please login.');
-                    redirect(APP_URL . '/auth/login.php');
+                    try {
+                        $db->beginTransaction();
+                        $hash = password_hash($password, defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT, defined('PASSWORD_ARGON2ID') ? [] : ['cost' => BCRYPT_COST]);
+                        $updated = $db->prepare('UPDATE users SET password_hash=? WHERE email=? AND status != "deleted"')->execute([$hash, $email]);
+                        $db->prepare('UPDATE password_resets SET used=1 WHERE email=? AND token_hash=?')->execute([$email, hash('sha256', $token)]);
+                        if (!$updated) {
+                            throw new RuntimeException('Password update statement failed.');
+                        }
+                        log_activity('password_reset', "Password reset for: {$email}");
+                        $db->commit();
+                        flash('success', 'Password reset successfully. Please login.');
+                        redirect(APP_URL . '/auth/login.php');
+                    } catch (Throwable $e) {
+                        if ($db->inTransaction()) $db->rollBack();
+                        error_log('Password reset failed: ' . $e->getMessage());
+                        $error = 'Unable to reset password right now. Please request a new reset link and try again.';
+                    }
                 }
             }
         }

@@ -17,6 +17,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
 
     if ($uid > 0) {
         switch ($action) {
+            case 'update_user':
+                $name = trim($_POST['name'] ?? '');
+                $email = strtolower(trim($_POST['email'] ?? ''));
+                $role = $_POST['role'] ?? 'user';
+                $status = $_POST['status'] ?? 'pending';
+                $emailVerified = isset($_POST['email_verified']) ? 1 : 0;
+                $newPassword = $_POST['new_password'] ?? '';
+                $allowedRoles = ['user', 'subscriber', 'admin'];
+                $allowedStatuses = ['pending', 'active', 'suspended'];
+                $errors = [];
+
+                $targetStmt = $db->prepare("SELECT id, name, email, role, status FROM users WHERE id=? AND status != 'deleted' LIMIT 1");
+                $targetStmt->execute([$uid]);
+                $target = $targetStmt->fetch();
+
+                if (!$target) $errors[] = 'User not found.';
+                if ($name === '' || strlen($name) > 100) $errors[] = 'Name must be 1–100 characters.';
+                if (!valid_email($email) || strlen($email) > 255) $errors[] = 'Enter a valid email address.';
+                if (!in_array($role, $allowedRoles, true)) $errors[] = 'Invalid role.';
+                if (!in_array($status, $allowedStatuses, true)) $errors[] = 'Invalid status.';
+
+                if ($uid === $adminUser['id']) {
+                    $role = $target['role'] ?? $adminUser['role'];
+                    $status = $target['status'] ?? $adminUser['status'];
+                }
+
+                if ($email !== '') {
+                    $dupeStmt = $db->prepare('SELECT id FROM users WHERE email=? AND id<>? LIMIT 1');
+                    $dupeStmt->execute([$email, $uid]);
+                    if ($dupeStmt->fetch()) $errors[] = 'Another user already uses this email.';
+                }
+
+                if ($newPassword !== '') {
+                    $pwdErrors = validate_password($newPassword);
+                    if ($pwdErrors) $errors[] = 'Password: ' . implode(', ', $pwdErrors);
+                }
+
+                if ($errors) {
+                    flash('danger', implode(' ', $errors));
+                    redirect(APP_URL . '/admin/users.php?edit=' . $uid . (isset($_GET['filter']) ? '&filter=' . urlencode($_GET['filter']) : ''));
+                }
+
+                $db->beginTransaction();
+                try {
+                    $params = [$name, $email, $role, $status, $emailVerified, $uid];
+                    $sql = 'UPDATE users SET name=?, email=?, role=?, status=?, email_verified=? WHERE id=?';
+                    if ($newPassword !== '') {
+                        $hash = password_hash($newPassword, defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT, defined('PASSWORD_ARGON2ID') ? [] : ['cost' => BCRYPT_COST]);
+                        $sql = 'UPDATE users SET name=?, email=?, role=?, status=?, email_verified=?, password_hash=? WHERE id=?';
+                        $params = [$name, $email, $role, $status, $emailVerified, $hash, $uid];
+                    }
+                    $db->prepare($sql)->execute($params);
+                    if ($newPassword !== '' || $email !== $target['email']) {
+                        $db->prepare('DELETE FROM password_resets WHERE email IN (?, ?)')->execute([$target['email'], $email]);
+                    }
+                    if ($status !== 'active') {
+                        $db->prepare("UPDATE subscriptions SET status='cancelled' WHERE user_id=? AND status='active'")->execute([$uid]);
+                    }
+                    $db->commit();
+                } catch (Throwable $e) {
+                    $db->rollBack();
+                    throw $e;
+                }
+
+                if ($uid === $adminUser['id']) {
+                    $_SESSION['user_name'] = $name;
+                    $_SESSION['user_email'] = $email;
+                    $_SESSION['user_role'] = $role;
+                    $_SESSION['user_status'] = $status;
+                }
+
+                log_activity('admin_update_user', "Updated user ID: {$uid}");
+                flash('success', 'User details updated.');
+                break;
             case 'activate':
                 $db->prepare("UPDATE users SET status='active' WHERE id=?")->execute([$uid]);
                 log_activity('admin_activate_user', "Activated user ID: {$uid}");
@@ -71,6 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
 // Fetch users
 $filter = $_GET['filter'] ?? 'all';
 $search = trim($_GET['q'] ?? '');
+$editId = (int)($_GET['edit'] ?? 0);
 $where = "WHERE status != 'deleted'";
 if ($filter === 'pending') $where .= " AND status = 'pending'";
 elseif ($filter === 'active') $where .= " AND status = 'active'";
@@ -85,6 +160,17 @@ if ($search) {
     $stmt = $db->query($sql);
 }
 $users = $stmt->fetchAll();
+
+$editUser = null;
+if ($editId > 0) {
+    $editStmt = $db->prepare("SELECT id, name, email, role, status, email_verified, created_at, last_login FROM users WHERE id=? AND status != 'deleted' LIMIT 1");
+    $editStmt->execute([$editId]);
+    $editUser = $editStmt->fetch() ?: null;
+    if (!$editUser) {
+        flash('danger', 'User not found.');
+        redirect(APP_URL . '/admin/users.php');
+    }
+}
 
 // Get subscription info for each user
 $subLookup = [];
@@ -111,6 +197,67 @@ admin_header('User Management', '👥', 'users');
 <a href="?filter=<?=$k?><?=$search?'&q='.urlencode($search):''?>" class="topbar-btn" style="<?=$filter===$k?'background:var(--theme);color:#fff;border-color:var(--theme)':''?>"><?=$v?></a>
 <?php endforeach; ?>
 </div>
+
+<?php if ($editUser):
+    $editingSelf = $editUser['id'] === session_user()['id'];
+?>
+<div class="data-card">
+<div class="dc-header">
+  <div class="dc-title">✏️ Edit User #<?= (int)$editUser['id'] ?></div>
+  <a href="<?= APP_URL ?>/admin/users.php<?= $filter !== 'all' ? '?filter=' . urlencode($filter) : '' ?>" class="topbar-btn">Close</a>
+</div>
+<form method="POST" class="admin-form" style="max-width:none;padding:18px;">
+<?= csrf_field() ?>
+<input type="hidden" name="action" value="update_user">
+<input type="hidden" name="user_id" value="<?= (int)$editUser['id'] ?>">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
+  <div class="form-group">
+    <label for="edit_name">Name</label>
+    <input type="text" id="edit_name" name="name" value="<?= e($editUser['name']) ?>" maxlength="100" required>
+  </div>
+  <div class="form-group">
+    <label for="edit_email">Email</label>
+    <input type="email" id="edit_email" name="email" value="<?= e($editUser['email']) ?>" maxlength="255" required>
+  </div>
+  <div class="form-group">
+    <label for="edit_role">Role</label>
+    <select id="edit_role" name="role" <?= $editingSelf ? 'disabled' : '' ?>>
+      <?php foreach(['user'=>'User','subscriber'=>'Subscriber','admin'=>'Admin'] as $rv=>$rl): ?>
+      <option value="<?= e($rv) ?>" <?= $editUser['role']===$rv?'selected':'' ?>><?= e($rl) ?></option>
+      <?php endforeach; ?>
+    </select>
+    <?php if ($editingSelf): ?><input type="hidden" name="role" value="<?= e($editUser['role']) ?>"><?php endif; ?>
+  </div>
+  <div class="form-group">
+    <label for="edit_status">Status</label>
+    <select id="edit_status" name="status" <?= $editingSelf ? 'disabled' : '' ?>>
+      <?php foreach(['pending'=>'Pending','active'=>'Active','suspended'=>'Suspended'] as $sv=>$sl): ?>
+      <option value="<?= e($sv) ?>" <?= $editUser['status']===$sv?'selected':'' ?>><?= e($sl) ?></option>
+      <?php endforeach; ?>
+    </select>
+    <?php if ($editingSelf): ?><input type="hidden" name="status" value="<?= e($editUser['status']) ?>"><?php endif; ?>
+  </div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;align-items:end;">
+  <label class="toggle-wrap" style="margin:0 0 16px;">
+    <span class="toggle"><input type="checkbox" name="email_verified" value="1" <?= (int)$editUser['email_verified'] === 1 ? 'checked' : '' ?>><span class="toggle-slider"></span></span>
+    <span class="toggle-label">Email verified</span>
+  </label>
+  <div class="form-group">
+    <label for="edit_password">New password (optional)</label>
+    <input type="password" id="edit_password" name="new_password" placeholder="Leave blank to keep current password" minlength="8" autocomplete="new-password">
+  </div>
+</div>
+<p style="font-size:.78rem;color:var(--text-3);font-weight:700;margin:-2px 0 14px;">
+  <?= $editingSelf ? 'For safety, you cannot change your own role or status here.' : 'Changing status away from active cancels active subscriptions.' ?>
+</p>
+<div style="display:flex;gap:10px;flex-wrap:wrap;">
+  <button type="submit" class="btn btn-primary" style="max-width:220px;">💾 Save Changes</button>
+  <a href="<?= APP_URL ?>/admin/users.php<?= $filter !== 'all' ? '?filter=' . urlencode($filter) : '' ?>" class="btn btn-secondary" style="max-width:160px;">Cancel</a>
+</div>
+</form>
+</div>
+<?php endif; ?>
 
 <div class="data-card">
 <div class="dc-header"><div class="dc-title">👥 Users (<?= count($users) ?>)</div></div>
@@ -139,9 +286,10 @@ admin_header('User Management', '👥', 'users');
 <td style="font-size:.78rem;color:var(--text-3)"><?= fmt_date($u['created_at']) ?></td>
 <td style="font-size:.78rem;color:var(--text-3)"><?= $u['last_login'] ? time_ago($u['last_login']) : '—' ?></td>
 <td style="white-space:nowrap">
-<?php if(!$isSelf): ?>
 <form method="POST" style="display:inline"><?= csrf_field() ?><input type="hidden" name="user_id" value="<?= $u['id'] ?>">
+<a href="?edit=<?= $u['id'] ?>&filter=<?= urlencode($filter) ?><?= $search?'&q='.urlencode($search):''?>" class="act-btn" style="text-decoration:none;display:inline-block" title="Edit user">✏️ Edit</a>
 
+<?php if(!$isSelf): ?>
 <?php // ── Status Actions ──
 if ($u['status'] === 'pending'): ?>
 <button name="action" value="activate" class="act-btn success" title="Approve user">✅ Approve</button>
@@ -158,7 +306,7 @@ if ($u['status'] === 'pending'): ?>
 
 </form>
 <?php else: ?>
-<span style="font-size:.75rem;color:var(--text-3);font-weight:600">—</span>
+</form>
 <?php endif; ?>
 </td>
 </tr>

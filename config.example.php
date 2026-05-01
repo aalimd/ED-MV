@@ -19,6 +19,16 @@ define('APP_URL', 'https://your-domain.com');   // Change for production
 define('APP_ROOT', __DIR__);
 define('APP_DEBUG', false);     // Keep false outside a private local debugging session
 
+// ── Mail / Password Reset SMTP ────────────────────────
+define('SMTP_HOST', 'smtp.example.com');
+define('SMTP_PORT', 587);
+define('SMTP_USERNAME', 'smtp_username');
+define('SMTP_PASSWORD', 'smtp_password');
+define('SMTP_SECURE', 'tls');    // tls or ssl
+define('SMTP_TIMEOUT', 10);      // seconds
+define('MAIL_FROM', 'noreply@example.com');
+define('MAIL_FROM_NAME', APP_NAME);
+
 // ── Security ──────────────────────────────────────────
 define('SESSION_NAME', 'ventguide_sid');
 define('SESSION_LIFETIME', 7200);        // 2 hours in seconds

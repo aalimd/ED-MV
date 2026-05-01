@@ -993,7 +993,7 @@ require_once __DIR__ . '/../includes/pwa.php';
       <ul>
         <li>In <strong>COPD</strong>, the baseline CO₂ is often chronically elevated (50–60 mmHg) — target <span class="term" tabindex="0" onclick="App.toast('Target the patient\'s baseline CO₂, not the normal value of 40 mmHg.')">their baseline</span>, not 40 mmHg.</li>
         <li>Recheck ABG or VBG <strong>30–60 min</strong> after any ventilator change.</li>
-        <li>Consider <strong>VBG</strong> as an alternative: PaCO₂ ≈ PvCO₂ − 5 mmHg (usually within 5 mmHg).</li>
+        <li><strong>VBG</strong> is often adequate for pH and CO₂ trend screening, but do not use venous CO₂ as an exact PaCO₂ substitute in shock or severe respiratory failure.</li>
         <li>Overcorrecting CO₂ too fast risks <strong>post-hypercapnic alkalosis</strong> and seizures.</li>
         <li>This RR tool is a <strong>screening aid</strong> only; in active asthma/COPD with air trapping, prioritize longer expiratory time over a “normal” PaCO₂.</li>
       </ul>
@@ -1088,8 +1088,8 @@ require_once __DIR__ . '/../includes/pwa.php';
       <p style="font-size:0.84rem;color:var(--text-2);margin-bottom:8px;">When SpO₂ remains &lt;88% despite 100% FiO₂ and optimal PEEP, escalate rapidly:</p>
       <ol style="font-size:0.85rem;color:var(--text-1);padding-left:20px;line-height:1.5;">
         <li style="margin-bottom:6px;"><strong>Rule out DOPE:</strong> Disconnect vent, bag manually. Is it hard to bag? Consider tension pneumo (decompress).</li>
-        <li style="margin-bottom:6px;"><strong>Deep Sedation &amp; Paralysis:</strong> Give a bolus of Rocuronium/Cisatracurium. This stops muscular O₂ consumption and vent dyssynchrony.</li>
-        <li style="margin-bottom:6px;"><strong>Recruitment Maneuvers:</strong> e.g., 40 cmH₂O for 40 seconds (if hemodynamically stable).</li>
+        <li style="margin-bottom:6px;"><strong>Deep Sedation &amp; Paralysis:</strong> If clearly indicated, ensure analgesia/sedation first, then use NMBA to regain synchrony and lung-protective ventilation.</li>
+        <li style="margin-bottom:6px;"><strong>Recruitment / PEEP Strategy:</strong> Avoid routine sustained inflation maneuvers. If expert teams use a recruitment approach, do it cautiously with continuous hemodynamic monitoring.</li>
         <li style="margin-bottom:6px;"><strong>Prone Positioning:</strong> Perform early in the ED if boarding. Highly effective for dependent atelectasis in ARDS.</li>
         <li><strong>ECMO / iNO:</strong> Consult for venovenous ECMO or start inhaled pulmonary vasodilators (Flolan/Nitric Oxide).</li>
       </ol>
@@ -1241,6 +1241,8 @@ require_once __DIR__ . '/../includes/pwa.php';
         <li>Current SCCM guidance allows either a <strong>fixed-dose</strong> strategy or a <strong>monitoring-based</strong> strategy for blockade depth.</li>
         <li>Train-of-four can be used when the team follows a titration approach, but guideline certainty for the best monitoring strategy remains low.</li>
         <li>Stop as soon as oxygenation/synchrony goals can be maintained without it; do not paralyze by inertia.</li>
+      </ul>
+    </div>
 </section>
 
   <!-- ── TOOLS TAB ── -->
@@ -1328,6 +1330,26 @@ require_once __DIR__ . '/../includes/pwa.php';
       <div style="display:flex;gap:10px;margin-top:12px;">
         <button class="ehr-btn secondary" id="resetChecklist" style="margin-top:0;flex:1;">🔄 Reset</button>
         <button class="ehr-btn" id="copyChecklist" style="margin-top:0;flex:2;">📋 Copy</button>
+      </div>
+    </div>
+
+    <!-- ── 5. POST-INTUBATION: Drug Infusion Quick Reference ── -->
+    <div class="info-card" style="border-left:4px solid #0f766e;">
+      <h3 style="color:#0f766e;">💉 Drug Infusion Quick Reference</h3>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Interactive weight-based titration for common ED/ICU drips.</p>
+
+      <div class="calc-field" style="margin-bottom:15px;">
+        <label class="calc-label">Patient Weight (kg)</label>
+        <input type="number" id="infusionWeight" class="calc-input" placeholder="e.g. 80" inputmode="decimal">
+        <p style="font-size:0.7rem;color:var(--text-3);margin-top:4px;">Used for weight-based dose calculations.</p>
+      </div>
+
+      <div class="stack-list" id="infusionList">
+        <div style="padding:20px;text-align:center;color:var(--text-3);font-size:.85rem;">Enter weight to see start &amp; usual upper ranges</div>
+      </div>
+
+      <div class="alert-box" style="margin-top:12px;background:var(--danger-bg);border-color:var(--danger-border);color:var(--danger);">
+        <strong>⚠️ Extravasation Warning:</strong> Vasopressors are vesicants. Peripheral use should be short-term through a well-functioning proximal line, with frequent site checks. Transition to <strong>central access</strong> if the infusion is ongoing or escalating.
       </div>
     </div>
 
@@ -1512,17 +1534,7 @@ require_once __DIR__ . '/../includes/pwa.php';
       </div>
     </div>
 
-    <!-- ── 15. BOARDING: Drug Infusion Quick Reference ── -->
-    <div class="info-card" style="border-left:4px solid #0f766e;">
-      <h3 style="color:#0f766e;">💉 Drug Infusion Quick Reference</h3>
-      <div class="alert-box">Verify local protocols before starting infusions.</div>
-      <div class="drug-grid">
-        <div class="drug-card"><h4>Norepinephrine</h4><p>0.02–0.05 mcg/kg/min.</p></div>
-        <div class="drug-card"><h4>Propofol</h4><p>5–50 mcg/kg/min.</p></div>
-        <div class="drug-card"><h4>Fentanyl</h4><p>25–200 mcg/h.</p></div>
-        <div class="drug-card"><h4>Ketamine</h4><p>0.3–1 mg/kg/h.</p></div>
-      </div>
-    </div>
+
 
     <!-- ── 16. BOARDING: RASS Sedation Target ── -->
     <div class="info-card" style="border-left:4px solid #0284c7;">
@@ -1539,7 +1551,7 @@ require_once __DIR__ . '/../includes/pwa.php';
         <div class="calc-field"><label class="calc-label">Resp</label><select id="sofaResp" class="calc-input"><option value="0">P/F >400</option><option value="1">P/F ≤400</option><option value="2">P/F ≤300</option><option value="3">P/F ≤200 on vent</option><option value="4">P/F ≤100 on vent</option></select></div>
         <div class="calc-field"><label class="calc-label">Coag</label><select id="sofaCoag" class="calc-input"><option value="0">Plt ≥150</option><option value="1">Plt &lt;150</option><option value="2">Plt &lt;100</option><option value="3">Plt &lt;50</option><option value="4">Plt &lt;20</option></select></div>
         <div class="calc-field"><label class="calc-label">Liver</label><select id="sofaLiver" class="calc-input"><option value="0">Bili &lt;1.2</option><option value="1">Bili 1.2–1.9</option><option value="2">Bili 2.0–5.9</option><option value="3">Bili 6.0–11.9</option><option value="4">Bili ≥12</option></select></div>
-        <div class="calc-field"><label class="calc-label">CV</label><select id="sofaCv" class="calc-input"><option value="0">MAP ≥70</option><option value="1">MAP &lt;70</option><option value="2">Dop &lt;5</option><option value="3">Dop >5 / Epi ≤0.1</option><option value="4">Dop >15 / Epi >0.1</option></select></div>
+        <div class="calc-field"><label class="calc-label">CV</label><select id="sofaCv" class="calc-input"><option value="0">MAP ≥70</option><option value="1">MAP &lt;70</option><option value="2">Dop &lt;5 or Dob any</option><option value="3">Dop >5 / Epi or Norepi ≤0.1</option><option value="4">Dop >15 / Epi or Norepi >0.1</option></select></div>
         <div class="calc-field"><label class="calc-label">CNS</label><select id="sofaCns" class="calc-input"><option value="0">GCS 15</option><option value="1">GCS 13–14</option><option value="2">GCS 10–12</option><option value="3">GCS 6–9</option><option value="4">GCS &lt;6</option></select></div>
         <div class="calc-field"><label class="calc-label">Renal</label><select id="sofaRenal" class="calc-input"><option value="0">Cr &lt;1.2</option><option value="1">Cr 1.2–1.9</option><option value="2">Cr 2.0–3.4</option><option value="3">Cr 3.5–4.9</option><option value="4">Cr ≥5</option></select></div>
       </div>
@@ -3531,36 +3543,36 @@ const App = {
         pressure: 'M0,70 L20,70 L30,20 Q60,50 90,20 L100,70 L200,70 L220,70 L230,20 Q260,50 290,20 L300,70 L400,70',
         flow:     'M0,120 L20,120 L25,85 L40,105 Q60,80 90,115 L100,120 C120,150 150,140 200,120 L220,120 L225,85 L240,105 Q260,80 290,115 L300,120 C320,150 350,140 400,120',
         steps:[
-          'Waveform clue: Scooped (concave) pressure curve, while the flow curve shows a "bump" or failure to decelerate smoothly because the patient is pulling for more air.',
-          'First move: Increase inspiratory flow (e.g., >60 L/min), choose a decelerating flow pattern, or switch to a pressure-targeted mode.',
-          'Also treat pain, acidosis, anxiety, and fever because high respiratory drive can mimic a “sedation problem”.'
+          'Waveform clue: Scooped pressure curve, while the flow curve shows a bump or failure to decelerate smoothly because the patient is pulling for more air.',
+          'First move: Increase inspiratory flow, choose a decelerating flow pattern, or switch to a pressure-targeted mode.',
+          'Also treat pain, acidosis, anxiety, and fever because high respiratory drive can mimic a sedation problem.'
         ]
       },
       double: {
         pressure: 'M0,70 L20,70 L30,20 L70,20 L80,50 L90,10 L130,10 L140,70 L280,70',
         flow:     'M0,120 L20,120 L25,85 L70,115 L75,125 L85,80 L130,115 L135,120 C150,160 190,140 280,120',
         steps:[
-          'Waveform clue: Two breaths stacked with little or no exhalation between them. The second breath often hits higher peak pressures.',
-          'First move: Match the vent to the patient. Lengthen inspiratory time if the patient wants a longer breath, or increase sedation if drive is excessively high.',
-          'In ARDS, double triggering causes "occult over-distension" (delivering 12+ mL/kg instead of 6 mL/kg), driving lung injury.'
+          'Waveform clue: Two breaths stack with little or no exhalation between them. The second breath often hits higher peak pressures.',
+          'First move: Match the ventilator to patient demand. Lengthen inspiratory time if the patient wants a longer breath, or increase sedation if drive is excessive.',
+          'In ARDS, double triggering can deliver injurious combined tidal volumes despite a lung-protective set VT.'
         ]
       },
       reverse: {
         pressure: 'M0,70 L20,70 L30,20 L70,20 L80,70 C90,70 100,80 105,75 L115,20 L155,20 L165,70 L320,70',
         flow:     'M0,120 L20,120 L25,85 L70,115 L75,120 C85,150 95,140 100,125 L110,85 L155,115 L160,120 C190,160 250,140 320,120',
         steps:[
-          'Waveform clue: A mandatory machine breath is delivered, and as it ends, the diaphragm reflexively contracts (negative pressure deflection, positive flow), triggering a second breath.',
-          'First move: This is often an issue of oversedation or specific paralytic washout. Reassess the mode and consider lightening sedation if safe.',
-          'Reverse triggering is dangerous because it looks like the patient is "breathing along" but actually causes breath stacking and diaphragm injury.'
+          'Waveform clue: A mandatory breath is delivered, then as it ends the diaphragm contracts and may trigger a second breath.',
+          'First move: Reassess sedation depth, respiratory drive, and mode settings; consider expert ventilator review if breath stacking persists.',
+          'Reverse triggering may look like synchrony but can still cause breath stacking, excess transpulmonary pressure, and diaphragm injury.'
         ]
       },
       auto: {
         pressure: 'M0,70 Q10,68 20,70 Q30,68 40,70 Q50,66 60,70 L70,20 L110,20 L120,70 Q130,68 140,70 Q150,68 160,70 L170,20 L210,20 L220,70',
         flow:     'M0,120 Q10,118 20,120 Q30,118 40,120 Q50,115 60,120 L65,85 L110,115 L115,120 C120,140 125,130 130,120 Q140,118 150,120 Q160,118 170,120 L175,85 L210,115 L215,120',
         steps:[
-          'Waveform clue: Extra breaths fire without true patient effort. Baseline flow or pressure shows tiny rhythmic ripples (cardiac oscillations) or jagged noise (water in tube).',
-          'First move: Drain condensate from the circuit, fix leaks, and slightly reduce trigger sensitivity (make it harder to trigger) until the false breaths stop.',
-          'Cardiogenic oscillation easily auto-triggers the vent in hyperdynamic states. Ensure you are treating the patient, not the heartbeat.'
+          'Waveform clue: Extra breaths fire without true patient effort. Baseline flow or pressure shows tiny rhythmic ripples or circuit noise.',
+          'First move: Drain condensate, fix leaks, and reduce trigger sensitivity until false breaths stop.',
+          'Cardiac oscillation can auto-trigger the ventilator in hyperdynamic states. Confirm the breaths are real before escalating sedation.'
         ]
       }
     };
@@ -3570,23 +3582,16 @@ const App = {
       const out = document.getElementById('dyssyncOutput');
       if (!wave || !out || !data) return;
       document.querySelectorAll('#dyssyncButtons .pill-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.dyssync === key));
-      
       wave.setAttribute('viewBox', '0 0 400 160');
       wave.style.minHeight = '140px';
-      
       wave.innerHTML = `
-        <!-- Grid -->
         <g stroke="var(--border)" stroke-width="1" stroke-dasharray="4 4">
           <line x1="0" y1="35" x2="400" y2="35"/>
           <line x1="0" y1="70" x2="400" y2="70"/>
           <line x1="0" y1="120" x2="400" y2="120"/>
         </g>
-        
-        <!-- Pressure Waveform (Yellow) -->
         <path d="${data.pressure}" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        <text x="10" y="20" fill="#f59e0b" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">Pressure (cmH₂O)</text>
-        
-        <!-- Flow Waveform (Green) -->
+        <text x="10" y="20" fill="#f59e0b" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">Pressure (cmH2O)</text>
         <path d="${data.flow}" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
         <text x="10" y="105" fill="#10b981" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">Flow (L/min)</text>
       `;
@@ -3649,38 +3654,29 @@ const App = {
     };
     ['pawPip','pawPeep','pawItime','pawRr'].forEach(id=>document.getElementById(id)?.addEventListener('input',pawCalc));
 
-    // RSI & Push-Dose Pressor Calculator
+    // RSI Calculator
     const rsiCalc = () => {
       const tbwRaw = document.getElementById('rsiTbw')?.value;
       const tbw = parseFloat(tbwRaw);
-      const pbw = Store.get('pbw'); // Get PBW if available
       const out = document.getElementById('rsiOutput');
       const hint = document.getElementById('rsiPbwHint');
       if (!out) return;
-
       if (hint) {
-        if (pbw) hint.textContent = `PBW detected: ${pbw.toFixed(1)} kg. (Used for Rocuronium if obese).`;
-        else hint.textContent = 'Set Height in PBW calculator above to use PBW for paralytics if indicated.';
+        hint.textContent = 'RSI doses use total body weight here; adjust for severe obesity or organ failure per local protocol.';
       }
-
       if (isNaN(tbw) || tbw <= 0) {
         out.innerHTML = '<div style="padding:10px;text-align:center;color:var(--text-3);font-size:.8rem;font-weight:600;">Enter Total Body Weight to calculate doses</div>';
         return;
       }
-
-      const rocWeight = pbw ? pbw : tbw;
-      const rocPrefix = pbw ? 'PBW' : 'TBW';
-
       const drugs = [
         { class: 'Induction', name: 'Ketamine', dose: '1.5 – 2.0 mg/kg', calc: `${(tbw * 1.5).toFixed(0)} – ${(tbw * 2.0).toFixed(0)} mg`, note: 'Bronchodilator, preserves drive. Avoid if catecholamine depleted.' },
-        { class: 'Induction', name: 'Etomidate', dose: '0.3 mg/kg', calc: `${(tbw * 0.3).toFixed(0)} mg`, note: 'Hemodynamically neutral. Avoid in sepsis if possible (adrenal suppression).' },
-        { class: 'Paralytic', name: 'Rocuronium', dose: `1.0 – 1.2 mg/kg (${rocPrefix})`, calc: `${(rocWeight * 1.0).toFixed(0)} – ${(rocWeight * 1.2).toFixed(0)} mg`, note: 'Safe in hyperkalemia. Lasts 45-60 min (ensure post-intubation sedation!).' },
+        { class: 'Induction', name: 'Etomidate', dose: '0.3 mg/kg', calc: `${(tbw * 0.3).toFixed(0)} mg`, note: 'Hemodynamically stable profile; adrenal suppression concern should be weighed against shock risk.' },
+        { class: 'Paralytic', name: 'Rocuronium', dose: '1.0 – 1.2 mg/kg (TBW)', calc: `${(tbw * 1.0).toFixed(0)} – ${(tbw * 1.2).toFixed(0)} mg`, note: 'Safe in hyperkalemia. Long duration; sedation must be active after intubation.' },
         { class: 'Paralytic', name: 'Succinylcholine', dose: '1.5 mg/kg (TBW)', calc: `${(tbw * 1.5).toFixed(0)} mg`, note: 'Avoid in crush, burns >48h, denervation, severe hyperkalemia.' },
         { class: 'Maintenance Drip', name: 'Propofol', dose: '10 – 50 mcg/kg/min', calc: `${(tbw * 10).toFixed(0)} – ${(tbw * 50).toFixed(0)} mcg/min`, note: 'Fast on/off. Risk of hypotension. Avoid if hemodynamically unstable.' },
         { class: 'Maintenance Drip', name: 'Fentanyl', dose: '50 – 150 mcg/hr', calc: '50 – 150 mcg/hr', note: 'Start analgesia FIRST. Does not provide amnesia alone.' },
         { class: 'Rescue Pressor', name: 'Push-Dose Epinephrine', dose: '10 – 20 mcg', calc: '1 – 2 mL', note: 'Mix 1 mL of cardiac Epi (1:10,000) in 9 mL saline = 10 mcg/mL.' }
       ];
-
       out.innerHTML = drugs.map(d => `
         <div class="stack-item" style="display:flex;justify-content:space-between;align-items:center;">
           <div>
@@ -3695,13 +3691,102 @@ const App = {
         </div>
       `).join('');
     };
-    document.getElementById('rsiTbw')?.addEventListener('input', rsiCalc);
+    // Drug Infusion Calculator
+    const INFUSIONS = [
+      { name: 'Norepinephrine', sel: 0, modes: [{ unit: 'mcg/kg/min', start: 0.05, max: 1.0 }, { unit: 'mcg/min', start: 2, max: 30 }], access: 'Peripheral acceptable short-term through proximal, well-functioning line.', note: 'First-line vasopressor in septic shock. Initial MAP target: 65 mmHg.' },
+      { name: 'Epinephrine', sel: 0, modes: [{ unit: 'mcg/kg/min', start: 0.05, max: 1.0 }, { unit: 'mcg/min', start: 2, max: 30 }], access: 'Central preferred; peripheral only as short bridge if needed.', note: 'Add-on or alternative vasopressor/inotrope. Monitor tachyarrhythmias and lactate.' },
+      { name: 'Vasopressin', sel: 0, modes: [{ unit: 'Units/min', start: 0.03, max: 0.04 }, { unit: 'Units/hr', start: 1.8, max: 2.4 }], access: 'Central preferred.', note: 'Adjunct to norepinephrine; usually fixed dose rather than titrated high.' },
+      { name: 'Propofol', sel: 0, modes: [{ unit: 'mcg/kg/min', start: 5, max: 50 }, { unit: 'mg/kg/hr', start: 0.3, max: 3.0 }], access: 'Peripheral acceptable.', note: 'Rapid onset/offset. Watch hypotension, triglycerides, and deep sedation.' },
+      { name: 'Dexmedetomidine', sel: 0, modes: [{ unit: 'mcg/kg/hr', start: 0.2, max: 0.7 }], access: 'Peripheral acceptable.', note: 'Light sedation; monitor bradycardia and hypotension. Higher doses are protocol-specific.' },
+      { name: 'Ketamine', sel: 0, modes: [{ unit: 'mg/kg/hr', start: 0.1, max: 2.0 }, { unit: 'mcg/kg/min', start: 1.6, max: 33 }], access: 'PIV safe.', note: 'Analgesia (0.1-0.3) vs. Sedation (0.5+).' },
+      { name: 'Fentanyl', sel: 0, modes: [{ unit: 'mcg/hr', start: 25, max: 200 }, { unit: 'mcg/kg/hr', start: 0.5, max: 2.0 }], access: 'Peripheral acceptable.', note: 'Analgesia, not amnesia. Titrate with validated pain/sedation scales.' },
+      { name: 'Midazolam', sel: 0, modes: [{ unit: 'mg/hr', start: 1, max: 10 }, { unit: 'mg/kg/hr', start: 0.02, max: 0.2 }], access: 'Peripheral acceptable.', note: 'Risk of accumulation and delirium; reserve when preferred agents are unsuitable.' }
+    ];
+
+    window.setInfusionMode = (drugIdx, modeIdx) => {
+      if (INFUSIONS[drugIdx]) {
+        INFUSIONS[drugIdx].sel = modeIdx;
+        infusionCalc();
+      }
+    };
+
+    const infusionCalc = () => {
+      const weight = parseFloat(document.getElementById('infusionWeight')?.value);
+      const list = document.getElementById('infusionList');
+      if (!list) return;
+      if (isNaN(weight) || weight <= 0) {
+        list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-3);font-size:.85rem;">Enter weight to see start &amp; usual upper ranges</div>';
+        return;
+      }
+      list.innerHTML = INFUSIONS.map((d, drugIdx) => {
+        const mode = d.modes[d.sel];
+        const isWeightBased = mode.unit.includes('/kg/');
+        const isMinute = mode.unit.includes('/min');
+        const startVal = isWeightBased ? (mode.start * weight).toFixed(1) : mode.start;
+        const maxVal = isWeightBased ? (mode.max * weight).toFixed(1) : mode.max;
+        const displayUnit = mode.unit.split('/')[0];
+        const timeSuffix = isMinute ? '/min' : '/hr';
+        const toggles = d.modes.length > 1 ? `
+          <div style="display:flex;background:var(--surface-3);padding:2px;border-radius:6px;margin-bottom:8px;">
+            ${d.modes.map((m, modeIdx) => `
+              <button onclick="setInfusionMode(${drugIdx}, ${modeIdx})" style="flex:1;border:0;padding:4px;font-size:0.65rem;font-weight:700;border-radius:4px;cursor:pointer;background:${d.sel === modeIdx ? 'var(--theme)' : 'transparent'};color:${d.sel === modeIdx ? '#fff' : 'var(--text-3)'};transition:all 0.2s;">
+                ${m.unit}
+              </button>
+            `).join('')}
+          </div>
+        ` : '';
+        return `
+          <div class="stack-item">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+              <strong style="font-size:1.05rem;color:var(--theme);">${d.name}</strong>
+              <span style="font-size:0.7rem;font-weight:700;color:var(--text-3);text-transform:uppercase;">${mode.unit}</span>
+            </div>
+            ${toggles}
+            <div class="simple-grid" style="gap:8px;margin-bottom:8px;">
+              <div style="background:var(--surface-2);padding:8px;border-radius:8px;text-align:center;">
+                <div style="font-size:0.6rem;font-weight:700;color:var(--text-2);text-transform:uppercase;">Start (${mode.start})</div>
+                <div style="font-size:1rem;font-weight:800;color:var(--text);">${startVal} <span style="font-size:0.7rem;">${displayUnit}${timeSuffix}</span></div>
+              </div>
+              <div style="background:var(--surface-2);padding:8px;border-radius:8px;text-align:center;">
+                <div style="font-size:0.6rem;font-weight:700;color:var(--text-2);text-transform:uppercase;">Usual upper (${mode.max})</div>
+                <div style="font-size:1rem;font-weight:800;color:var(--text);">${maxVal} <span style="font-size:0.7rem;">${displayUnit}${timeSuffix}</span></div>
+              </div>
+            </div>
+            <div style="background:rgba(220,38,38,0.05);border:1px solid rgba(220,38,38,0.1);padding:6px 10px;border-radius:8px;margin-bottom:4px;">
+              <div style="font-size:0.6rem;font-weight:700;color:var(--danger);text-transform:uppercase;margin-bottom:2px;">Vascular Access Safety</div>
+              <div style="font-size:0.75rem;font-weight:700;color:var(--text);">${d.access}</div>
+              <p style="font-size:0.7rem;color:var(--text-3);margin-top:2px;line-height:1.4;">${d.note}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    };
+    document.getElementById('rsiTbw')?.addEventListener('input', (e) => {
+      rsiCalc();
+      const val = e.target.value;
+      const other = document.getElementById('infusionWeight');
+      if (other && other.value !== val) {
+        other.value = val;
+        other.dispatchEvent(new Event('input'));
+      }
+    });
+
+    document.getElementById('infusionWeight')?.addEventListener('input', (e) => {
+      infusionCalc();
+      const val = e.target.value;
+      const other = document.getElementById('rsiTbw');
+      if (other && other.value !== val) {
+        other.value = val;
+        other.dispatchEvent(new Event('input'));
+      }
+    });
 
     this._refreshToolSummaries = () => {
       mvCalc();
       sfCalc();
       rsbiCalc();
       rsiCalc();
+      infusionCalc();
     };
     this._refreshToolSummaries();
 

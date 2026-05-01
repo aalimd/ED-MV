@@ -9,9 +9,9 @@ config.php
 # Runtime output
 logs/
 *.log
+vendor/
 
 # Local editor and OS files
 .idea/
 .vscode/
 Thumbs.db
-
