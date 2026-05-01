@@ -8,6 +8,7 @@ require_once __DIR__ . '/../includes/pwa.php';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
   <?= pwa_head_tags('Evidence-based emergency department ventilation reference.') . "\n" ?>
+  <?= pwa_zoom_lock_script() . "\n" ?>
   <title>🫁 ED VentGuide Pro</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1240,32 +1241,7 @@ require_once __DIR__ . '/../includes/pwa.php';
         <li>Current SCCM guidance allows either a <strong>fixed-dose</strong> strategy or a <strong>monitoring-based</strong> strategy for blockade depth.</li>
         <li>Train-of-four can be used when the team follows a titration approach, but guideline certainty for the best monitoring strategy remains low.</li>
         <li>Stop as soon as oxygenation/synchrony goals can be maintained without it; do not paralyze by inertia.</li>
-    </ul>
-    </div>
-
-    <div class="info-card">
-      <h3>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-        🔢 Quick Reference Formulas
-      </h3>
-      <ul>
-        <li>📐 <strong>PBW Male:</strong> 50 + 0.91 × (height cm − 152.4) kg</li>
-        <li>📐 <strong>PBW Female:</strong> 45.5 + 0.91 × (height cm − 152.4) kg</li>
-        <li>🌬️ <strong>Minute Ventilation:</strong> VE = VT × RR (Normal ≈ 5–8 L/min)</li>
-        <li>💧 <strong>P/F Ratio:</strong> PaO₂ ÷ FiO₂ — Mild &lt;300 | Mod &lt;200 | Severe &lt;100</li>
-        <li>📊 <strong>Driving Pressure:</strong> ΔP = Pplat − PEEP (Target &lt; 15)</li>
-      </ul>
-    </div>
-
-    <div class="info-card">
-      <h3>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        ⚠️ Pediatric Warning
-      </h3>
-      <p>This tool uses adult ARDSNet formulas. For patients &lt; 18 years or &lt; 30 kg, use pediatric-specific protocols (PALICC guidelines).</p>
-    </div>
-
-  </section>
+</section>
 
   <!-- ── TOOLS TAB ── -->
   <section id="view-tools" class="view" aria-label="Clinical tools">
@@ -1273,13 +1249,13 @@ require_once __DIR__ . '/../includes/pwa.php';
     <!-- ── 1. ASSESSMENT: Difficult Airway Predictor (LEMON) ── -->
     <div class="info-card mt-4" style="border-left:4px solid #7c2d12;">
       <h3 style="color:#7c2d12;">🧱 Difficult Airway Predictor (LEMON)</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Each positive item adds one point. Obstruction or severe external distortion should override the total and escalate the plan.</p>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Each positive item adds one point. Obstruction overrides total and escalates plan.</p>
       <div class="simple-grid">
-        <label class="checklist-item" style="margin-bottom:0;"><input type="checkbox" id="lemonLook" style="margin-top:3px;"> <div><div class="ci-text">Look externally difficult</div><div class="ci-sub">Trauma, beard, obesity, facial distortion, limited mouth opening, etc.</div></div></label>
-        <label class="checklist-item" style="margin-bottom:0;"><input type="checkbox" id="lemonEval" style="margin-top:3px;"> <div><div class="ci-text">Evaluate 3-3-2 abnormal</div><div class="ci-sub">Any major 3-3-2 violation or very limited mandibular space.</div></div></label>
-        <label class="checklist-item" style="margin-bottom:0;"><input type="checkbox" id="lemonMallampati" style="margin-top:3px;"> <div><div class="ci-text">Mallampati III/IV or unable</div><div class="ci-sub">Treat “cannot assess” as potentially difficult if the rest of the exam is concerning.</div></div></label>
-        <label class="checklist-item" style="margin-bottom:0;"><input type="checkbox" id="lemonObstruction" style="margin-top:3px;"> <div><div class="ci-text">Obstruction / edema / blood</div><div class="ci-sub">Anaphylaxis, airway burn, infection, hematoma, tumor, vomit.</div></div></label>
-        <label class="checklist-item" style="margin-bottom:0;"><input type="checkbox" id="lemonNeck" style="margin-top:3px;"> <div><div class="ci-text">Neck mobility limited</div><div class="ci-sub">C-collar, ankylosis, severe pain, rigid habitus.</div></div></label>
+        <label class="checklist-item" style="margin-bottom:0;"><input type="checkbox" id="lemonLook" style="margin-top:3px;"> <div><div class="ci-text">Look externally difficult</div><div class="ci-sub">Trauma, beard, obesity, facial distortion.</div></div></label>
+        <label class="checklist-item" style="margin-bottom:0;"><input type="checkbox" id="lemonEval" style="margin-top:3px;"> <div><div class="ci-text">Evaluate 3-3-2 abnormal</div><div class="ci-sub">Limited mandibular space or opening.</div></div></label>
+        <label class="checklist-item" style="margin-bottom:0;"><input type="checkbox" id="lemonMallampati" style="margin-top:3px;"> <div><div class="ci-text">Mallampati III/IV or unable</div><div class="ci-sub">Treat “cannot assess” as potentially difficult.</div></div></label>
+        <label class="checklist-item" style="margin-bottom:0;"><input type="checkbox" id="lemonObstruction" style="margin-top:3px;"> <div><div class="ci-text">Obstruction / edema / blood</div><div class="ci-sub">Anaphylaxis, burn, infection, tumor.</div></div></label>
+        <label class="checklist-item" style="margin-bottom:0;"><input type="checkbox" id="lemonNeck" style="margin-top:3px;"> <div><div class="ci-text">Neck mobility limited</div><div class="ci-sub">C-collar, ankylosis, severe pain.</div></div></label>
       </div>
       <div class="simple-grid" style="margin-top:12px;">
         <div class="tool-result" style="margin-top:0;border-color:rgba(124,45,18,.2);background:rgba(124,45,18,.06);">
@@ -1290,7 +1266,7 @@ require_once __DIR__ . '/../includes/pwa.php';
         </div>
         <div class="mini-card">
           <h4>Suggested Approach</h4>
-          <p id="lemonPlan">Low score supports a standard RSI pathway if physiology allows.</p>
+          <p id="lemonPlan">Low score supports standard RSI pathway.</p>
         </div>
       </div>
     </div>
@@ -1298,21 +1274,43 @@ require_once __DIR__ . '/../includes/pwa.php';
     <!-- ── 2. PREPARATION: Peri-Intubation Hemodynamic Risk Screen ── -->
     <div class="info-card" style="border-left:4px solid #dc2626;">
       <h3 style="color:#dc2626;">🫀 Peri-Intubation Hemodynamic Risk Screen</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);"> बेडसाइड स्क्रीन to force early resuscitation planning before induction.</p>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Bedside clinical screen to force early resuscitation planning before induction.</p>
       <div class="tools-row">
         <div class="calc-field" style="flex:1"><label class="calc-label">HR (/min)</label><input type="number" id="riskHr" class="calc-input" placeholder="e.g. 128" inputmode="decimal"></div>
         <div class="calc-field" style="flex:1"><label class="calc-label">SBP (mmHg)</label><input type="number" id="riskSbp" class="calc-input" placeholder="e.g. 86" inputmode="decimal"></div>
-        <div class="calc-field" style="flex:1"><label class="calc-label">Likely Physiology</label><select id="riskDx" class="calc-input"><option value="">Select</option><option value="sepsis">Sepsis</option><option value="hypovolemia">Hypovolemia</option><option value="dka">DKA/Acidosis</option></select></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">DBP (mmHg)</label><input type="number" id="riskDbp" class="calc-input" placeholder="e.g. 48" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">Hb (g/dL)</label><input type="number" id="riskHb" class="calc-input" placeholder="e.g. 7.8" step="0.1" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1">
+          <label class="calc-label">Likely Physiology</label>
+          <select id="riskDx" class="calc-input">
+            <option value="">Select</option>
+            <option value="sepsis">Sepsis</option>
+            <option value="pe">Massive PE</option>
+            <option value="cardiogenic">Cardiogenic Shock</option>
+            <option value="hypovolemia">Hypovolemia</option>
+            <option value="dka">DKA/Acidosis</option>
+            <option value="neuro">Neurocritical</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
       </div>
-      <div class="tool-result" style="margin-top:0;border-color:rgba(220,38,38,.2);background:rgba(220,38,38,.06);">
-        <div class="tr-label" style="color:#dc2626;">Risk Score</div><div class="tr-val" id="riskVal">--</div>
+      <div class="simple-grid">
+        <div class="tool-result" style="margin-top:0;border-color:rgba(220,38,38,.2);background:rgba(220,38,38,.06);">
+          <div class="tr-label" style="color:#dc2626;">Risk Score</div>
+          <div class="tr-val" id="riskVal">--</div>
+          <div class="tr-badge hidden" id="riskBadge"></div>
+        </div>
+        <div class="mini-card">
+          <h4>Pre-induction Plan</h4>
+          <p id="riskPlan">Enter hemodynamics to generate plan.</p>
+        </div>
       </div>
     </div>
 
     <!-- ── 3. INTUBATION: RSI & Push-Dose Pressor Calculator ── -->
     <div class="info-card" style="border-left:4px solid #dc2626;">
       <h3 style="color:#dc2626;">💉 RSI &amp; Push-Dose Pressor Calculator</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Calculates induction, paralysis, and rescue pressor doses.</p>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Calculates induction, paralysis, and rescue pressor doses based on body weight.</p>
       <div class="calc-field">
         <label class="calc-label">Total Body Weight (kg)</label>
         <input type="number" id="rsiTbw" class="calc-input" placeholder="e.g. 80" inputmode="decimal">
@@ -1336,11 +1334,12 @@ require_once __DIR__ . '/../includes/pwa.php';
     <!-- ── 5. EMERGENCY TROUBLESHOOTING: Rapid Deterioration Troubleshooter ── -->
     <div class="info-card" style="border-left:4px solid #1d4ed8;">
       <h3 style="color:#1d4ed8;">🚨 Rapid Deterioration Troubleshooter</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Choose the acute problem. Prioritizes actions for high-pressure or desaturation.</p>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Acute management for bedside crises. Choose the primary problem.</p>
       <div class="pill-row" id="deteriorationButtons">
         <button class="pill-btn active" data-problem="desat">Desaturation</button>
-        <button class="pill-btn" data-problem="high-pressure">High Pressure Alarm</button>
+        <button class="pill-btn" data-problem="high-pressure">High Pressure</button>
         <button class="pill-btn" data-problem="hypotension">Hypotension</button>
+        <button class="pill-btn" data-problem="fighting">Fighting Vent</button>
       </div>
       <div class="stack-list" id="deteriorationOutput"></div>
     </div>
@@ -1348,10 +1347,12 @@ require_once __DIR__ . '/../includes/pwa.php';
     <!-- ── 6. VENT MANAGEMENT: Ventilator Dyssynchrony Guide ── -->
     <div class="info-card" style="border-left:4px solid #475569;">
       <h3 style="color:#475569;">📈 Ventilator Dyssynchrony Guide</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Waveform patterns and actionable bedside moves.</p>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Identify and fix ventilator/patient mismatch using waveforms.</p>
       <div class="pill-row" id="dyssyncButtons">
         <button class="pill-btn active" data-dyssync="flow">Flow Starvation</button>
-        <button class="pill-btn" data-dyssync="double">Double Triggering</button>
+        <button class="pill-btn" data-dyssync="double">Double Trigger</button>
+        <button class="pill-btn" data-dyssync="reverse">Reverse Trigger</button>
+        <button class="pill-btn" data-dyssync="auto">Auto-Trigger</button>
       </div>
       <svg id="dyssyncWave" class="flow-svg" viewBox="0 0 400 86" preserveAspectRatio="none"></svg>
       <div class="stack-list" id="dyssyncOutput"></div>
@@ -1360,26 +1361,41 @@ require_once __DIR__ . '/../includes/pwa.php';
     <!-- ── 7. METABOLIC: Minute Ventilation Matcher ── -->
     <div class="info-card" style="border-left:4px solid #9333ea;">
       <h3 style="color:#9333ea;">⚙️ Minute Ventilation Matcher</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">For DKA/Acidosis. Preserve compensatory minute ventilation.</p>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">For DKA or severe metabolic acidosis. Match pre-intubation breathing.</p>
       <div class="tools-row">
-        <div class="calc-field" style="flex:1"><label class="calc-label">Obs RR</label><input type="number" id="mvObsRr" class="calc-input" inputmode="decimal"></div>
-        <div class="calc-field" style="flex:1"><label class="calc-label">Obs VT</label><input type="number" id="mvObsVt" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">Obs RR (/min)</label><input type="number" id="mvObsRr" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">Obs VT (mL)</label><input type="number" id="mvObsVt" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">Target VT (mL)</label><input type="number" id="mvTargetVt" class="calc-input" placeholder="Auto" inputmode="decimal"></div>
       </div>
-      <div class="tool-result" style="margin-top:0;border-color:rgba(147,51,234,.2);background:rgba(147,51,234,.06);">
-        <div class="tr-label" style="color:#9333ea;">Matched RR</div><div class="tr-val" id="mvNeedRr">--</div>
+      <div class="simple-grid">
+        <div class="tool-result" style="margin-top:0;border-color:rgba(147,51,234,.2);background:rgba(147,51,234,.06);">
+          <div class="tr-label" style="color:#9333ea;">Current VE</div><div class="tr-val" id="mvVal">--</div>
+        </div>
+        <div class="tool-result" style="margin-top:0;border-color:rgba(147,51,234,.2);background:rgba(147,51,234,.06);">
+          <div class="tr-label" style="color:#9333ea;">Matched RR</div><div class="tr-val" id="mvNeedRr">--</div>
+        </div>
+      </div>
+      <div class="mini-card" style="margin-top:12px;">
+        <p id="mvAlt" style="font-size:0.8rem;"></p>
       </div>
     </div>
 
     <!-- ── 8. METABOLIC: Acidosis Rescue (Bicarb Deficit) ── -->
     <div class="info-card" style="border-left:4px solid #ec4899;">
       <h3 style="color:#ec4899;">🧪 Acidosis Rescue (Bicarb Deficit)</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Temporizing measure for profound acidosis (pH &lt; 6.9).</p>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Temporizing measure for profound acidosis (pH &lt; 6.9). Goal HCO₃ ≈ 15.</p>
       <div class="tools-row">
         <div class="calc-field" style="flex:1"><label class="calc-label">Weight (kg)</label><input type="number" id="bicarbTbw" class="calc-input" inputmode="decimal"></div>
-        <div class="calc-field" style="flex:1"><label class="calc-label">HCO₃</label><input type="number" id="bicarbCurr" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">Current HCO₃</label><input type="number" id="bicarbCurr" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">Target HCO₃</label><input type="number" id="bicarbTarget" class="calc-input" value="15" inputmode="decimal"></div>
       </div>
-      <div class="tool-result" style="margin-top:0;border-color:rgba(236,72,153,.2);background:rgba(236,72,153,.06);">
-        <div class="tr-label" style="color:#ec4899;">Safe Dose (Amps)</div><div class="tr-val" id="bicarbDoseVal">--</div>
+      <div class="simple-grid">
+        <div class="tool-result" style="margin-top:0;border-color:rgba(236,72,153,.2);background:rgba(236,72,153,.06);">
+          <div class="tr-label" style="color:#ec4899;">Deficit (mEq)</div><div class="tr-val" id="bicarbDeficitVal">--</div>
+        </div>
+        <div class="tool-result" style="margin-top:0;border-color:rgba(236,72,153,.2);background:rgba(236,72,153,.06);">
+          <div class="tr-label" style="color:#ec4899;">Initial Amps</div><div class="tr-val" id="bicarbDoseVal">--</div>
+        </div>
       </div>
     </div>
 
@@ -1390,9 +1406,24 @@ require_once __DIR__ . '/../includes/pwa.php';
       <div class="tools-row">
         <div class="calc-field" style="flex:1"><label class="calc-label">Total PEEP</label><input type="number" id="autoPeepTotal" class="calc-input" inputmode="decimal"></div>
         <div class="calc-field" style="flex:1"><label class="calc-label">Set PEEP</label><input type="number" id="autoPeepSet" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1">
+          <label class="calc-label">Returns to Zero?</label>
+          <select id="autoPeepFlow" class="calc-input"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
+        </div>
+        <div class="calc-field" style="flex:1">
+          <label class="calc-label">Trigger Burden?</label>
+          <select id="autoPeepTrigger" class="calc-input"><option value="">Select</option><option value="yes">Yes</option><option value="no">No</option></select>
+        </div>
       </div>
-      <div class="tool-result" style="margin-top:0;border-color:rgba(217,119,6,.2);background:rgba(217,119,6,.08);">
-        <div class="tr-label" style="color:#d97706;">Intrinsic PEEP</div><div class="tr-val" id="autoPeepVal">--</div>
+      <div class="simple-grid">
+        <div class="tool-result" style="margin-top:0;border-color:rgba(217,119,6,.2);background:rgba(217,119,6,.08);">
+          <div class="tr-label" style="color:#d97706;">Intrinsic PEEP</div>
+          <div class="tr-val" id="autoPeepVal">--</div>
+          <div class="tr-badge hidden" id="autoPeepBadge"></div>
+        </div>
+        <div class="mini-card">
+          <p id="autoPeepExt" style="font-size:0.8rem;">Confirm measurements.</p>
+        </div>
       </div>
     </div>
 
@@ -1402,10 +1433,12 @@ require_once __DIR__ . '/../includes/pwa.php';
       <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Quick estimate of oxygenation before ABG results.</p>
       <div class="tools-row">
         <div class="calc-field" style="flex:1"><label class="calc-label">SpO₂ (%)</label><input type="number" id="sfSpo2" class="calc-input" inputmode="decimal"></div>
-        <div class="calc-field" style="flex:1"><label class="calc-label">FiO₂ (%)</label><input type="number" id="sfFio2" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">FiO₂ (0.21–1.0)</label><input type="number" id="sfFio2" class="calc-input" step="0.01" inputmode="decimal"></div>
       </div>
       <div class="tool-result" style="border-color:rgba(15,118,110,.2);background:rgba(15,118,110,.06);">
-        <div class="tr-label" style="color:#0f766e;">S/F Ratio</div><div class="tr-val" id="sfVal">--</div>
+        <div class="tr-label" style="color:#0f766e;">S/F Ratio</div>
+        <div class="tr-val" id="sfVal">--</div>
+        <div class="tr-badge hidden" id="sfBadge"></div>
       </div>
     </div>
 
@@ -1414,11 +1447,22 @@ require_once __DIR__ . '/../includes/pwa.php';
       <h3 style="color:#dc2626;">💧 P/F Ratio & ARDS Severity</h3>
       <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Berlin criteria for ventilated ARDS patients.</p>
       <div class="tools-row">
-        <div class="calc-field" style="flex:1"><label class="calc-label">PaO₂</label><input type="number" id="pfPao2" class="calc-input" inputmode="decimal"></div>
-        <div class="calc-field" style="flex:1"><label class="calc-label">FiO₂ (%)</label><input type="number" id="pfFio2" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">PaO₂ (mmHg)</label><input type="number" id="pfPao2" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">FiO₂ (0.21–1.0)</label><input type="number" id="pfFio2" class="calc-input" step="0.01" inputmode="decimal"></div>
       </div>
       <div class="tool-result" style="border-color:rgba(220,38,38,.2);background:rgba(220,38,38,.06);">
-        <div class="tr-label" style="color:#dc2626;">P/F Ratio</div><div class="tr-val" id="pfVal">--</div>
+        <div class="tr-label" style="color:#dc2626;">P/F Ratio</div>
+        <div class="tr-val" id="pfVal">--</div>
+        <div class="tr-badge hidden" id="pfBadge"></div>
+      </div>
+      <div class="berlin-bar" id="berlinBar" style="display:none;margin-top:14px;">
+        <div class="berlin-track">
+          <div class="berlin-seg" style="background:#dc2626;flex:1;"></div>
+          <div class="berlin-seg" style="background:#d97706;flex:1;"></div>
+          <div class="berlin-seg" style="background:#ca8a04;flex:1;"></div>
+          <div class="berlin-seg" style="background:#16a34a;flex:1;"></div>
+        </div>
+        <div class="berlin-arrow" id="berlinArrow">▲</div>
       </div>
     </div>
 
@@ -1427,24 +1471,29 @@ require_once __DIR__ . '/../includes/pwa.php';
       <h3>📐 Driving Pressure Calculator</h3>
       <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">ΔP = Pplat − PEEP. Target: &lt; 15 cmH₂O.</p>
       <div class="tools-row">
-        <div class="calc-field" style="flex:1"><label class="calc-label">Pplat</label><input type="number" id="dpPplat" class="calc-input" inputmode="decimal"></div>
-        <div class="calc-field" style="flex:1"><label class="calc-label">PEEP</label><input type="number" id="dpPeep" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">Pplat (cmH₂O)</label><input type="number" id="dpPplat" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">PEEP (cmH₂O)</label><input type="number" id="dpPeep" class="calc-input" inputmode="decimal"></div>
       </div>
-      <div class="tool-result" style="border-color:rgba(var(--theme-rgb),.2);background:rgba(var(--theme-rgb),.06);">
-        <div class="tr-label">Driving Pressure</div><div class="tr-val" id="dpVal">--</div>
+      <div class="tool-result">
+        <div class="tr-label">Driving Pressure</div>
+        <div class="tr-val" id="dpVal">--</div>
+        <div class="tr-badge hidden" id="dpBadge"></div>
       </div>
     </div>
 
     <!-- ── 13. LUNG PROTECTION: Static Compliance ── -->
     <div class="info-card" style="border-left:4px solid #7c3aed;">
       <h3 style="color:#7c3aed;">📊 Static Compliance Calculator</h3>
-      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Crs = VT ÷ (Pplat − PEEP). Normal ≥ 50.</p>
+      <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Crs = VT ÷ (Pplat − PEEP). Normal ≥ 50 mL/cmH₂O.</p>
       <div class="tools-row">
         <div class="calc-field" style="flex:1"><label class="calc-label">VT (mL)</label><input type="number" id="crsVt" class="calc-input" inputmode="decimal"></div>
-        <div class="calc-field" style="flex:1"><label class="calc-label">Pplat</label><input type="number" id="crsPplat" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">Pplat (cmH₂O)</label><input type="number" id="crsPplat" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">PEEP (cmH₂O)</label><input type="number" id="crsPeep" class="calc-input" inputmode="decimal"></div>
       </div>
       <div class="tool-result" style="border-color:rgba(124,58,237,.2);background:rgba(124,58,237,.07);">
-        <div class="tr-label" style="color:#7c3aed;">Compliance</div><div class="tr-val" id="crsVal">--</div>
+        <div class="tr-label" style="color:#7c3aed;">Compliance</div>
+        <div class="tr-val" id="crsVal">--</div>
+        <div class="tr-badge hidden" id="crsBadge"></div>
       </div>
     </div>
 
@@ -1452,6 +1501,12 @@ require_once __DIR__ . '/../includes/pwa.php';
     <div class="info-card" style="border-left:4px solid #059669;">
       <h3 style="color:#059669;">🌡️ Mean Airway Pressure (Paw)</h3>
       <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Averaged pressure across the respiratory cycle.</p>
+      <div class="tools-row">
+        <div class="calc-field" style="flex:1"><label class="calc-label">PIP</label><input type="number" id="pawPip" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">PEEP</label><input type="number" id="pawPeep" class="calc-input" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">I-time</label><input type="number" id="pawItime" class="calc-input" step="0.1" inputmode="decimal"></div>
+        <div class="calc-field" style="flex:1"><label class="calc-label">RR</label><input type="number" id="pawRr" class="calc-input" inputmode="decimal"></div>
+      </div>
       <div class="tool-result" style="border-color:rgba(5,150,105,.2);background:rgba(5,150,105,.07);">
         <div class="tr-label" style="color:#059669;">Mean Paw</div><div class="tr-val" id="pawVal">--</div>
       </div>
@@ -1465,13 +1520,14 @@ require_once __DIR__ . '/../includes/pwa.php';
         <div class="drug-card"><h4>Norepinephrine</h4><p>0.02–0.05 mcg/kg/min.</p></div>
         <div class="drug-card"><h4>Propofol</h4><p>5–50 mcg/kg/min.</p></div>
         <div class="drug-card"><h4>Fentanyl</h4><p>25–200 mcg/h.</p></div>
+        <div class="drug-card"><h4>Ketamine</h4><p>0.3–1 mg/kg/h.</p></div>
       </div>
     </div>
 
     <!-- ── 16. BOARDING: RASS Sedation Target ── -->
     <div class="info-card" style="border-left:4px solid #0284c7;">
       <h3 style="color:#0284c7;">😴 RASS Sedation Target</h3>
-      <p style="margin-bottom:10px;font-size:.84rem;color:var(--text-2);">Richmond Agitation-Sedation Scale. Tap a level to see non-prescriptive management guidance.</p>
+      <p style="margin-bottom:10px;font-size:.84rem;color:var(--text-2);">Richmond Agitation-Sedation Scale. Tap level for actions.</p>
       <div class="rass-grid" id="rassGrid"></div>
     </div>
 
@@ -1479,10 +1535,16 @@ require_once __DIR__ . '/../includes/pwa.php';
     <div class="info-card" style="border-left:4px solid #2563eb;">
       <h3 style="color:#2563eb;">📊 SOFA Severity Context</h3>
       <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">Select organ dysfunction category. Quick severity context tool.</p>
+      <div class="simple-grid">
+        <div class="calc-field"><label class="calc-label">Resp</label><select id="sofaResp" class="calc-input"><option value="0">P/F >400</option><option value="1">P/F ≤400</option><option value="2">P/F ≤300</option><option value="3">P/F ≤200 on vent</option><option value="4">P/F ≤100 on vent</option></select></div>
+        <div class="calc-field"><label class="calc-label">Coag</label><select id="sofaCoag" class="calc-input"><option value="0">Plt ≥150</option><option value="1">Plt &lt;150</option><option value="2">Plt &lt;100</option><option value="3">Plt &lt;50</option><option value="4">Plt &lt;20</option></select></div>
+        <div class="calc-field"><label class="calc-label">Liver</label><select id="sofaLiver" class="calc-input"><option value="0">Bili &lt;1.2</option><option value="1">Bili 1.2–1.9</option><option value="2">Bili 2.0–5.9</option><option value="3">Bili 6.0–11.9</option><option value="4">Bili ≥12</option></select></div>
+        <div class="calc-field"><label class="calc-label">CV</label><select id="sofaCv" class="calc-input"><option value="0">MAP ≥70</option><option value="1">MAP &lt;70</option><option value="2">Dop &lt;5</option><option value="3">Dop >5 / Epi ≤0.1</option><option value="4">Dop >15 / Epi >0.1</option></select></div>
+        <div class="calc-field"><label class="calc-label">CNS</label><select id="sofaCns" class="calc-input"><option value="0">GCS 15</option><option value="1">GCS 13–14</option><option value="2">GCS 10–12</option><option value="3">GCS 6–9</option><option value="4">GCS &lt;6</option></select></div>
+        <div class="calc-field"><label class="calc-label">Renal</label><select id="sofaRenal" class="calc-input"><option value="0">Cr &lt;1.2</option><option value="1">Cr 1.2–1.9</option><option value="2">Cr 2.0–3.4</option><option value="3">Cr 3.5–4.9</option><option value="4">Cr ≥5</option></select></div>
+      </div>
       <div class="tool-result" style="border-color:rgba(37,99,235,.2);background:rgba(37,99,235,.07);">
-        <div class="tr-label">SOFA Total</div>
-        <div class="tr-val" id="sofaTotal">0</div>
-        <div class="tr-unit">0–24</div>
+        <div class="tr-label">SOFA Total</div><div class="tr-val" id="sofaTotal">0</div><div class="tr-badge hidden" id="sofaBadge"></div>
       </div>
     </div>
 
@@ -1490,14 +1552,8 @@ require_once __DIR__ . '/../includes/pwa.php';
     <div class="info-card" style="border-left:4px solid #16a34a;">
       <h3 style="color:#16a34a;">🫁 Weaning &amp; Extubation Readiness</h3>
       <p style="margin-bottom:12px;font-size:.84rem;color:var(--text-2);">RSBI = RR ÷ VT (in liters). Target &lt; 105 breaths/min/L.</p>
-      <div class="tool-result" style="border-color:rgba(22,163,74,.2);background:rgba(22,163,74,.06);">
-        <div class="tr-label" style="color:#16a34a;">RSBI</div>
-        <div class="tr-val" id="rsbiVal">--</div>
-        <div class="tr-unit">breaths / min / L</div>
-      </div>
-    </div>
-
-  </section>x:1">
+      <div class="tools-row">
+        <div class="calc-field" style="flex:1">
           <label class="calc-label">Spontaneous RR (/min)</label>
           <input type="number" id="rsbiRr" class="calc-input" placeholder="e.g. 24" inputmode="decimal">
         </div>

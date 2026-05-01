@@ -21,12 +21,26 @@
 
   // ── Service Worker Registration ──────────────────────────────────
   window.addEventListener('load', function () {
-    var script = document.currentScript || document.querySelector('script[src$="/assets/js/pwa.js"]');
-    var scriptUrl = script ? script.src : new URL('/assets/js/pwa.js', location.origin).toString();
+    // Robustly find the script element even with query strings (e.g., ?v=3)
+    var script = document.currentScript;
+    if (!script) {
+      var scripts = document.getElementsByTagName('script');
+      for (var i = 0; i < scripts.length; i++) {
+        if (scripts[i].src && scripts[i].src.indexOf('/assets/js/pwa.js') !== -1) {
+          script = scripts[i];
+          break;
+        }
+      }
+    }
+    
+    var scriptUrl = script ? script.src : new URL('pwa.js', location.href).toString();
     var workerUrl = new URL('../../sw.js', scriptUrl);
     var scopeUrl  = new URL('../../', scriptUrl);
+    
+    console.log('PWA: Registering SW', { worker: workerUrl.toString(), scope: scopeUrl.pathname });
+    
     navigator.serviceWorker.register(workerUrl, { scope: scopeUrl.pathname })
-      .catch(function () { /* never block app */ });
+      .catch(function (err) { console.error('PWA: SW registration failed', err); });
   });
 
   // ── Universal Desktop/Android Install Banner ─────────────────────
@@ -43,6 +57,7 @@
 
     // Show banner universally on all non-iOS browsers (Safari Mac, Firefox, Chrome, Android)
     setTimeout(function () {
+      console.log('PWA: Checking install banner conditions', { isIos, isInStandaloneMode, dismissed: sessionStorage.getItem('pwa_install_dismissed') });
       if (document.getElementById('pwa-install-banner')) return; // already exists
       
       injectAnimations();
