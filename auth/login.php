@@ -9,7 +9,7 @@ require_once __DIR__ . '/../includes/pwa.php';
 init_session();
 if (is_logged_in()) redirect(APP_URL . '/index.php');
 
-$error = ''; $email = '';
+$error = ''; $email = ''; $showResendVerification = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!csrf_validate()) { $error = 'Invalid request. Please try again.'; }
     else {
@@ -29,7 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($user && password_verify($password, $user['password_hash'])) {
                     if ($user['status'] === 'deleted') $error = 'Invalid credentials.';
                     elseif ($user['status'] === 'suspended') $error = 'Your account has been suspended.';
-                    elseif (email_verification_required() && (int)$user['email_verified'] !== 1) $error = 'Please verify your email address before signing in. Check your inbox for the verification link.';
+                    elseif (email_verification_required() && (int)$user['email_verified'] !== 1) {
+                        $error = 'Please verify your email address before signing in. Check your inbox for the verification link.';
+                        $showResendVerification = true;
+                    }
                     elseif ($user['status'] === 'pending') $error = 'Your account is pending admin approval.';
                     else {
                         clear_login_attempts($ip);
@@ -59,7 +62,7 @@ if (isset($_GET['registered'])) {
     if ($_GET['registered'] === 'verify') {
         flash('success', 'Account created! Please verify your email address, then wait for admin approval.');
     } elseif ($_GET['registered'] === 'verify_failed') {
-        flash('warning', 'Account created, but the verification email could not be sent. Ask an admin to verify your email manually.');
+        flash('warning', 'Account created, but the verification email could not be sent. You can request a new verification link below.');
     } else {
         flash('success','Account created! Please wait for admin approval.');
     }
@@ -83,6 +86,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <p class="auth-subtitle">Sign in to access your ventilation tools.</p>
 <?= render_flashes() ?>
 <?php if($error): ?><div class="flash flash-danger">❌ <?= e($error) ?></div><?php endif; ?>
+<?php if($showResendVerification): ?><div class="flash flash-warning">📧 Didn't receive it? <a href="<?= APP_URL ?>/auth/resend-verification.php?email=<?= urlencode($email) ?>">Request a new verification link</a>.</div><?php endif; ?>
 <form method="POST" autocomplete="on"><?= csrf_field() ?>
 <div class="form-group"><label class="form-label" for="email">📧 Email</label>
 <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" value="<?= e($email) ?>" required autofocus></div>
@@ -93,7 +97,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <a href="<?= APP_URL ?>/auth/forgot.php" class="auth-link">Forgot password?</a></div>
 <button type="submit" class="btn btn-primary">🔑 Sign In</button>
 </form>
-<div class="auth-footer">Don't have an account? <a href="<?= APP_URL ?>/auth/register.php">Create one</a></div>
+<div class="auth-footer">Don't have an account? <a href="<?= APP_URL ?>/auth/register.php">Create one</a><br><a href="<?= APP_URL ?>/auth/resend-verification.php">Resend verification email</a></div>
 </div></div>
 <script>
 function togglePwd(id){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}

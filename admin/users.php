@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
                 $allowedStatuses = ['pending', 'active', 'suspended'];
                 $errors = [];
 
-                $targetStmt = $db->prepare("SELECT id, name, email, role, status FROM users WHERE id=? AND status != 'deleted' LIMIT 1");
+                $targetStmt = $db->prepare("SELECT id, name, email, role, status, email_verified FROM users WHERE id=? AND status != 'deleted' LIMIT 1");
                 $targetStmt->execute([$uid]);
                 $target = $targetStmt->fetch();
 
@@ -71,6 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
                     $db->prepare($sql)->execute($params);
                     if ($newPassword !== '' || $email !== $target['email']) {
                         $db->prepare('DELETE FROM password_resets WHERE email IN (?, ?)')->execute([$target['email'], $email]);
+                    }
+                    if ($email !== $target['email'] || $emailVerified === 1 || (int)$target['email_verified'] !== $emailVerified) {
+                        $db->prepare('DELETE FROM email_verifications WHERE user_id = ? OR email IN (?, ?)')->execute([$uid, $target['email'], $email]);
                     }
                     if ($status !== 'active') {
                         $db->prepare("UPDATE subscriptions SET status='cancelled' WHERE user_id=? AND status='active'")->execute([$uid]);

@@ -9,12 +9,22 @@ init_session();
 
 $token = $_GET['token'] ?? '';
 $email = $_GET['email'] ?? '';
-$verified = verify_email_token((string)$token, (string)$email);
 
-if ($verified) {
+if (valid_email((string)$email)) {
+    $db = getDB();
+    $stmt = $db->prepare('SELECT email_verified FROM users WHERE email = ? AND status != "deleted" LIMIT 1');
+    $stmt->execute([(string)$email]);
+    $user = $stmt->fetch();
+} else {
+    $user = null;
+}
+
+if ($user && (int)$user['email_verified'] === 1) {
+    flash('success', 'Email is already verified. You can sign in after admin approval is complete.');
+} elseif (verify_email_token((string)$token, (string)$email)) {
     flash('success', 'Email verified successfully. Please sign in after admin approval is complete.');
 } else {
-    flash('danger', 'Invalid or expired verification link. Please contact an admin for help.');
+    flash('danger', 'Invalid or expired verification link. Please request a new verification email.');
 }
 
 redirect(APP_URL . '/auth/login.php');

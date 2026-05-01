@@ -35,6 +35,37 @@ function send_verification_email(int $userId, string $email, string $name): bool
     return send_email_verification_email($email, $name, $verifyUrl);
 }
 
+function resend_verification_email_for_address(string $email): bool
+{
+    if (!valid_email($email) || !email_verification_required()) {
+        return false;
+    }
+
+    $db = getDB();
+    $stmt = $db->prepare(
+        'SELECT id, name, email, email_verified, status
+         FROM users
+         WHERE email = ? AND status != "deleted"
+         LIMIT 1'
+    );
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+
+    if (!$user || (int)$user['email_verified'] === 1) {
+        return false;
+    }
+
+    $sent = send_verification_email((int)$user['id'], $user['email'], $user['name']);
+    if (function_exists('log_activity')) {
+        log_activity(
+            $sent ? 'email_verification_resent' : 'email_verification_resend_failed',
+            "Verification resend requested for: {$email}",
+            (int)$user['id']
+        );
+    }
+    return $sent;
+}
+
 function verify_email_token(string $token, string $email): bool
 {
     if ($token === '' || !valid_email($email)) {
