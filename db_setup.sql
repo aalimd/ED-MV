@@ -95,6 +95,21 @@ CREATE TABLE IF NOT EXISTS `password_resets` (
   INDEX `idx_expires` (`expires_at`)
 ) ENGINE=InnoDB;
 
+-- ── Email Verifications ──────────────────────────────
+CREATE TABLE IF NOT EXISTS `email_verifications` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT UNSIGNED NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `token_hash` VARCHAR(255) NOT NULL,
+  `expires_at` DATETIME NOT NULL,
+  `used` TINYINT(1) NOT NULL DEFAULT 0,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  INDEX `idx_email` (`email`),
+  INDEX `idx_token` (`token_hash`),
+  INDEX `idx_expires` (`expires_at`)
+) ENGINE=InnoDB;
+
 -- ── Activity Log ──────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `activity_log` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -124,6 +139,7 @@ INSERT IGNORE INTO `app_settings` (`setting_key`, `setting_value`) VALUES
 ('theme_color', '#2563eb'),
 ('maintenance_mode', '0'),
 ('registration_open', '1'),
+('require_email_verification', '1'),
 ('require_approval', '1'),
 ('session_timeout_minutes', '120'),
 ('max_login_attempts', '5'),

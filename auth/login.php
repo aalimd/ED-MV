@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/rate_limit.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/email_verification.php';
 require_once __DIR__ . '/../includes/pwa.php';
 init_session();
 if (is_logged_in()) redirect(APP_URL . '/index.php');
@@ -26,9 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $db->prepare('SELECT * FROM users WHERE email = ? LIMIT 1');
                 $stmt->execute([$email]); $user = $stmt->fetch();
                 if ($user && password_verify($password, $user['password_hash'])) {
-                    if ($user['status'] === 'pending') $error = 'Your account is pending admin approval.';
+                    if ($user['status'] === 'deleted') $error = 'Invalid credentials.';
                     elseif ($user['status'] === 'suspended') $error = 'Your account has been suspended.';
-                    elseif ($user['status'] === 'deleted') $error = 'Invalid credentials.';
+                    elseif (email_verification_required() && (int)$user['email_verified'] !== 1) $error = 'Please verify your email address before signing in. Check your inbox for the verification link.';
+                    elseif ($user['status'] === 'pending') $error = 'Your account is pending admin approval.';
                     else {
                         clear_login_attempts($ip);
                         session_set_user($user, $remember);
@@ -53,7 +55,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 if (isset($_GET['error']) && $_GET['error']==='suspended') $error='Your account has been suspended.';
-if (isset($_GET['registered'])) flash('success','Account created! Please wait for admin approval.');
+if (isset($_GET['registered'])) {
+    if ($_GET['registered'] === 'verify') {
+        flash('success', 'Account created! Please verify your email address, then wait for admin approval.');
+    } elseif ($_GET['registered'] === 'verify_failed') {
+        flash('warning', 'Account created, but the verification email could not be sent. Ask an admin to verify your email manually.');
+    } else {
+        flash('success','Account created! Please wait for admin approval.');
+    }
+}
 $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 ?>
 <!DOCTYPE html>

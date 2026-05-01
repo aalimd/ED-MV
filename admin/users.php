@@ -272,7 +272,10 @@ admin_header('User Management', '👥', 'users');
 <tr>
 <td style="font-family:'Space Mono',monospace;font-size:.78rem;color:var(--text-3)">#<?= $u['id'] ?></td>
 <td><strong><?= e($u['name']) ?></strong><?= $isSelf ? ' <span style="font-size:.7rem;color:var(--theme);font-weight:800">(You)</span>' : '' ?></td>
-<td style="font-size:.8rem;color:var(--text-2)"><?= e($u['email']) ?></td>
+<td style="font-size:.8rem;color:var(--text-2)">
+  <?= e($u['email']) ?>
+  <br><span style="font-size:.7rem;color:<?= (int)$u['email_verified'] === 1 ? 'var(--success)' : 'var(--warning)' ?>;font-weight:800"><?= (int)$u['email_verified'] === 1 ? 'Email verified' : 'Email unverified' ?></span>
+</td>
 <td><span class="badge badge-<?= $u['role'] ?>"><?= $u['role'] ?></span></td>
 <td><span class="badge badge-<?= $u['status'] ?>"><?= $u['status'] ?></span></td>
 <td style="font-size:.78rem">

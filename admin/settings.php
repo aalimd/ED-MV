@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
         'theme_color' => trim($_POST['theme_color'] ?? '#2563eb'),
         'maintenance_mode' => isset($_POST['maintenance_mode']) ? '1' : '0',
         'registration_open' => isset($_POST['registration_open']) ? '1' : '0',
+        'require_email_verification' => isset($_POST['require_email_verification']) ? '1' : '0',
         'require_approval' => '1',
         'session_timeout_minutes' => max(5, (int)($_POST['session_timeout_minutes'] ?? 120)),
         'max_login_attempts' => max(3, (int)($_POST['max_login_attempts'] ?? 5)),
@@ -45,6 +46,10 @@ admin_header('Settings', '⚙️', 'settings');
 <div class="toggle-wrap" style="margin-bottom:14px">
 <label class="toggle"><input type="checkbox" name="registration_open" <?= get_setting('registration_open','1')==='1'?'checked':'' ?>><span class="toggle-slider"></span></label>
 <span class="toggle-label">📝 Registration Open</span>
+</div>
+<div class="toggle-wrap" style="margin-bottom:14px">
+<label class="toggle"><input type="checkbox" name="require_email_verification" <?= get_setting('require_email_verification','1')==='1'?'checked':'' ?>><span class="toggle-slider"></span></label>
+<span class="toggle-label">📧 Require Email Verification <span style="font-size:.75rem;color:var(--text-3)">(new users must verify before login)</span></span>
 </div>
 <div class="toggle-wrap" style="margin-bottom:14px">
 <label class="toggle"><input type="checkbox" name="require_approval" checked disabled><span class="toggle-slider"></span></label>

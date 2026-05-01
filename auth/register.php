@@ -3,6 +3,7 @@ require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/email_verification.php';
 require_once __DIR__ . '/../includes/pwa.php';
 init_session();
 if (is_logged_in()) redirect(APP_URL . '/index.php');
@@ -36,10 +37,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $db = getDB();
             $hash = password_hash($password, defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT, defined('PASSWORD_ARGON2ID') ? [] : ['cost' => BCRYPT_COST]);
             $status = REQUIRE_ADMIN_APPROVAL ? 'pending' : 'active';
-            $stmt = $db->prepare('INSERT INTO users (name, email, password_hash, role, status) VALUES (?,?,?,?,?)');
-            $stmt->execute([$name, $email, $hash, 'user', $status]);
-            log_activity('register', "New registration: {$email} (status: {$status})");
-            redirect(APP_URL . '/auth/login.php?registered=1');
+            $requiresVerification = email_verification_required();
+            $emailVerified = $requiresVerification ? 0 : 1;
+            $stmt = $db->prepare('INSERT INTO users (name, email, password_hash, role, status, email_verified) VALUES (?,?,?,?,?,?)');
+            $stmt->execute([$name, $email, $hash, 'user', $status, $emailVerified]);
+            $userId = (int)$db->lastInsertId();
+
+            $mailSent = true;
+            if ($requiresVerification) {
+                $mailSent = send_verification_email($userId, $email, $name);
+            }
+
+            log_activity('register', "New registration: {$email} (status: {$status}, email verification: " . ($requiresVerification ? 'required' : 'off') . ")");
+            $registeredState = $requiresVerification ? ($mailSent ? 'verify' : 'verify_failed') : '1';
+            redirect(APP_URL . '/auth/login.php?registered=' . $registeredState);
         }
     }
 }

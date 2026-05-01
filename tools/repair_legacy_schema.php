@@ -103,6 +103,7 @@ function ensureDefaultSettings(PDO $pdo): void {
         ('theme_color', '#2563eb'),
         ('maintenance_mode', '0'),
         ('registration_open', '1'),
+        ('require_email_verification', '1'),
         ('require_approval', '1'),
         ('session_timeout_minutes', '120'),
         ('max_login_attempts', '5'),
