@@ -18,13 +18,13 @@ function mailer_enabled(): bool
 function send_app_email(string $to, string $subject, string $htmlBody, ?string $textBody = null): bool
 {
     if (!mailer_enabled()) {
-        error_log('SMTP mail is not configured.');
+        error_log("MAILER ERROR: SMTP not configured in config.php. Trying to send to: {$to}");
         return false;
     }
 
     $autoload = __DIR__ . '/../vendor/autoload.php';
     if (!is_file($autoload)) {
-        error_log('Composer autoload not found. Run composer install.');
+        error_log("MAILER ERROR: Composer autoload not found at {$autoload}. Run composer install.");
         return false;
     }
 

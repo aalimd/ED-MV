@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $mailSent = send_verification_email($userId, $email, $name);
             }
 
-            log_activity('register', "New registration: {$email} (status: {$status}, email verification: " . ($requiresVerification ? 'required' : 'off') . ")");
+            log_activity('register', "New registration: {$email} (status: {$status}, email verification: " . ($requiresVerification ? 'required' : 'off') . ")", $userId);
             $registeredState = $requiresVerification ? ($mailSent ? 'verify' : 'verify_failed') : '1';
             redirect(APP_URL . '/auth/login.php?registered=' . $registeredState);
         }

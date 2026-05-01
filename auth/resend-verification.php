@@ -25,12 +25,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message = 'If this email needs verification, a new link has been sent.';
             } else {
                 try {
-                    resend_verification_email_for_address($email);
-                    $_SESSION[$cooldownKey] = time();
+                    $sent = resend_verification_email_for_address($email);
+                    if ($sent) {
+                        $_SESSION[$cooldownKey] = time();
+                        $message = 'If this email needs verification, a new link has been sent.';
+                    } else {
+                        $error = 'We were unable to send the verification email. Please try again later or contact support.';
+                    }
                 } catch (Throwable $e) {
                     error_log('Email verification resend failed: ' . $e->getMessage());
+                    $error = 'An unexpected error occurred while sending the email.';
                 }
-                $message = 'If this email needs verification, a new link has been sent.';
             }
         }
     }
