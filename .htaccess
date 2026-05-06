@@ -6,7 +6,20 @@ AddType application/javascript .js
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /
+
+    # Security: block access to sensitive dirs
     RewriteRule ^(\.git|tools|migrations)(/|$) - [F,L]
+
+    # Clean URLs Step 1: External redirect .php → clean (GET only, preserves POST data)
+    RewriteCond %{REQUEST_METHOD} !POST
+    RewriteCond %{THE_REQUEST} \s/([^.]+)\.php[\s?] [NC]
+    RewriteRule ^ /%1 [R=301,L]
+
+    # Clean URLs Step 2: Internal rewrite clean → .php (invisible to user)
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^(.+)$ $1.php [L]
 </IfModule>
 
 <FilesMatch "^(index-public-disabled|do-not-use-this-page-disabled)\.html$">

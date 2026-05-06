@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
     foreach ($settings as $k => $v) set_setting($k, (string)$v);
     log_activity('admin_settings_update', 'Updated app settings');
     flash('success', 'Settings saved!');
-    redirect(APP_URL . '/admin/settings.php');
+    redirect(APP_URL . '/admin/settings');
 }
 
 admin_header('Settings', '⚙️', 'settings');

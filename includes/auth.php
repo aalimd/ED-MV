@@ -24,11 +24,11 @@ if (!headers_sent()) {
 function require_login(): void {
     $user = session_user();
     if (!$user) {
-        $requestUri = $_SERVER['REQUEST_URI'] ?? '/index.php';
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
         $_SESSION['redirect_after_login'] = (is_string($requestUri) && str_starts_with($requestUri, '/') && !str_starts_with($requestUri, '//'))
             ? $requestUri
-            : '/index.php';
-        header('Location: ' . APP_URL . '/auth/login.php');
+            : '/';
+        header('Location: ' . APP_URL . '/auth/login');
         exit;
     }
     // Check if account is still active in DB
@@ -38,7 +38,7 @@ function require_login(): void {
     $row = $stmt->fetch();
     if (!$row || $row['status'] !== 'active') {
         session_destroy_full();
-        header('Location: ' . APP_URL . '/auth/login.php?error=suspended');
+        header('Location: ' . APP_URL . '/auth/login?error=suspended');
         exit;
     }
     // Sync role if changed by admin
@@ -55,7 +55,7 @@ function require_admin(): void {
     require_login();
     $user = session_user();
     if ($user['role'] !== 'admin') {
-        header('Location: ' . APP_URL . '/index.php');
+        header('Location: ' . APP_URL . '/');
         exit;
     }
 }
@@ -79,7 +79,7 @@ function require_subscription(): void {
     );
     $stmt->execute([$user['id']]);
     if (!$stmt->fetch()) {
-        header('Location: ' . APP_URL . '/subscribe.php');
+        header('Location: ' . APP_URL . '/subscribe');
         exit;
     }
 }

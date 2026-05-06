@@ -27,4 +27,4 @@ if ($user && (int)$user['email_verified'] === 1) {
     flash('danger', 'Invalid or expired verification link. Please request a new verification email.');
 }
 
-redirect(APP_URL . '/auth/login.php');
+redirect(APP_URL . '/auth/login');

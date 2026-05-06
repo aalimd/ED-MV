@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $hash = hash('sha256', $token);
                         $expires = date('Y-m-d H:i:s', time() + 3600);
                         $db->prepare('INSERT INTO password_resets (email, token_hash, expires_at) VALUES (?,?,?)')->execute([$email, $hash, $expires]);
-                        $resetUrl = rtrim(APP_URL, '/') . "/auth/reset.php?token={$token}&email=" . urlencode($email);
+                        $resetUrl = rtrim(APP_URL, '/') . "/auth/reset?token={$token}&email=" . urlencode($email);
                         $sent = send_password_reset_email($email, $resetUrl);
                         $_SESSION[$cooldownKey] = time();
                         log_activity($sent ? 'password_reset_email_sent' : 'password_reset_email_failed', "Reset requested for: {$email}");
@@ -66,7 +66,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required autofocus></div>
 <button type="submit" class="btn btn-primary">📩 Send Reset Link</button>
 </form>
-<div class="auth-footer"><a href="<?= APP_URL ?>/auth/login.php">← Back to login</a></div>
+<div class="auth-footer"><a href="<?= APP_URL ?>/auth/login">← Back to login</a></div>
 </div></div>
 <script>
 function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}

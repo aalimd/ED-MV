@@ -25,7 +25,7 @@ function redirect(string $url): void {
 /**
  * Redirect only to an in-app path to avoid sending users to external URLs.
  */
-function redirect_local(string $path, string $fallback = '/index.php'): void {
+function redirect_local(string $path, string $fallback = '/'): void {
     if ($path === '' || $path[0] !== '/' || str_starts_with($path, '//') || preg_match('/[\r\n]/', $path)) {
         $path = $fallback;
     }

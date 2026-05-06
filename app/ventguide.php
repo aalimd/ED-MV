@@ -108,7 +108,7 @@ if ($isAdmin) {
 }
 
 $userMenu .= '
-    <a href="' . APP_URL . '/auth/logout.php" class="danger">🚪 <span>Sign Out</span></a>
+    <a href="' . APP_URL . '/auth/logout" class="danger">🚪 <span>Sign Out</span></a>
   </div>
 </details>';
 

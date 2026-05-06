@@ -23,14 +23,14 @@ admin_header('Dashboard', '📊', 'dashboard');
 </div>
 
 <?php if($pendingUsers > 0): ?>
-<div class="flash flash-warning">⚠️ You have <strong><?= $pendingUsers ?></strong> user(s) awaiting approval. <a href="<?= APP_URL ?>/admin/users.php?filter=pending" style="color:var(--warning);font-weight:800">Review now →</a></div>
+<div class="flash flash-warning">⚠️ You have <strong><?= $pendingUsers ?></strong> user(s) awaiting approval. <a href="<?= APP_URL ?>/admin/users?filter=pending" style="color:var(--warning);font-weight:800">Review now →</a></div>
 <?php endif; ?>
 <?php if($pendingSubs > 0): ?>
-<div class="flash flash-info">📩 You have <strong><?= $pendingSubs ?></strong> subscription request(s). <a href="<?= APP_URL ?>/admin/subscriptions.php?filter=pending" style="color:var(--theme);font-weight:800">Review now →</a></div>
+<div class="flash flash-info">📩 You have <strong><?= $pendingSubs ?></strong> subscription request(s). <a href="<?= APP_URL ?>/admin/subscriptions?filter=pending" style="color:var(--theme);font-weight:800">Review now →</a></div>
 <?php endif; ?>
 
 <div class="data-card">
-<div class="dc-header"><div class="dc-title">👥 Recent Users</div><a href="<?= APP_URL ?>/admin/users.php" class="topbar-btn">View All →</a></div>
+<div class="dc-header"><div class="dc-title">👥 Recent Users</div><a href="<?= APP_URL ?>/admin/users" class="topbar-btn">View All →</a></div>
 <table class="data-table">
 <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th></tr></thead>
 <tbody>
@@ -47,7 +47,7 @@ admin_header('Dashboard', '📊', 'dashboard');
 </div>
 
 <div class="data-card">
-<div class="dc-header"><div class="dc-title">📋 Recent Activity</div><a href="<?= APP_URL ?>/admin/logs.php" class="topbar-btn">View All →</a></div>
+<div class="dc-header"><div class="dc-title">📋 Recent Activity</div><a href="<?= APP_URL ?>/admin/logs" class="topbar-btn">View All →</a></div>
 <table class="data-table">
 <thead><tr><th>User</th><th>Action</th><th>Details</th><th>Time</th></tr></thead>
 <tbody>

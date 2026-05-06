@@ -7,7 +7,7 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/email_verification.php';
 require_once __DIR__ . '/../includes/pwa.php';
 init_session();
-if (is_logged_in()) redirect(APP_URL . '/index.php');
+if (is_logged_in()) redirect(APP_URL . '/');
 
 $error = ''; $email = ''; $showResendVerification = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         session_set_user($user, $remember);
                         $db->prepare('UPDATE users SET last_login=NOW(),last_ip=? WHERE id=?')->execute([$ip,$user['id']]);
                         log_activity('login','Successful login',$user['id']);
-                        $redir = $_SESSION['redirect_after_login'] ?? APP_URL . '/index.php';
+                        $redir = $_SESSION['redirect_after_login'] ?? APP_URL . '/';
                         unset($_SESSION['redirect_after_login']);
                         // If $redir is a relative path starting with the app directory, it works fine
                         // Ensure it doesn't double-prepend APP_URL
@@ -86,7 +86,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <p class="auth-subtitle">Sign in to access your ventilation tools.</p>
 <?= render_flashes() ?>
 <?php if($error): ?><div class="flash flash-danger">❌ <?= e($error) ?></div><?php endif; ?>
-<?php if($showResendVerification): ?><div class="flash flash-warning">📧 Didn't receive it? <a href="<?= APP_URL ?>/auth/resend-verification.php?email=<?= urlencode($email) ?>">Request a new verification link</a>.</div><?php endif; ?>
+<?php if($showResendVerification): ?><div class="flash flash-warning">📧 Didn't receive it? <a href="<?= APP_URL ?>/auth/resend-verification?email=<?= urlencode($email) ?>">Request a new verification link</a>.</div><?php endif; ?>
 <form method="POST" autocomplete="on"><?= csrf_field() ?>
 <div class="form-group"><label class="form-label" for="email">📧 Email</label>
 <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" value="<?= e($email) ?>" required autofocus></div>
@@ -94,10 +94,10 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <div class="input-password-wrap"><input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
 <button type="button" class="password-toggle" onclick="togglePwd('password')">👁️</button></div></div>
 <div class="auth-links"><label class="form-check" style="margin-bottom:0"><input type="checkbox" name="remember"><span style="font-size:.82rem;font-weight:600;color:var(--text-2)">Remember me</span></label>
-<a href="<?= APP_URL ?>/auth/forgot.php" class="auth-link">Forgot password?</a></div>
+<a href="<?= APP_URL ?>/auth/forgot" class="auth-link">Forgot password?</a></div>
 <button type="submit" class="btn btn-primary">🔑 Sign In</button>
 </form>
-<div class="auth-footer">Don't have an account? <a href="<?= APP_URL ?>/auth/register.php">Create one</a><br><a href="<?= APP_URL ?>/auth/resend-verification.php">Resend verification email</a></div>
+<div class="auth-footer">Don't have an account? <a href="<?= APP_URL ?>/auth/register">Create one</a><br><a href="<?= APP_URL ?>/auth/resend-verification">Resend verification email</a></div>
 </div></div>
 <script>
 function togglePwd(id){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}

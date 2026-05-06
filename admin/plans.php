@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
         log_activity('admin_update_sub_page', 'Updated subscription page settings');
         flash('success', 'Page settings saved!');
     }
-    redirect(APP_URL . '/admin/plans.php');
+    redirect(APP_URL . '/admin/plans');
 }
 
 $plans = $db->query("SELECT * FROM plans ORDER BY sort_order, id")->fetchAll();
@@ -205,7 +205,7 @@ admin_header('Plans & Pricing', '🏷️', 'plans');
 
 <div style="display:flex;gap:10px;flex-wrap:wrap">
   <button type="submit" class="btn btn-primary" style="max-width:240px"><?= $editing ? '💾 Update Plan' : '➕ Create Plan' ?></button>
-  <?php if($editing): ?><a href="<?= APP_URL ?>/admin/plans.php" class="btn btn-secondary" style="max-width:140px">Cancel</a><?php endif; ?>
+  <?php if($editing): ?><a href="<?= APP_URL ?>/admin/plans" class="btn btn-secondary" style="max-width:140px">Cancel</a><?php endif; ?>
 </div>
 </form>
 </div>

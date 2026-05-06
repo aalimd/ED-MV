@@ -19,19 +19,19 @@ if (get_setting('maintenance_mode', '0') === '1' && !is_admin()) {
 
 // Not logged in → login page
 if (!is_logged_in()) {
-    redirect(APP_URL . '/auth/login.php');
+    redirect(APP_URL . '/auth/login');
 }
 
 // Admin → admin dashboard or app
 $user = session_user();
 if ($user['role'] === 'admin') {
     // Admins go straight to the app
-    redirect(APP_URL . '/app/ventguide.php');
+    redirect(APP_URL . '/app/ventguide');
 }
 
 // Check subscription
 if (has_subscription()) {
-    redirect(APP_URL . '/app/ventguide.php');
+    redirect(APP_URL . '/app/ventguide');
 } else {
-    redirect(APP_URL . '/subscribe.php');
+    redirect(APP_URL . '/subscribe');
 }

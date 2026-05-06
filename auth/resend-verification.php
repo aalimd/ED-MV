@@ -6,7 +6,7 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/email_verification.php';
 require_once __DIR__ . '/../includes/pwa.php';
 init_session();
-if (is_logged_in()) redirect(APP_URL . '/index.php');
+if (is_logged_in()) redirect(APP_URL . '/');
 
 $email = trim($_GET['email'] ?? '');
 $message = '';
@@ -65,7 +65,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" value="<?= e($email) ?>" required autofocus></div>
 <button type="submit" class="btn btn-primary">📩 Send Verification Link</button>
 </form>
-<div class="auth-footer"><a href="<?= APP_URL ?>/auth/login.php">← Back to login</a></div>
+<div class="auth-footer"><a href="<?= APP_URL ?>/auth/login">← Back to login</a></div>
 </div></div>
 <script>
 function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}

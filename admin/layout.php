@@ -12,12 +12,12 @@ function admin_header(string $title, string $icon = '📊', string $activePage =
     $user = session_user();
     $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
     $pages = [
-        ['url'=>'index.php','icon'=>'📊','label'=>'Dashboard','key'=>'dashboard'],
-        ['url'=>'users.php','icon'=>'👥','label'=>'Users','key'=>'users'],
-        ['url'=>'subscriptions.php','icon'=>'💳','label'=>'Subscriptions','key'=>'subscriptions'],
-        ['url'=>'plans.php','icon'=>'🏷️','label'=>'Plans & Pricing','key'=>'plans'],
-        ['url'=>'settings.php','icon'=>'⚙️','label'=>'Settings','key'=>'settings'],
-        ['url'=>'logs.php','icon'=>'📋','label'=>'Activity Logs','key'=>'logs'],
+        ['url'=>'index','icon'=>'📊','label'=>'Dashboard','key'=>'dashboard'],
+        ['url'=>'users','icon'=>'👥','label'=>'Users','key'=>'users'],
+        ['url'=>'subscriptions','icon'=>'💳','label'=>'Subscriptions','key'=>'subscriptions'],
+        ['url'=>'plans','icon'=>'🏷️','label'=>'Plans & Pricing','key'=>'plans'],
+        ['url'=>'settings','icon'=>'⚙️','label'=>'Settings','key'=>'settings'],
+        ['url'=>'logs','icon'=>'📋','label'=>'Activity Logs','key'=>'logs'],
     ];
 ?>
 <!DOCTYPE html>
@@ -41,7 +41,7 @@ function admin_header(string $title, string $icon = '📊', string $activePage =
     <?php endforeach; ?>
   </nav>
   <div class="sb-footer">
-    <a href="<?= APP_URL ?>/app/ventguide.php">← Back to App</a><br>
+    <a href="<?= APP_URL ?>/app/ventguide">← Back to App</a><br>
     Logged in as <strong><?= e($user['name']) ?></strong>
   </div>
 </aside>
@@ -50,7 +50,7 @@ function admin_header(string $title, string $icon = '📊', string $activePage =
   <h1 class="admin-page-title"><?= $icon ?> <?= e($title) ?></h1>
   <div class="topbar-actions">
     <button class="topbar-btn" onclick="toggleDark()"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
-    <a href="<?= APP_URL ?>/auth/logout.php" class="topbar-btn" style="color:var(--danger)">🚪 Logout</a>
+    <a href="<?= APP_URL ?>/auth/logout" class="topbar-btn" style="color:var(--danger)">🚪 Logout</a>
   </div>
 </div>
 <?= render_flashes() ?>

@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
         log_activity('admin_grant_sub', "Granted subscription to user ID: {$userId}");
         flash('success', 'Subscription granted!');
     }
-    redirect(APP_URL . '/admin/subscriptions.php' . (isset($_GET['filter']) ? '?filter=' . urlencode($_GET['filter']) : ''));
+    redirect(APP_URL . '/admin/subscriptions' . (isset($_GET['filter']) ? '?filter=' . urlencode($_GET['filter']) : ''));
 }
 
 $filter = $_GET['filter'] ?? 'all';

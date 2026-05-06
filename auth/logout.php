@@ -6,5 +6,5 @@ init_session();
 if (is_logged_in()) log_activity('logout', 'User logged out');
 session_destroy_full();
 // Clear dark mode cookie? No — keep it.
-header('Location: ' . APP_URL . '/auth/login.php');
+header('Location: ' . APP_URL . '/auth/login');
 exit;

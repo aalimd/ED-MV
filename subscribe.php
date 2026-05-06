@@ -163,9 +163,9 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
   <div class="pending-sub">Your subscription request for <strong><?= e($pending['plan_name'] ?? 'a plan') ?></strong> is awaiting admin approval. You'll get full access as soon as it's approved.</div>
   <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px;">
     <?php if($hasSub): ?>
-      <a href="<?= APP_URL ?>/app/ventguide.php" class="btn btn-primary" style="flex:1;min-width:140px;">📱 Open App</a>
+      <a href="<?= APP_URL ?>/app/ventguide" class="btn btn-primary" style="flex:1;min-width:140px;">📱 Open App</a>
     <?php endif; ?>
-    <a href="<?= APP_URL ?>/auth/logout.php" class="btn btn-secondary" style="flex:1;min-width:140px;">🚪 Logout</a>
+    <a href="<?= APP_URL ?>/auth/logout" class="btn btn-secondary" style="flex:1;min-width:140px;">🚪 Logout</a>
   </div>
 </div>
 </div>
@@ -228,9 +228,9 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 
 <div class="pricing-footer" style="margin-top:0;display:flex;flex-direction:column;gap:12px;align-items:center;">
   <?php if($hasSub): ?>
-    <a href="<?= APP_URL ?>/app/ventguide.php" class="btn btn-primary" style="max-width:260px;width:100%;font-size:1rem;padding:12px;border-radius:12px;">📱 Return to App</a>
+    <a href="<?= APP_URL ?>/app/ventguide" class="btn btn-primary" style="max-width:260px;width:100%;font-size:1rem;padding:12px;border-radius:12px;">📱 Return to App</a>
   <?php endif; ?>
-  <p>Logged in as <strong><?= e($user['name']) ?></strong> · <a href="<?= APP_URL ?>/auth/logout.php">Logout</a></p>
+  <p>Logged in as <strong><?= e($user['name']) ?></strong> · <a href="<?= APP_URL ?>/auth/logout">Logout</a></p>
 </div>
 </div>
 <?php endif; ?>

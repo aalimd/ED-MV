@@ -6,7 +6,7 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/email_verification.php';
 require_once __DIR__ . '/../includes/pwa.php';
 init_session();
-if (is_logged_in()) redirect(APP_URL . '/index.php');
+if (is_logged_in()) redirect(APP_URL . '/');
 
 $errors = []; $name = ''; $email = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             log_activity('register', "New registration: {$email} (status: {$status}, email verification: " . ($requiresVerification ? 'required' : 'off') . ")", $userId);
             $registeredState = $requiresVerification ? ($mailSent ? 'verify' : 'verify_failed') : '1';
-            redirect(APP_URL . '/auth/login.php?registered=' . $registeredState);
+            redirect(APP_URL . '/auth/login?registered=' . $registeredState);
         }
     }
 }
@@ -87,7 +87,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <button type="button" class="password-toggle" onclick="togglePwd('confirm')">👁️</button></div></div>
 <button type="submit" class="btn btn-primary">📝 Create Account</button>
 </form>
-<div class="auth-footer">Already have an account? <a href="<?= APP_URL ?>/auth/login.php">Sign in</a></div>
+<div class="auth-footer">Already have an account? <a href="<?= APP_URL ?>/auth/login">Sign in</a></div>
 </div></div>
 <script>
 function togglePwd(id){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}
