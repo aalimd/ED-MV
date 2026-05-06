@@ -81,13 +81,11 @@ body {
   align-items: center;
   justify-content: center;
   padding: 24px 16px;
-  position: absolute;
+  position: fixed;
   inset: 0;
-  /* The universal JS script in pwa.php will block ghost scrolling automatically if content fits */
-  overflow-y: auto;
-  overflow-x: hidden;
-  overscroll-behavior-y: none;
-  touch-action: pan-y;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
 }
 
 /* Animated background blobs */
@@ -125,6 +123,9 @@ body {
   box-shadow: var(--shadow-xl);
   width: 100%;
   max-width: 440px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 40px 32px;
   position: relative;
   z-index: 1;
@@ -449,8 +450,8 @@ img, svg, video, canvas { max-width: 100%; height: auto; }
 
 /* ── Responsive ──────────────────────────────── */
 @media (max-width: 480px) {
-  .auth-wrapper { align-items:flex-start; padding:64px 12px 20px; }
-  .auth-card { padding: 26px 18px; border-radius: var(--r-lg); max-width:100%; }
+  .auth-wrapper { align-items:center; padding:12px; }
+  .auth-card { padding: 24px 16px; border-radius: var(--r-lg); max-width:100%; max-height: calc(100vh - 24px); }
   .auth-logo { font-size: 2rem; }
   .auth-app-name { font-size: 1.15rem; }
   .auth-links { align-items:flex-start; flex-direction:column; gap:10px; }
