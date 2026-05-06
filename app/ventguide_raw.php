@@ -862,7 +862,7 @@ require_once __DIR__ . '/../includes/pwa.php';
       <div class="header-badge" id="hBadge">🏥 STANDARD INITIATION</div>
     </div>
     <div class="header-actions">
-      <button class="hbtn" id="printBtn" aria-label="Print pocket card" title="Print">
+      <button class="hbtn" id="printBtn" data-feature="print" data-feature-name="Print Pocket Card" aria-label="Print pocket card" title="Print">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       </button>
       <button class="hbtn" id="darkToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
@@ -3129,7 +3129,13 @@ const App = {
 
   // ── Print ──────────────────────────────────────────
   _setupPrint() {
-    document.getElementById('printBtn').addEventListener('click', () => window.print());
+    document.getElementById('printBtn').addEventListener('click', () => {
+      if (!Features.has('print')) {
+        this.toast('🖨️ Printing is disabled by your administrator.', 'danger');
+        return;
+      }
+      window.print();
+    });
   },
 
   // ── Toast ──────────────────────────────────────────
