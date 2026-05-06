@@ -97,9 +97,9 @@ php tools/deployment_check.php
 
 Also test the live app:
 
-- `/auth/login.php`
-- `/auth/register.php`
-- `/subscribe.php`
+- `/auth/login`
+- `/auth/register`
+- `/subscribe`
 - `/admin/`
 
 ## Rollback
