@@ -8,6 +8,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
     $action = $_POST['action'] ?? '';
     $uid = (int)($_POST['user_id'] ?? 0);
     $adminUser = session_user();
+    $allowedRoles = ['user', 'subscriber', 'admin'];
+    $allowedStatuses = ['pending', 'active', 'suspended'];
+
+    if ($action === 'create_user') {
+        $name = trim($_POST['name'] ?? '');
+        $email = strtolower(trim($_POST['email'] ?? ''));
+        $role = $_POST['role'] ?? 'user';
+        $status = $_POST['status'] ?? 'active';
+        $emailVerified = isset($_POST['email_verified']) ? 1 : 0;
+        $password = $_POST['password'] ?? '';
+        $errors = [];
+
+        if ($name === '' || strlen($name) > 100) $errors[] = 'Name must be 1-100 characters.';
+        if (!valid_email($email) || strlen($email) > 255) $errors[] = 'Enter a valid email address.';
+        if (!in_array($role, $allowedRoles, true)) $errors[] = 'Invalid role.';
+        if (!in_array($status, $allowedStatuses, true)) $errors[] = 'Invalid status.';
+        $pwdErrors = validate_password($password);
+        if ($pwdErrors) $errors[] = 'Password: ' . implode(', ', $pwdErrors);
+
+        if ($email !== '') {
+            $dupeStmt = $db->prepare('SELECT id, status FROM users WHERE email=? LIMIT 1');
+            $dupeStmt->execute([$email]);
+            $existing = $dupeStmt->fetch();
+            if ($existing) {
+                $errors[] = $existing['status'] === 'deleted'
+                    ? 'A deleted account already uses this email. Restore or permanently purge it before reusing the address.'
+                    : 'An account with this email already exists.';
+            }
+        }
+
+        if ($errors) {
+            flash('danger', implode(' ', $errors));
+            redirect(APP_URL . '/admin/users?create=1' . (isset($_GET['filter']) ? '&filter=' . urlencode($_GET['filter']) : ''));
+        }
+
+        $hash = password_hash($password, defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT, defined('PASSWORD_ARGON2ID') ? [] : ['cost' => BCRYPT_COST]);
+        $stmt = $db->prepare('INSERT INTO users (name, email, password_hash, role, status, email_verified) VALUES (?,?,?,?,?,?)');
+        $stmt->execute([$name, $email, $hash, $role, $status, $emailVerified]);
+        $newUserId = (int)$db->lastInsertId();
+
+        log_activity('admin_create_user', "Created user ID: {$newUserId} ({$email})", $newUserId);
+        flash('success', 'User created successfully.');
+        redirect(APP_URL . '/admin/users?edit=' . $newUserId);
+    }
 
     // Prevent self-modification for destructive actions
     if ($uid > 0 && $uid === $adminUser['id'] && in_array($action, ['suspend', 'delete', 'make_user', 'make_subscriber'], true)) {
@@ -24,8 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
                 $status = $_POST['status'] ?? 'pending';
                 $emailVerified = isset($_POST['email_verified']) ? 1 : 0;
                 $newPassword = $_POST['new_password'] ?? '';
-                $allowedRoles = ['user', 'subscriber', 'admin'];
-                $allowedStatuses = ['pending', 'active', 'suspended'];
                 $errors = [];
 
                 $targetStmt = $db->prepare("SELECT id, name, email, role, status, email_verified FROM users WHERE id=? AND status != 'deleted' LIMIT 1");
@@ -149,6 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
 $filter = $_GET['filter'] ?? 'all';
 $search = trim($_GET['q'] ?? '');
 $editId = (int)($_GET['edit'] ?? 0);
+$showCreate = isset($_GET['create']);
 $where = "WHERE status != 'deleted'";
 if ($filter === 'pending') $where .= " AND status = 'pending'";
 elseif ($filter === 'active') $where .= " AND status = 'active'";
@@ -193,6 +236,7 @@ admin_header('User Management', '👥', 'users');
 <input type="hidden" name="filter" value="<?= e($filter) ?>">
 <button type="submit" class="topbar-btn">Search</button>
 </form>
+<a href="<?= APP_URL ?>/admin/users?create=1<?= $filter !== 'all' ? '&filter=' . urlencode($filter) : '' ?><?= $search ? '&q=' . urlencode($search) : '' ?>" class="topbar-btn" style="background:var(--theme);color:#fff;border-color:var(--theme);text-decoration:none">➕ Add User</a>
 </div>
 
 <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
@@ -200,6 +244,60 @@ admin_header('User Management', '👥', 'users');
 <a href="?filter=<?=$k?><?=$search?'&q='.urlencode($search):''?>" class="topbar-btn" style="<?=$filter===$k?'background:var(--theme);color:#fff;border-color:var(--theme)':''?>"><?=$v?></a>
 <?php endforeach; ?>
 </div>
+
+<?php if ($showCreate): ?>
+<div class="data-card">
+<div class="dc-header">
+  <div class="dc-title">➕ Add User</div>
+  <a href="<?= APP_URL ?>/admin/users<?= $filter !== 'all' ? '?filter=' . urlencode($filter) : '' ?>" class="topbar-btn">Close</a>
+</div>
+<form method="POST" class="admin-form" style="max-width:none;padding:18px;">
+<?= csrf_field() ?>
+<input type="hidden" name="action" value="create_user">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
+  <div class="form-group">
+    <label for="create_name">Name</label>
+    <input type="text" id="create_name" name="name" maxlength="100" required autofocus>
+  </div>
+  <div class="form-group">
+    <label for="create_email">Email</label>
+    <input type="email" id="create_email" name="email" maxlength="255" required>
+  </div>
+  <div class="form-group">
+    <label for="create_password">Password</label>
+    <input type="password" id="create_password" name="password" minlength="8" autocomplete="new-password" required>
+  </div>
+  <div class="form-group">
+    <label for="create_role">Role</label>
+    <select id="create_role" name="role">
+      <option value="user">User</option>
+      <option value="subscriber">Subscriber</option>
+      <option value="admin">Admin</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="create_status">Status</label>
+    <select id="create_status" name="status">
+      <option value="active">Active</option>
+      <option value="pending">Pending</option>
+      <option value="suspended">Suspended</option>
+    </select>
+  </div>
+</div>
+<label class="toggle-wrap" style="margin:0 0 16px;">
+  <span class="toggle"><input type="checkbox" name="email_verified" value="1" checked><span class="toggle-slider"></span></span>
+  <span class="toggle-label">Email verified</span>
+</label>
+<p style="font-size:.78rem;color:var(--text-3);font-weight:700;margin:-2px 0 14px;">
+  Password must be at least 8 characters and include one uppercase letter and one number.
+</p>
+<div style="display:flex;gap:10px;flex-wrap:wrap;">
+  <button type="submit" class="btn btn-primary" style="max-width:220px;">➕ Create User</button>
+  <a href="<?= APP_URL ?>/admin/users<?= $filter !== 'all' ? '?filter=' . urlencode($filter) : '' ?>" class="btn btn-secondary" style="max-width:160px;">Cancel</a>
+</div>
+</form>
+</div>
+<?php endif; ?>
 
 <?php if ($editUser):
     $editingSelf = $editUser['id'] === session_user()['id'];
