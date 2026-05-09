@@ -26,7 +26,7 @@ function admin_header(string $title, string $icon = '📊', string $activePage =
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
 <title><?= e($title) ?> — Admin</title>
 <?= pwa_head_tags('ED VentGuide Pro admin control panel.') . "\n" ?>
-<link rel="stylesheet" href="<?= APP_URL ?>/assets/css/admin.css?v=5">
+<link rel="stylesheet" href="<?= APP_URL ?>/assets/css/admin.css?v=6">
 </head>
 <body>
 <button class="sb-toggle" onclick="document.querySelector('.admin-sidebar').classList.toggle('open')">☰</button>

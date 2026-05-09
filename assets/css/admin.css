@@ -44,6 +44,7 @@ html,body{min-height:100vh;width:100%;max-width:100vw;overflow-x:hidden;font-fam
 
 /* Data Tables */
 .data-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:20px}
+.data-card [style*="overflow-x:auto"]{-webkit-overflow-scrolling:touch;scrollbar-width:thin}
 .dc-header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--border)}
 .dc-title{font-size:.95rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px}
 .dc-actions{display:flex;gap:6px}
@@ -64,7 +65,7 @@ html,body{min-height:100vh;width:100%;max-width:100vw;overflow-x:hidden;font-fam
 .badge-user{background:var(--surface-2);color:var(--text-3);border:1px solid var(--border)}
 
 /* Action Buttons */
-.act-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s;color:var(--text-2)}
+.act-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s;color:var(--text-2);text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:4px;line-height:1.2;touch-action:manipulation}
 .act-btn:hover{border-color:var(--theme);color:var(--theme);background:var(--theme-light)}
 .act-btn.danger:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-bg)}
 .act-btn.success{border-color:rgba(22,163,74,.3);color:var(--success);background:var(--success-bg)}
@@ -100,7 +101,7 @@ html,body{min-height:100vh;width:100%;max-width:100vw;overflow-x:hidden;font-fam
 .empty-state p{font-size:.88rem;font-weight:600}
 
 /* Search */
-.search-bar{display:flex;gap:8px;margin-bottom:16px}
+.search-bar{display:flex;gap:8px;margin-bottom:16px;align-items:stretch}
 .search-bar form{min-width:0}
 .search-bar input{flex:1;padding:10px 14px;border:2px solid var(--border);border-radius:var(--r-sm);font-family:inherit;font-size:16px;font-weight:600;color:var(--text);background:var(--surface);transition:border-color .2s}
 .search-bar input:focus{outline:none;border-color:var(--theme)}
@@ -125,23 +126,34 @@ html,body{min-height:100vh;width:100%;max-width:100vw;overflow-x:hidden;font-fam
 @media(max-width:768px){
   .admin-sidebar{transform:translateX(-100%)}
   .admin-sidebar.open{transform:translateX(0);box-shadow:var(--shadow-lg)}
-  .admin-main{margin-left:0;padding:16px;padding-top:64px;width:100%}
+  .admin-main{margin-left:0;padding:14px;padding-top:64px;width:100%}
   .admin-topbar{align-items:flex-start;flex-direction:column}
   .admin-page-title{font-size:1.1rem;line-height:1.25}
   .topbar-actions{width:100%;justify-content:flex-start}
-  .topbar-btn,.act-btn{min-height:38px}
+  .topbar-btn,.act-btn{min-height:40px}
+  .topbar-btn{justify-content:center}
   .sb-toggle{display:block}
   .stats-grid{grid-template-columns:1fr 1fr}
-  .data-table{font-size:.78rem}
+  .data-card{border-radius:14px}
+  .data-card [style*="overflow-x:auto"]{margin:0 -1px}
+  .data-table{font-size:.78rem;min-width:640px}
   .data-table th,.data-table td{padding:8px 10px}
   .dc-header{align-items:flex-start;flex-direction:column}
+  .search-bar{flex-direction:column}
   .search-bar form{flex-direction:column}
-  .search-bar input,.search-bar button{width:100%}
+  .search-bar input,.search-bar button,.search-bar .topbar-btn{width:100%}
+  .admin-form{max-width:none}
+  .admin-form .btn{max-width:none!important;width:100%}
 }
 @media(max-width:480px){
   .stats-grid{grid-template-columns:1fr}
-  .admin-main{padding-left:12px;padding-right:12px}
+  .admin-main{padding-left:10px;padding-right:10px}
   .data-card{border-radius:var(--r-sm)}
-  .admin-form .btn{max-width:none;width:100%}
+  .data-card[style*="padding:20px"]{padding:14px!important}
+  .dc-header{padding:14px}
+  .admin-form[style*="padding:18px"]{padding:14px!important}
+  .admin-form label{font-size:.72rem}
   .toggle-wrap{align-items:flex-start}
+  .toggle-label{line-height:1.35}
+  .pagination{justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch}
 }

@@ -6,6 +6,7 @@
   var isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
   var isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true;
+  var isAdminPath = /\/admin(?:\/|$)/.test(location.pathname);
 
   function injectAnimations() {
     if (document.getElementById('pwa-animations')) return;
@@ -36,6 +37,9 @@
     var scriptUrl = script ? script.src : new URL('pwa.js', location.href).toString();
     var workerUrl = new URL('../../sw.js', scriptUrl);
     var scopeUrl  = new URL('../../', scriptUrl);
+    if (workerUrl.origin !== location.origin) {
+      return;
+    }
     
     console.log('PWA: Registering SW', { worker: workerUrl.toString(), scope: scopeUrl.pathname });
     
@@ -52,7 +56,7 @@
 
   window.addEventListener('load', function () {
     // If it's iOS, the bottom sheet handles it. If already installed, do nothing.
-    if (isIos || isInStandaloneMode) return;
+    if (isAdminPath || isIos || isInStandaloneMode) return;
     if (sessionStorage.getItem('pwa_install_dismissed')) return;
 
     // Show banner universally on all non-iOS browsers (Safari Mac, Firefox, Chrome, Android)
@@ -93,7 +97,7 @@
 
   // ── iOS Safari: Step-by-step Install Guide ───────────────────────
   window.addEventListener('load', function () {
-    if (!isIos || isInStandaloneMode) return;
+    if (isAdminPath || !isIos || isInStandaloneMode) return;
 
     if (sessionStorage.getItem('pwa_ios_guide_dismissed')) return;
 
