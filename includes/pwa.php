@@ -5,6 +5,8 @@ declare(strict_types=1);
  * Shared PWA tags for installable mobile/desktop app support.
  */
 
+require_once __DIR__ . '/security_headers.php';
+
 function pwa_asset_url(string $path): string {
     $base = defined('APP_URL') ? rtrim((string)APP_URL, '/') : '';
     return $base . '/' . ltrim($path, '/');
@@ -42,7 +44,7 @@ function pwa_script_tag(): string {
  * Must run before iOS registers touch handlers — defer/async won't work.
  */
 function pwa_zoom_lock_script(): string {
-    return '<script>(function(){
+    return '<script' . script_nonce_attr() . '>(function(){
 /* ── Zoom prevention (must run synchronously before iOS claims gestures) ── */
 var _lastTouch=0;
 document.addEventListener("gesturestart",function(e){e.preventDefault();},{passive:false});

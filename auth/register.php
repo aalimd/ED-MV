@@ -72,7 +72,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/auth.css?v=2">
 </head>
 <body>
-<button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
+<button class="dark-toggle" type="button" data-toggle-dark title="Toggle dark mode"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
 <div class="auth-wrapper"><div class="auth-card">
 <div class="auth-brand"><div class="auth-logo">🫁</div><div class="auth-app-name"><?= e(APP_NAME) ?></div><div class="auth-app-sub">Evidence-Based Emergency Ventilation</div></div>
 <h1 class="auth-title">Create your account</h1>
@@ -85,20 +85,19 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <input type="email" id="email" name="email" class="form-input" placeholder="you@hospital.com" value="<?= e($email) ?>" required></div>
 <div class="form-group"><label class="form-label" for="password">🔒 Password</label>
 <div class="input-password-wrap"><input type="password" id="password" name="password" class="form-input" placeholder="Min 8 chars, 1 upper, 1 number, 1 special" required minlength="8" oninput="checkStrength(this.value)">
-<button type="button" class="password-toggle" onclick="togglePwd('password')">👁️</button></div>
+<button type="button" class="password-toggle" data-toggle-pwd="password">👁️</button></div>
 <div class="pwd-strength"><div class="pwd-bar" id="b1"></div><div class="pwd-bar" id="b2"></div><div class="pwd-bar" id="b3"></div></div>
 <div class="pwd-label" id="pwdLabel" style="color:var(--text-3)"></div></div>
 <div class="form-group"><label class="form-label" for="confirm">🔒 Confirm Password</label>
 <div class="input-password-wrap"><input type="password" id="confirm" name="confirm" class="form-input" placeholder="Repeat your password" required>
-<button type="button" class="password-toggle" onclick="togglePwd('confirm')">👁️</button></div></div>
+<button type="button" class="password-toggle" data-toggle-pwd="confirm">👁️</button></div></div>
 <button type="submit" class="btn btn-primary">📝 Create Account</button>
 </form>
 <div class="auth-footer">Already have an account? <a href="<?= APP_URL ?>/auth/login">Sign in</a></div>
 </div></div>
-<script>
-function togglePwd(id){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}
-function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}
+<script<?= script_nonce_attr() ?>>
 function checkStrength(p){const b=[document.getElementById('b1'),document.getElementById('b2'),document.getElementById('b3')];const l=document.getElementById('pwdLabel');let s=0;if(p.length>=8)s++;if(/[A-Z]/.test(p)&&/[0-9]/.test(p)&&/[^A-Za-z0-9]/.test(p))s++;if(p.length>=12)s++;b.forEach((x,i)=>{x.className='pwd-bar';if(i<s)x.classList.add(s===1?'active-weak':s===2?'active-medium':'active-strong');});l.textContent=s===0?'':s===1?'Weak':s===2?'Medium':'Strong';l.style.color=s===1?'var(--danger)':s===2?'var(--warning)':'var(--success)';}
 </script>
+<?= ui_script_tag() . "\n" ?>
 <?= pwa_script_tag() . "\n" ?>
 </body></html>

@@ -230,7 +230,7 @@ admin_header('Plans & Pricing', '🏷️', 'plans');
 <a href="?edit=<?= $p['id'] ?>" class="act-btn">✏️ Edit</a>
 <form method="POST" style="display:inline"><?= csrf_field() ?>
 <input type="hidden" name="plan_id" value="<?= $p['id'] ?>">
-<button name="action" value="delete" class="act-btn danger" onclick="return confirm('Delete this plan?')">🗑️</button>
+<button name="action" value="delete" class="act-btn danger" data-confirm="Delete this plan?">🗑️</button>
 </form>
 </td>
 </tr>

@@ -35,7 +35,7 @@ if ($user['role'] !== 'admin') {
 
 // Inject a user menu bar right after <body>
 $userMenu = '
-<style>
+<style' . style_nonce_attr() . '>
   #vg-user-details {
     font-family: \'DM Sans\', sans-serif;
     position: relative;

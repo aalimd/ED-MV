@@ -75,7 +75,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/auth.css?v=2">
 </head>
 <body>
-<button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
+<button class="dark-toggle" type="button" data-toggle-dark title="Toggle dark mode"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
 <div class="auth-wrapper"><div class="auth-card">
 <div class="auth-brand"><div class="auth-logo">🔐</div><div class="auth-app-name"><?= e(APP_NAME) ?></div></div>
 <h1 class="auth-title">Set new password</h1>
@@ -87,17 +87,14 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <input type="hidden" name="email" value="<?= e($email) ?>">
 <div class="form-group"><label class="form-label" for="password">🔒 New Password</label>
 <div class="input-password-wrap"><input type="password" id="password" name="password" class="form-input" placeholder="Min 8 chars" required minlength="8">
-<button type="button" class="password-toggle" onclick="togglePwd('password')">👁️</button></div></div>
+<button type="button" class="password-toggle" data-toggle-pwd="password">👁️</button></div></div>
 <div class="form-group"><label class="form-label" for="confirm">🔒 Confirm</label>
 <div class="input-password-wrap"><input type="password" id="confirm" name="confirm" class="form-input" placeholder="Repeat password" required>
-<button type="button" class="password-toggle" onclick="togglePwd('confirm')">👁️</button></div></div>
+<button type="button" class="password-toggle" data-toggle-pwd="confirm">👁️</button></div></div>
 <button type="submit" class="btn btn-primary">✅ Reset Password</button>
 </form>
 <?php endif; ?>
 </div></div>
-<script>
-function togglePwd(id){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}
-function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}
-</script>
+<?= ui_script_tag() . "\n" ?>
 <?= pwa_script_tag() . "\n" ?>
 </body></html>

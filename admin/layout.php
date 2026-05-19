@@ -29,7 +29,7 @@ function admin_header(string $title, string $icon = '📊', string $activePage =
 <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/admin.css?v=6">
 </head>
 <body>
-<button class="sb-toggle" onclick="document.querySelector('.admin-sidebar').classList.toggle('open')">☰</button>
+<button class="sb-toggle" type="button" data-sidebar-toggle>☰</button>
 <div class="admin-layout">
 <aside class="admin-sidebar">
   <div class="sb-brand"><span class="sb-logo">🫁</span><div><div class="sb-name">VentGuide Admin</div><div class="sb-sub">Control Panel</div></div></div>
@@ -49,7 +49,7 @@ function admin_header(string $title, string $icon = '📊', string $activePage =
 <div class="admin-topbar">
   <h1 class="admin-page-title"><?= $icon ?> <?= e($title) ?></h1>
   <div class="topbar-actions">
-    <button class="topbar-btn" onclick="toggleDark()"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
+    <button class="topbar-btn" type="button" data-toggle-dark><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
     <form method="POST" action="<?= APP_URL ?>/auth/logout" style="display:inline">
       <?= csrf_field() ?>
       <button type="submit" class="topbar-btn" style="color:var(--danger)">🚪 Logout</button>
@@ -61,9 +61,7 @@ function admin_header(string $title, string $icon = '📊', string $activePage =
 
 function admin_footer(): void { ?>
 </main></div>
-<script>
-function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}
-</script>
+<?= ui_script_tag() . "\n" ?>
 <?= pwa_script_tag() . "\n" ?>
 </body></html>
 <?php } // end admin_footer

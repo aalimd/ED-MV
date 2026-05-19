@@ -7,8 +7,13 @@ AddType application/javascript .js
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # Force HTTPS (respect reverse-proxy on shared hosting)
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
     # Security: block access to sensitive dirs
-    RewriteRule ^(\.git|tools|migrations)(/|$) - [F,L]
+    RewriteRule ^(\.git|tools|migrations|logs)(/|$) - [F,L]
 
     # Clean URLs Step 1: External redirect .php → clean (GET only, preserves POST data)
     RewriteCond %{REQUEST_METHOD} !POST
@@ -25,11 +30,19 @@ AddType application/javascript .js
     Require all denied
 </FilesMatch>
 
-<FilesMatch "^(\.env.*|config\.php|db_setup\.sql|.*\.md)$">
+<FilesMatch "^(\.env.*|config\.php|config\.secrets\.ini|db_setup\.sql|.*\.md)$">
     Require all denied
 </FilesMatch>
 
 <IfModule mod_headers.c>
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Header always set Cross-Origin-Opener-Policy "same-origin"
+    Header always set Cross-Origin-Resource-Policy "same-origin"
+
+    <If "%{HTTPS} == 'on' || %{HTTP:X-Forwarded-Proto} == 'https'">
+        Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    </If>
+
     <FilesMatch "^(sw\.js|manifest\.webmanifest)$">
         Header set Cache-Control "no-cache, no-store, must-revalidate"
     </FilesMatch>

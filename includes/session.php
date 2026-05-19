@@ -5,22 +5,15 @@
  */
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/security_headers.php';
 
 function init_session(): void {
     if (session_status() === PHP_SESSION_ACTIVE) return;
 
-    $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+    $secure = request_is_https();
     ini_set('session.use_strict_mode', '1');
     ini_set('session.use_only_cookies', '1');
-    if (!headers_sent()) {
-        header('X-Frame-Options: SAMEORIGIN');
-        header('X-Content-Type-Options: nosniff');
-        header('Referrer-Policy: same-origin');
-        header("Content-Security-Policy: frame-ancestors 'self'");
-        if ($secure) {
-            header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
-        }
-    }
+    send_security_headers();
     
     session_name(SESSION_NAME);
     session_set_cookie_params([

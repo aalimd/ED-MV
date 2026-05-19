@@ -54,7 +54,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/auth.css?v=2">
 </head>
 <body>
-<button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
+<button class="dark-toggle" type="button" data-toggle-dark title="Toggle dark mode"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
 <div class="auth-wrapper"><div class="auth-card">
 <div class="auth-brand"><div class="auth-logo">🔐</div><div class="auth-app-name"><?= e(APP_NAME) ?></div></div>
 <h1 class="auth-title">Reset your password</h1>
@@ -68,8 +68,6 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 </form>
 <div class="auth-footer"><a href="<?= APP_URL ?>/auth/login">← Back to login</a></div>
 </div></div>
-<script>
-function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}
-</script>
+<?= ui_script_tag() . "\n" ?>
 <?= pwa_script_tag() . "\n" ?>
 </body></html>

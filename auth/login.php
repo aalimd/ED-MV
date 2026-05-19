@@ -9,7 +9,8 @@ require_once __DIR__ . '/../includes/pwa.php';
 init_session();
 if (is_logged_in()) redirect(APP_URL . '/');
 
-$error = ''; $email = ''; $showResendVerification = false;
+$error = ''; $email = '';
+$dummyHash = '$2y$12$8VhGph3Hr470itKl3BI8weV7b0Wj5FOd9zLYQ98JEBe4RvXPwThG6';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!csrf_validate()) { $error = 'Invalid request. Please try again.'; }
     else {
@@ -26,26 +27,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $db = getDB();
                 $stmt = $db->prepare('SELECT * FROM users WHERE email = ? LIMIT 1');
                 $stmt->execute([$email]); $user = $stmt->fetch();
-                if ($user && password_verify($password, $user['password_hash'])) {
-                    if ($user['status'] === 'deleted') $error = 'Invalid credentials.';
-                    elseif ($user['status'] === 'suspended') $error = 'Your account has been suspended.';
-                    elseif (email_verification_required() && (int)$user['email_verified'] !== 1) {
-                        $error = 'Please verify your email address before signing in. Check your inbox for the verification link.';
-                        $showResendVerification = true;
-                    }
-                    elseif ($user['status'] === 'pending') $error = 'Your account is pending admin approval.';
-                    else {
-                        clear_login_attempts($ip);
-                        session_set_user($user, $remember);
-                        $db->prepare('UPDATE users SET last_login=NOW(),last_ip=? WHERE id=?')->execute([$ip,$user['id']]);
-                        log_activity('login','Successful login',$user['id']);
-                        
-                        $redir = $_SESSION['redirect_after_login'] ?? '/';
-                        unset($_SESSION['redirect_after_login']);
-                        
-                        // Ensure $redir is a local path
-                        redirect_local($redir);
-                    }
+                $verifyHash = ($user && !empty($user['password_hash'])) ? $user['password_hash'] : $dummyHash;
+                if (password_verify($password, $verifyHash) && $user && $user['status'] === 'active' && (!email_verification_required() || (int)$user['email_verified'] === 1)) {
+                    clear_login_attempts($ip);
+                    session_set_user($user, $remember);
+                    $db->prepare('UPDATE users SET last_login=NOW(),last_ip=? WHERE id=?')->execute([$ip,$user['id']]);
+                    log_activity('login','Successful login',$user['id']);
+                    $redir = $_SESSION['redirect_after_login'] ?? '/';
+                    unset($_SESSION['redirect_after_login']);
+                    redirect_local($redir);
                 } else {
                     record_failed_attempt($ip, $email);
                     log_activity('login_failed',"Failed login for: {$email}");
@@ -55,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-if (isset($_GET['error']) && $_GET['error']==='suspended') $error='Your account has been suspended.';
 if (isset($_GET['reauth']) && $_GET['reauth']==='1') {
     flash('warning', 'Please sign in again. Your security settings were updated.');
 }
@@ -80,29 +69,25 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <link rel="stylesheet" href="<?= APP_URL ?>/assets/css/auth.css?v=4">
 </head>
 <body>
-<button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
+<button class="dark-toggle" type="button" data-toggle-dark title="Toggle dark mode"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
 <div class="auth-wrapper"><div class="auth-card">
 <div class="auth-brand"><div class="auth-logo">🫁</div><div class="auth-app-name"><?= e(APP_NAME) ?></div><div class="auth-app-sub">Evidence-Based Emergency Ventilation</div></div>
 <h1 class="auth-title">Welcome back</h1>
 <p class="auth-subtitle">Sign in to access your ventilation tools.</p>
 <?= render_flashes() ?>
 <?php if($error): ?><div class="flash flash-danger">❌ <?= e($error) ?></div><?php endif; ?>
-<?php if($showResendVerification): ?><div class="flash flash-warning">📧 Didn't receive it? <a href="<?= APP_URL ?>/auth/resend-verification?email=<?= urlencode($email) ?>">Request a new verification link</a>.</div><?php endif; ?>
 <form method="POST" autocomplete="on"><?= csrf_field() ?>
 <div class="form-group"><label class="form-label" for="email">📧 Email</label>
 <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" value="<?= e($email) ?>" required autofocus></div>
 <div class="form-group"><label class="form-label" for="password">🔒 Password</label>
 <div class="input-password-wrap"><input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
-<button type="button" class="password-toggle" onclick="togglePwd('password')">👁️</button></div></div>
+<button type="button" class="password-toggle" data-toggle-pwd="password">👁️</button></div></div>
 <div class="auth-links"><label class="form-check" style="margin-bottom:0"><input type="checkbox" name="remember"><span style="font-size:.82rem;font-weight:600;color:var(--text-2)">Remember me</span></label>
 <a href="<?= APP_URL ?>/auth/forgot" class="auth-link">Forgot password?</a></div>
 <button type="submit" class="btn btn-primary">🔑 Sign In</button>
 </form>
 <div class="auth-footer">Don't have an account? <a href="<?= APP_URL ?>/auth/register">Create one</a><br><a href="<?= APP_URL ?>/auth/resend-verification">Resend verification email</a></div>
 </div></div>
-<script>
-function togglePwd(id){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}
-function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}
-</script>
+<?= ui_script_tag() . "\n" ?>
 <?= pwa_script_tag() . "\n" ?>
 </body></html>

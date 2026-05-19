@@ -11,14 +11,6 @@ require_once __DIR__ . '/helpers.php';
 
 init_session();
 
-// Add HTTP security headers
-if (!headers_sent()) {
-    header('X-Content-Type-Options: nosniff');
-    header('X-Frame-Options: DENY');
-    header('Referrer-Policy: strict-origin-when-cross-origin');
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; worker-src 'self'; manifest-src 'self'; connect-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
-}
-
 /**
  * Require user to be logged in. Redirects to login if not.
  */
@@ -39,7 +31,7 @@ function require_login(): void {
     $row = $stmt->fetch();
     if (!$row || $row['status'] !== 'active') {
         session_destroy_full();
-        header('Location: ' . APP_URL . '/auth/login?error=suspended');
+        header('Location: ' . APP_URL . '/auth/login?reauth=1');
         exit;
     }
     if ((int)$row['auth_version'] !== (int)($user['auth_version'] ?? 1)) {
@@ -124,6 +116,17 @@ function has_subscription(): bool {
     );
     $stmt->execute([$user['id']]);
     return (bool) $stmt->fetch();
+}
+
+/**
+ * Increment auth_version so stale sessions lose privileges.
+ */
+function bump_auth_version(int $userId): void {
+    if ($userId <= 0) {
+        return;
+    }
+    $db = getDB();
+    $db->prepare('UPDATE users SET auth_version = auth_version + 1 WHERE id = ?')->execute([$userId]);
 }
 
 /**
