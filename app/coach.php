@@ -9,8 +9,12 @@
  * This file handles HTTP I/O, persistence, and rendering only.
  *
  * Visual design intentionally mirrors app/ventguide_raw.php so users
- * experience a single, coherent app (matching tokens, classes, dark-mode
- * toggle persisted in the same localStorage key).
+ * experience a single, coherent app:
+ *   • Same design tokens, fonts, components and dark-mode toggle.
+ *   • Same scroll model (fixed body + scrollable main) so the PWA
+ *     zoom-lock script lets the page scroll on touch devices.
+ *   • Same bottom navigation, with Coach as the 6th tab; the other
+ *     five tabs link back to /app/ventguide#hash for instant return.
  */
 
 declare(strict_types=1);
@@ -242,20 +246,32 @@ function vc_box_class(string $level): string {
     }
     @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
 
+    /* ─── RESET & SCROLL MODEL (mirrors main app) ──────────────────── */
     *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
-    html,body { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+    html,body {
+      height:100%; width:100%;
+      max-width:100vw;
+      overflow:hidden;
+      overscroll-behavior:none;
+      -webkit-text-size-adjust:100%; text-size-adjust:100%;
+    }
     body {
       font-family:'DM Sans',system-ui,-apple-system,sans-serif;
       background:var(--bg); color:var(--text);
-      min-height:100vh;
       display:flex; flex-direction:column;
       transition:background .3s,color .3s;
+      position:fixed; inset:0;
+      max-width:100vw;
+      overflow:hidden;
+      touch-action:pan-y;
+      -webkit-user-select:none; user-select:none;
       -webkit-font-smoothing:antialiased;
     }
+    input, textarea, select, [contenteditable] { -webkit-user-select:auto; user-select:auto; }
     button { font-family:inherit; cursor:pointer; }
     a { color:var(--theme); text-decoration:none; }
 
-    ::-webkit-scrollbar { width:6px; height:6px; }
+    ::-webkit-scrollbar { width:4px; height:4px; }
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:99px; }
 
@@ -269,7 +285,7 @@ function vc_box_class(string $level): string {
       padding:max(env(safe-area-inset-top),14px) 18px 22px;
       border-bottom-left-radius:var(--r-xl); border-bottom-right-radius:var(--r-xl);
       box-shadow:var(--shadow-md); transition:background .4s ease;
-      position:relative; z-index:10; overflow:hidden;
+      position:relative; z-index:10; overflow:hidden; flex-shrink:0;
     }
     .header::before { content:''; position:absolute; top:-55%; right:-8%; width:210px; height:210px; border-radius:50%; background:rgba(255,255,255,.08); pointer-events:none; }
     .header::after  { content:''; position:absolute; bottom:-30%; left:-4%; width:130px; height:130px; border-radius:50%; background:rgba(255,255,255,.05); pointer-events:none; }
@@ -288,12 +304,20 @@ function vc_box_class(string $level): string {
     .hbtn:active { transform:scale(.88); }
     .hbtn svg { width:17px; height:17px; pointer-events:none; }
 
-    /* ─── CONTENT (scrollable) ─────────────────────────────────────── */
-    main { flex:1; width:100%; max-width:100vw; }
+    /* ─── CONTENT (scrollable, matches .content of main app) ────────── */
+    main { flex:1; min-height:0; width:100%; max-width:100vw; overflow:hidden; }
     .content {
-      max-width:1180px; margin:0 auto;
-      padding:16px max(14px,env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));
+      flex:1; min-height:0; width:100%; max-width:100vw;
+      height:100%;
+      overflow-y:auto; overflow-x:hidden;
+      padding:16px max(14px,env(safe-area-inset-right)) calc(96px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));
+      scroll-behavior:smooth;
+      overscroll-behavior-y:contain;
+      overscroll-behavior-x:none;
+      -webkit-overflow-scrolling:touch;
+      touch-action:pan-y;
     }
+    .content-inner { max-width:1180px; margin:0 auto; }
 
     /* ─── FLASH MESSAGES ────────────────────────────────────────────── */
     .flash {
@@ -351,10 +375,6 @@ function vc_box_class(string $level): string {
     .input-hint { font-size:.74rem; color:var(--text-3); margin-top:4px; font-weight:600; }
 
     .calc-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; }
-    .field-section-title {
-      font-size:.78rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em;
-      color:var(--text-3); margin:16px 0 10px; display:flex; align-items:center; gap:8px;
-    }
 
     /* ─── BUTTONS (matches .ehr-btn) ────────────────────────────────── */
     .vc-btn-row { display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
@@ -369,8 +389,6 @@ function vc_box_class(string $level): string {
     .ehr-btn:active { transform:scale(.98); }
     .ehr-btn.secondary { background:var(--theme-light); color:var(--theme); border:2px solid var(--theme); box-shadow:none; }
     .dark .ehr-btn.secondary { background:rgba(37,99,235,0.15); }
-    .ehr-btn.ghost { background:var(--surface); color:var(--text-2); border:2px solid var(--border); box-shadow:none; }
-    .ehr-btn.ghost:hover { background:var(--surface-2); }
 
     /* ─── SAFETY OVERVIEW CARD ─────────────────────────────────────── */
     .vc-safety {
@@ -396,7 +414,7 @@ function vc_box_class(string $level): string {
     .vc-safety-title  { font-size:1.05rem; font-weight:800; color:var(--text); margin:2px 0 4px; }
     .vc-safety-sub    { font-size:.83rem; color:var(--text-2); font-weight:600; line-height:1.45; }
 
-    /* ─── DERIVED TILES (matches .stat-pill structure but as grid) ───── */
+    /* ─── DERIVED TILES ─────────────────────────────────────────────── */
     .derived-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:4px; }
     .derived-tile {
       background:var(--surface-2); border:1px solid var(--border);
@@ -463,7 +481,7 @@ function vc_box_class(string $level): string {
     .cp-bar { flex:1; height:5px; background:var(--border); border-radius:99px; overflow:hidden; }
     .cp-fill { height:100%; background:var(--theme); border-radius:99px; transition:width .3s; }
 
-    /* ─── EMPTY STATE (for results & cases) ─────────────────────────── */
+    /* ─── EMPTY STATE ───────────────────────────────────────────────── */
     .empty-state {
       padding:32px 18px; text-align:center;
       background:var(--surface-2); border:1.5px dashed var(--border);
@@ -497,10 +515,36 @@ function vc_box_class(string $level): string {
     .case-act:hover { background:var(--surface); color:var(--theme); }
     .case-act.danger:hover { background:var(--danger-bg); color:var(--danger); }
 
+    /* ─── BOTTOM NAV (matches main app exactly) ─────────────────────── */
+    .bottom-nav {
+      position:fixed; bottom:0; left:0; width:100%; max-width:100vw;
+      background:var(--surface); box-shadow:0 -2px 20px rgba(0,0,0,.09);
+      display:flex; justify-content:space-around;
+      padding:10px 4px calc(10px + env(safe-area-inset-bottom));
+      z-index:100; border-top:1px solid var(--border);
+      border-top-left-radius:var(--r-xl); border-top-right-radius:var(--r-xl);
+      gap:2px;
+    }
+    .nav-it {
+      display:flex; flex-direction:column; align-items:center; gap:4px;
+      color:var(--text-3); font-size:.58rem; font-weight:800;
+      letter-spacing:.03em; text-transform:uppercase;
+      padding:7px 3px; border-radius:var(--r-sm);
+      cursor:pointer; transition:all .2s ease;
+      flex:1 1 0; min-width:0;
+      border:none; background:transparent; font-family:inherit; text-decoration:none;
+    }
+    .nav-it .nav-emoji { font-size:1.25rem; line-height:1; transition:transform .25s cubic-bezier(.34,1.56,.64,1); }
+    .nav-it.active { color:var(--theme); background:var(--theme-light); }
+    .nav-it.active .nav-emoji { transform:scale(1.22); }
+    .nav-it > span:last-child { width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center; }
+
     /* ─── PRINT (lean output) ──────────────────────────────────────── */
     @media print {
-      .header, .vc-btn-row, .case-list, form.vc-form, .vc-no-print { display:none !important; }
+      html,body { position:static; height:auto; overflow:visible; max-width:none; }
+      .header, .vc-btn-row, .case-list, form.vc-form, .vc-no-print, .bottom-nav { display:none !important; }
       body { background:white; color:black; }
+      main, .content { position:static; height:auto; overflow:visible; padding:0; }
       .info-card, .sec-hdr { box-shadow:none; border:1px solid #ccc; break-inside:avoid; }
       .vc-disclaimer { display:none; }
       .vc-grid { grid-template-columns:1fr !important; }
@@ -522,9 +566,6 @@ function vc_box_class(string $level): string {
       <?php endif; ?>
     </div>
     <div class="header-actions">
-      <a class="hbtn" href="<?= app_url('/app/ventguide') ?>" title="Back to main app" aria-label="Back to main app">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-      </a>
       <button class="hbtn" id="printBtn" title="Print" aria-label="Print">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       </button>
@@ -536,292 +577,318 @@ function vc_box_class(string $level): string {
   </div>
 </header>
 
+<!-- ── MAIN SCROLLABLE CONTENT ──────────────────────────────────────── -->
 <main>
   <div class="content">
+    <div class="content-inner">
 
-    <?= render_flashes() ?>
+      <?= render_flashes() ?>
 
-    <div class="vc-disclaimer">
-      ⚠️ <strong>Educational use only.</strong>
-      Vent Coach provides evidence-based suggestions, not orders. Always verify with your patient, your team, and local protocols.
-    </div>
+      <div class="vc-disclaimer">
+        ⚠️ <strong>Educational use only.</strong>
+        Vent Coach provides evidence-based suggestions, not orders. Always verify with your patient, your team, and local protocols.
+      </div>
 
-    <div class="vc-grid">
+      <div class="vc-grid">
 
-      <!-- ── LEFT: INPUT FORM ──────────────────────────────────────── -->
-      <form method="POST" action="<?= app_url('/app/coach') ?>" class="vc-form vc-no-print">
-        <?= csrf_field() ?>
-        <input type="hidden" name="case_id" value="<?= e((string)($activeCaseId ?? '')) ?>">
+        <!-- ── LEFT: INPUT FORM ──────────────────────────────────── -->
+        <form method="POST" action="<?= app_url('/app/coach') ?>" class="vc-form vc-no-print">
+          <?= csrf_field() ?>
+          <input type="hidden" name="case_id" value="<?= e((string)($activeCaseId ?? '')) ?>">
 
-        <div class="sec-hdr">
-          <div class="sec-hdr-title">📋 Patient snapshot</div>
-          <div class="sec-hdr-sub">Anonymous bedside data only — never enter the patient's name or MRN.</div>
-        </div>
-
-        <div class="info-card">
-          <h3>🩺 Reference &amp; scenario</h3>
-
-          <div class="calc-field">
-            <label class="calc-label">Bedside reference (optional)</label>
-            <input type="text" name="reference" maxlength="80" class="calc-input"
-                   placeholder="e.g. Bed 12 — 06:30"
-                   value="<?= e($activeReference) ?>"
-                   style="font-family:'DM Sans',sans-serif">
-            <div class="input-hint">Free-text label only — no patient identifiers.</div>
+          <div class="sec-hdr">
+            <div class="sec-hdr-title">📋 Patient snapshot</div>
+            <div class="sec-hdr-sub">Anonymous bedside data only — never enter the patient's name or MRN.</div>
           </div>
 
-          <div class="calc-grid">
-            <div class="calc-field">
-              <label class="calc-label">Scenario</label>
-              <select name="scenario" class="calc-input">
-                <?php foreach($scenarios as $k => $s):
-                  $sel = ($activeInput['scenario'] ?? 'healthy') === $k ? 'selected' : ''; ?>
-                  <option value="<?= e($k) ?>" <?= $sel ?>><?= e($s['emoji']) ?> <?= e($s['name']) ?></option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-            <div class="calc-field">
-              <label class="calc-label">PBW (kg)</label>
-              <input type="number" name="pbw_kg" step="0.1" min="25" max="150" inputmode="decimal" class="calc-input"
-                     value="<?= e(vc_field($activeInput['pbw_kg'] ?? null)) ?>" placeholder="62">
-              <div class="input-hint">From height/sex · <a href="<?= app_url('/app/ventguide') ?>">PBW calculator →</a></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="info-card">
-          <h3>🎛️ Ventilator settings</h3>
-          <div class="calc-grid">
-            <div class="calc-field">
-              <label class="calc-label">VT (mL)</label>
-              <input type="number" name="vt_ml" step="1" min="100" max="1500" inputmode="numeric" class="calc-input"
-                     value="<?= e(vc_field($activeInput['vent']['vt_ml'] ?? null)) ?>" placeholder="450">
-            </div>
-            <div class="calc-field">
-              <label class="calc-label">RR (/min)</label>
-              <input type="number" name="rr" step="1" min="4" max="60" inputmode="numeric" class="calc-input"
-                     value="<?= e(vc_field($activeInput['vent']['rr'] ?? null)) ?>" placeholder="14">
-            </div>
-            <div class="calc-field">
-              <label class="calc-label">PEEP (cmH₂O)</label>
-              <input type="number" name="peep" step="1" min="0" max="25" inputmode="numeric" class="calc-input"
-                     value="<?= e(vc_field($activeInput['vent']['peep'] ?? null)) ?>" placeholder="5">
-            </div>
-            <div class="calc-field">
-              <label class="calc-label">Pplat (cmH₂O)</label>
-              <input type="number" name="pplat" step="1" min="0" max="60" inputmode="numeric" class="calc-input"
-                     value="<?= e(vc_field($activeInput['vent']['pplat'] ?? null)) ?>" placeholder="22">
-            </div>
-            <div class="calc-field">
-              <label class="calc-label">FiO₂ (%)</label>
-              <input type="number" name="fio2_pct" step="1" min="21" max="100" inputmode="numeric" class="calc-input"
-                     value="<?= e(vc_field($activeInput['vent']['fio2_pct'] ?? null)) ?>" placeholder="40">
-            </div>
-          </div>
-        </div>
-
-        <div class="info-card">
-          <h3>🧪 Latest ABG <span style="font-size:.7rem;font-weight:600;color:var(--text-3);margin-left:6px;">(optional)</span></h3>
-          <div class="calc-grid">
-            <div class="calc-field">
-              <label class="calc-label">pH</label>
-              <input type="number" name="ph" step="0.01" min="6.8" max="8.0" inputmode="decimal" class="calc-input"
-                     value="<?= e(vc_field($activeInput['abg']['ph'] ?? null)) ?>" placeholder="7.38">
-            </div>
-            <div class="calc-field">
-              <label class="calc-label">PaCO₂</label>
-              <input type="number" name="paco2" step="1" min="10" max="150" inputmode="numeric" class="calc-input"
-                     value="<?= e(vc_field($activeInput['abg']['paco2'] ?? null)) ?>" placeholder="40">
-            </div>
-            <div class="calc-field">
-              <label class="calc-label">PaO₂</label>
-              <input type="number" name="pao2" step="1" min="20" max="700" inputmode="numeric" class="calc-input"
-                     value="<?= e(vc_field($activeInput['abg']['pao2'] ?? null)) ?>" placeholder="80">
-            </div>
-            <div class="calc-field">
-              <label class="calc-label">HCO₃</label>
-              <input type="number" name="hco3" step="0.1" min="3" max="60" inputmode="decimal" class="calc-input"
-                     value="<?= e(vc_field($activeInput['abg']['hco3'] ?? null)) ?>" placeholder="24">
-            </div>
-            <div class="calc-field">
-              <label class="calc-label">SpO₂ (%)</label>
-              <input type="number" name="spo2" step="1" min="30" max="100" inputmode="numeric" class="calc-input"
-                     value="<?= e(vc_field($activeInput['abg']['spo2'] ?? null)) ?>" placeholder="96">
-            </div>
-            <div class="calc-field">
-              <label class="calc-label">Target PaCO₂</label>
-              <input type="number" name="target_paco2" step="1" min="25" max="80" inputmode="numeric" class="calc-input"
-                     value="<?= e(vc_field($activeInput['target_paco2'] ?? null)) ?>" placeholder="40">
-            </div>
-          </div>
-        </div>
-
-        <div class="vc-btn-row">
-          <button type="submit" name="action" value="analyze" class="ehr-btn">🔎 Analyze</button>
-          <button type="submit" name="action" value="save" class="ehr-btn secondary">💾 <?= $activeCaseId ? 'Update case' : 'Save case' ?></button>
-        </div>
-      </form>
-
-      <!-- ── RIGHT: RESULTS ────────────────────────────────────────── -->
-      <div>
-        <div class="sec-hdr">
-          <div class="sec-hdr-title">🩺 Live analysis</div>
-          <div class="sec-hdr-sub">All thresholds reference published evidence (ARDSNet, Amato 2015, SCCM, ATS).</div>
-        </div>
-
-        <?php if ($result === null): ?>
           <div class="info-card">
-            <div class="empty-state">
-              <div class="es-icon">🧠</div>
-              <div class="es-text">Fill in the ventilator settings (and ABG, if available) on the left, then press <strong>🔎 Analyze</strong> to see a personalized safety report.</div>
-            </div>
-          </div>
-        <?php else: ?>
+            <h3>🩺 Reference &amp; scenario</h3>
 
-          <?php $lvl = $result['safety_level']; ?>
-          <div class="vc-safety <?= e($lvl) ?>">
-            <div class="vc-safety-icon"><?= vc_level_emoji($lvl) ?></div>
-            <div>
-              <div class="vc-safety-label"><?= strtoupper($lvl) ?> zone</div>
-              <div class="vc-safety-title"><?= e(vc_level_label($lvl)) ?></div>
-              <div class="vc-safety-sub">
-                <?= e($result['scenario']['emoji'] . ' ' . $result['scenario']['name']) ?>
-                <?php if ($activeInput['pbw_kg'] !== null): ?> · PBW <?= e(vc_field($activeInput['pbw_kg'])) ?> kg<?php endif; ?>
+            <div class="calc-field">
+              <label class="calc-label">Bedside reference (optional)</label>
+              <input type="text" name="reference" maxlength="80" class="calc-input"
+                     placeholder="e.g. Bed 12 — 06:30"
+                     value="<?= e($activeReference) ?>"
+                     style="font-family:'DM Sans',sans-serif">
+              <div class="input-hint">Free-text label only — no patient identifiers.</div>
+            </div>
+
+            <div class="calc-grid">
+              <div class="calc-field">
+                <label class="calc-label">Scenario</label>
+                <select name="scenario" class="calc-input">
+                  <?php foreach($scenarios as $k => $s):
+                    $sel = ($activeInput['scenario'] ?? 'healthy') === $k ? 'selected' : ''; ?>
+                    <option value="<?= e($k) ?>" <?= $sel ?>><?= e($s['emoji']) ?> <?= e($s['name']) ?></option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+              <div class="calc-field">
+                <label class="calc-label">PBW (kg)</label>
+                <input type="number" name="pbw_kg" step="0.1" min="25" max="150" inputmode="decimal" class="calc-input"
+                       value="<?= e(vc_field($activeInput['pbw_kg'] ?? null)) ?>" placeholder="62">
+                <div class="input-hint">From height/sex · <a href="<?= app_url('/app/ventguide') ?>">PBW calculator →</a></div>
               </div>
             </div>
           </div>
 
           <div class="info-card">
-            <div class="completeness">
-              <span>Data completeness</span>
-              <div class="cp-bar"><div class="cp-fill" style="width:<?= (int)$result['completeness'] ?>%"></div></div>
-              <span><?= (int)$result['completeness'] ?>%</span>
-            </div>
-
-            <h3>📊 Derived metrics</h3>
-            <div class="derived-grid">
-              <div class="derived-tile">
-                <div class="k">ΔP (driving)</div>
-                <div class="v"><?= $result['derived']['driving_pressure'] !== null ? e(vc_field($result['derived']['driving_pressure'])) . '<span class="u">cmH₂O</span>' : '—' ?></div>
+            <h3>🎛️ Ventilator settings</h3>
+            <div class="calc-grid">
+              <div class="calc-field">
+                <label class="calc-label">VT (mL)</label>
+                <input type="number" name="vt_ml" step="1" min="100" max="1500" inputmode="numeric" class="calc-input"
+                       value="<?= e(vc_field($activeInput['vent']['vt_ml'] ?? null)) ?>" placeholder="450">
               </div>
-              <div class="derived-tile">
-                <div class="k">VT / PBW</div>
-                <div class="v"><?= $result['derived']['vt_per_kg'] !== null ? e(vc_field($result['derived']['vt_per_kg'])) . '<span class="u">mL/kg</span>' : '—' ?></div>
+              <div class="calc-field">
+                <label class="calc-label">RR (/min)</label>
+                <input type="number" name="rr" step="1" min="4" max="60" inputmode="numeric" class="calc-input"
+                       value="<?= e(vc_field($activeInput['vent']['rr'] ?? null)) ?>" placeholder="14">
               </div>
-              <div class="derived-tile">
-                <div class="k">Minute vent</div>
-                <div class="v"><?= $result['derived']['minute_ventilation'] !== null ? e(vc_field($result['derived']['minute_ventilation'])) . '<span class="u">L/min</span>' : '—' ?></div>
+              <div class="calc-field">
+                <label class="calc-label">PEEP (cmH₂O)</label>
+                <input type="number" name="peep" step="1" min="0" max="25" inputmode="numeric" class="calc-input"
+                       value="<?= e(vc_field($activeInput['vent']['peep'] ?? null)) ?>" placeholder="5">
               </div>
-              <div class="derived-tile">
-                <div class="k">P/F ratio</div>
-                <div class="v"><?= $result['derived']['pf_ratio'] !== null ? (int)$result['derived']['pf_ratio'] : '—' ?></div>
+              <div class="calc-field">
+                <label class="calc-label">Pplat (cmH₂O)</label>
+                <input type="number" name="pplat" step="1" min="0" max="60" inputmode="numeric" class="calc-input"
+                       value="<?= e(vc_field($activeInput['vent']['pplat'] ?? null)) ?>" placeholder="22">
               </div>
-              <div class="derived-tile">
-                <div class="k">Compliance</div>
-                <div class="v"><?= $result['derived']['static_compliance'] !== null ? e(vc_field($result['derived']['static_compliance'])) . '<span class="u">mL/cm</span>' : '—' ?></div>
+              <div class="calc-field">
+                <label class="calc-label">FiO₂ (%)</label>
+                <input type="number" name="fio2_pct" step="1" min="21" max="100" inputmode="numeric" class="calc-input"
+                       value="<?= e(vc_field($activeInput['vent']['fio2_pct'] ?? null)) ?>" placeholder="40">
               </div>
-              <?php if ($result['target_vt']): ?>
-                <div class="derived-tile">
-                  <div class="k">Target VT</div>
-                  <div class="v"><?= (int)$result['target_vt']['low'] ?>–<?= (int)$result['target_vt']['high'] ?><span class="u">mL</span></div>
-                </div>
-              <?php endif; ?>
             </div>
           </div>
 
-          <?php if (!empty($result['abg']['summary'])): ?>
+          <div class="info-card">
+            <h3>🧪 Latest ABG <span style="font-size:.7rem;font-weight:600;color:var(--text-3);margin-left:6px;">(optional)</span></h3>
+            <div class="calc-grid">
+              <div class="calc-field">
+                <label class="calc-label">pH</label>
+                <input type="number" name="ph" step="0.01" min="6.8" max="8.0" inputmode="decimal" class="calc-input"
+                       value="<?= e(vc_field($activeInput['abg']['ph'] ?? null)) ?>" placeholder="7.38">
+              </div>
+              <div class="calc-field">
+                <label class="calc-label">PaCO₂</label>
+                <input type="number" name="paco2" step="1" min="10" max="150" inputmode="numeric" class="calc-input"
+                       value="<?= e(vc_field($activeInput['abg']['paco2'] ?? null)) ?>" placeholder="40">
+              </div>
+              <div class="calc-field">
+                <label class="calc-label">PaO₂</label>
+                <input type="number" name="pao2" step="1" min="20" max="700" inputmode="numeric" class="calc-input"
+                       value="<?= e(vc_field($activeInput['abg']['pao2'] ?? null)) ?>" placeholder="80">
+              </div>
+              <div class="calc-field">
+                <label class="calc-label">HCO₃</label>
+                <input type="number" name="hco3" step="0.1" min="3" max="60" inputmode="decimal" class="calc-input"
+                       value="<?= e(vc_field($activeInput['abg']['hco3'] ?? null)) ?>" placeholder="24">
+              </div>
+              <div class="calc-field">
+                <label class="calc-label">SpO₂ (%)</label>
+                <input type="number" name="spo2" step="1" min="30" max="100" inputmode="numeric" class="calc-input"
+                       value="<?= e(vc_field($activeInput['abg']['spo2'] ?? null)) ?>" placeholder="96">
+              </div>
+              <div class="calc-field">
+                <label class="calc-label">Target PaCO₂</label>
+                <input type="number" name="target_paco2" step="1" min="25" max="80" inputmode="numeric" class="calc-input"
+                       value="<?= e(vc_field($activeInput['target_paco2'] ?? null)) ?>" placeholder="40">
+              </div>
+            </div>
+          </div>
+
+          <div class="vc-btn-row">
+            <button type="submit" name="action" value="analyze" class="ehr-btn">🔎 Analyze</button>
+            <button type="submit" name="action" value="save" class="ehr-btn secondary">💾 <?= $activeCaseId ? 'Update case' : 'Save case' ?></button>
+          </div>
+        </form>
+
+        <!-- ── RIGHT: RESULTS ──────────────────────────────────────── -->
+        <div>
+          <div class="sec-hdr">
+            <div class="sec-hdr-title">🩺 Live analysis</div>
+            <div class="sec-hdr-sub">All thresholds reference published evidence (ARDSNet, Amato 2015, SCCM, ATS).</div>
+          </div>
+
+          <?php if ($result === null): ?>
             <div class="info-card">
-              <h3>🧪 ABG interpretation</h3>
-              <div class="abg-interp">
-                <h4>Acid–base assessment</h4>
-                <p><?= e($result['abg']['summary']) ?></p>
-                <?php if (!empty($result['abg']['severity']) && $result['abg']['severity'] !== 'normal'): ?>
-                  <div class="meta">Severity: <strong><?= e(ucfirst($result['abg']['severity'])) ?></strong></div>
+              <div class="empty-state">
+                <div class="es-icon">🧠</div>
+                <div class="es-text">Fill in the ventilator settings (and ABG, if available) on the left, then press <strong>🔎 Analyze</strong> to see a personalized safety report.</div>
+              </div>
+            </div>
+          <?php else: ?>
+
+            <?php $lvl = $result['safety_level']; ?>
+            <div class="vc-safety <?= e($lvl) ?>">
+              <div class="vc-safety-icon"><?= vc_level_emoji($lvl) ?></div>
+              <div>
+                <div class="vc-safety-label"><?= strtoupper($lvl) ?> zone</div>
+                <div class="vc-safety-title"><?= e(vc_level_label($lvl)) ?></div>
+                <div class="vc-safety-sub">
+                  <?= e($result['scenario']['emoji'] . ' ' . $result['scenario']['name']) ?>
+                  <?php if ($activeInput['pbw_kg'] !== null): ?> · PBW <?= e(vc_field($activeInput['pbw_kg'])) ?> kg<?php endif; ?>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="completeness">
+                <span>Data completeness</span>
+                <div class="cp-bar"><div class="cp-fill" style="width:<?= (int)$result['completeness'] ?>%"></div></div>
+                <span><?= (int)$result['completeness'] ?>%</span>
+              </div>
+
+              <h3>📊 Derived metrics</h3>
+              <div class="derived-grid">
+                <div class="derived-tile">
+                  <div class="k">ΔP (driving)</div>
+                  <div class="v"><?= $result['derived']['driving_pressure'] !== null ? e(vc_field($result['derived']['driving_pressure'])) . '<span class="u">cmH₂O</span>' : '—' ?></div>
+                </div>
+                <div class="derived-tile">
+                  <div class="k">VT / PBW</div>
+                  <div class="v"><?= $result['derived']['vt_per_kg'] !== null ? e(vc_field($result['derived']['vt_per_kg'])) . '<span class="u">mL/kg</span>' : '—' ?></div>
+                </div>
+                <div class="derived-tile">
+                  <div class="k">Minute vent</div>
+                  <div class="v"><?= $result['derived']['minute_ventilation'] !== null ? e(vc_field($result['derived']['minute_ventilation'])) . '<span class="u">L/min</span>' : '—' ?></div>
+                </div>
+                <div class="derived-tile">
+                  <div class="k">P/F ratio</div>
+                  <div class="v"><?= $result['derived']['pf_ratio'] !== null ? (int)$result['derived']['pf_ratio'] : '—' ?></div>
+                </div>
+                <div class="derived-tile">
+                  <div class="k">Compliance</div>
+                  <div class="v"><?= $result['derived']['static_compliance'] !== null ? e(vc_field($result['derived']['static_compliance'])) . '<span class="u">mL/cm</span>' : '—' ?></div>
+                </div>
+                <?php if ($result['target_vt']): ?>
+                  <div class="derived-tile">
+                    <div class="k">Target VT</div>
+                    <div class="v"><?= (int)$result['target_vt']['low'] ?>–<?= (int)$result['target_vt']['high'] ?><span class="u">mL</span></div>
+                  </div>
                 <?php endif; ?>
               </div>
             </div>
-          <?php endif; ?>
 
-          <?php if (!empty($result['alerts'])): ?>
-            <div class="info-card">
-              <h3>🔔 Safety alerts</h3>
-              <div class="alert-list">
-                <?php foreach ($result['alerts'] as $a):
-                  $boxClass = vc_box_class($a['level']); ?>
-                  <div class="<?= e($boxClass) ?>">
-                    <div class="alert-title"><?= e($a['icon']) ?> <?= e($a['title']) ?></div>
-                    <div class="alert-detail"><?= e($a['detail']) ?></div>
-                    <div class="alert-src">Source · <?= e($a['source']) ?></div>
-                  </div>
-                <?php endforeach; ?>
+            <?php if (!empty($result['abg']['summary'])): ?>
+              <div class="info-card">
+                <h3>🧪 ABG interpretation</h3>
+                <div class="abg-interp">
+                  <h4>Acid–base assessment</h4>
+                  <p><?= e($result['abg']['summary']) ?></p>
+                  <?php if (!empty($result['abg']['severity']) && $result['abg']['severity'] !== 'normal'): ?>
+                    <div class="meta">Severity: <strong><?= e(ucfirst($result['abg']['severity'])) ?></strong></div>
+                  <?php endif; ?>
+                </div>
               </div>
-            </div>
-          <?php endif; ?>
+            <?php endif; ?>
 
-          <?php if (!empty($result['recommendations'])): ?>
-            <div class="info-card">
-              <h3>✅ Recommended actions</h3>
-              <div class="stack-list">
-                <?php foreach ($result['recommendations'] as $rc): ?>
-                  <div class="stack-item">
-                    <div class="ttl">
-                      <span class="pri">P<?= (int)$rc['priority'] ?></span>
-                      <?= e($rc['icon']) ?>
-                      <span><?= e($rc['action']) ?></span>
+            <?php if (!empty($result['alerts'])): ?>
+              <div class="info-card">
+                <h3>🔔 Safety alerts</h3>
+                <div class="alert-list">
+                  <?php foreach ($result['alerts'] as $a):
+                    $boxClass = vc_box_class($a['level']); ?>
+                    <div class="<?= e($boxClass) ?>">
+                      <div class="alert-title"><?= e($a['icon']) ?> <?= e($a['title']) ?></div>
+                      <div class="alert-detail"><?= e($a['detail']) ?></div>
+                      <div class="alert-src">Source · <?= e($a['source']) ?></div>
                     </div>
-                    <div class="why"><?= e($rc['rationale']) ?></div>
-                    <div class="src">Source · <?= e($rc['source']) ?></div>
-                  </div>
-                <?php endforeach; ?>
+                  <?php endforeach; ?>
+                </div>
               </div>
-            </div>
-          <?php endif; ?>
+            <?php endif; ?>
 
+            <?php if (!empty($result['recommendations'])): ?>
+              <div class="info-card">
+                <h3>✅ Recommended actions</h3>
+                <div class="stack-list">
+                  <?php foreach ($result['recommendations'] as $rc): ?>
+                    <div class="stack-item">
+                      <div class="ttl">
+                        <span class="pri">P<?= (int)$rc['priority'] ?></span>
+                        <?= e($rc['icon']) ?>
+                        <span><?= e($rc['action']) ?></span>
+                      </div>
+                      <div class="why"><?= e($rc['rationale']) ?></div>
+                      <div class="src">Source · <?= e($rc['source']) ?></div>
+                    </div>
+                  <?php endforeach; ?>
+                </div>
+              </div>
+            <?php endif; ?>
+
+          <?php endif; ?>
+        </div>
+
+      </div>
+
+      <!-- ── SAVED CASES ─────────────────────────────────────────── -->
+      <div class="sec-hdr vc-no-print" style="margin-top:18px;">
+        <div class="sec-hdr-title">📂 Saved cases <span style="font-size:.78rem;font-weight:700;color:var(--text-3);margin-left:6px;">(<?= count($savedCases) ?>)</span></div>
+        <div class="sec-hdr-sub">All cases are anonymous and stored only inside your own account. Delete any time.</div>
+      </div>
+
+      <div class="info-card vc-no-print">
+        <?php if (empty($savedCases)): ?>
+          <div class="empty-state">
+            <div class="es-icon">📂</div>
+            <div class="es-text">No saved cases yet. Press <strong>💾 Save case</strong> after analyzing to create your first snapshot.</div>
+          </div>
+        <?php else: ?>
+          <div class="case-list">
+            <?php foreach ($savedCases as $c):
+              $isActive = $activeCaseId === (int)$c['id'];
+              $sc       = $scenarios[$c['scenario']] ?? ['emoji'=>'🩺','name'=>$c['scenario']];
+              $lvl      = $c['safety_level'] ?? '';
+            ?>
+              <div class="case-row <?= $isActive ? 'active' : '' ?>">
+                <div class="case-dot <?= e($lvl) ?>"></div>
+                <div class="case-info">
+                  <div class="case-ref"><?= e($c['reference'] ?: ('Case #' . $c['id'])) ?></div>
+                  <div class="case-meta"><?= e($sc['emoji'] . ' ' . $sc['name']) ?> · <?= e(time_ago($c['updated_at'])) ?></div>
+                </div>
+                <a class="case-act" href="?case=<?= (int)$c['id'] ?>" title="Open">📂</a>
+                <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this case?');">
+                  <?= csrf_field() ?>
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="case_id" value="<?= (int)$c['id'] ?>">
+                  <button type="submit" class="case-act danger" title="Delete">🗑️</button>
+                </form>
+              </div>
+            <?php endforeach; ?>
+          </div>
         <?php endif; ?>
       </div>
 
     </div>
-
-    <!-- ── SAVED CASES ─────────────────────────────────────────────── -->
-    <div class="sec-hdr vc-no-print" style="margin-top:18px;">
-      <div class="sec-hdr-title">📂 Saved cases <span style="font-size:.78rem;font-weight:700;color:var(--text-3);margin-left:6px;">(<?= count($savedCases) ?>)</span></div>
-      <div class="sec-hdr-sub">All cases are anonymous and stored only inside your own account. Delete any time.</div>
-    </div>
-
-    <div class="info-card vc-no-print">
-      <?php if (empty($savedCases)): ?>
-        <div class="empty-state">
-          <div class="es-icon">📂</div>
-          <div class="es-text">No saved cases yet. Press <strong>💾 Save case</strong> after analyzing to create your first snapshot.</div>
-        </div>
-      <?php else: ?>
-        <div class="case-list">
-          <?php foreach ($savedCases as $c):
-            $isActive = $activeCaseId === (int)$c['id'];
-            $sc       = $scenarios[$c['scenario']] ?? ['emoji'=>'🩺','name'=>$c['scenario']];
-            $lvl      = $c['safety_level'] ?? '';
-          ?>
-            <div class="case-row <?= $isActive ? 'active' : '' ?>">
-              <div class="case-dot <?= e($lvl) ?>"></div>
-              <div class="case-info">
-                <div class="case-ref"><?= e($c['reference'] ?: ('Case #' . $c['id'])) ?></div>
-                <div class="case-meta"><?= e($sc['emoji'] . ' ' . $sc['name']) ?> · <?= e(time_ago($c['updated_at'])) ?></div>
-              </div>
-              <a class="case-act" href="?case=<?= (int)$c['id'] ?>" title="Open">📂</a>
-              <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this case?');">
-                <?= csrf_field() ?>
-                <input type="hidden" name="action" value="delete">
-                <input type="hidden" name="case_id" value="<?= (int)$c['id'] ?>">
-                <button type="submit" class="case-act danger" title="Delete">🗑️</button>
-              </form>
-            </div>
-          <?php endforeach; ?>
-        </div>
-      <?php endif; ?>
-    </div>
-
   </div>
 </main>
+
+<!-- ── BOTTOM NAV — matches the main app exactly so the tab strip ─── -->
+<!--    stays visible when the user opens Coach, giving a native feel.  -->
+<nav class="bottom-nav" role="tablist" aria-label="Main navigation">
+  <a class="nav-it" href="<?= app_url('/app/ventguide') ?>#scenarios" data-feature="scenarios" data-feature-name="Ventilation Scenarios">
+    <span class="nav-emoji">🏥</span><span>Scenarios</span>
+  </a>
+  <a class="nav-it" href="<?= app_url('/app/ventguide') ?>#abg" data-feature="abg_calc" data-feature-name="ABG Calculator">
+    <span class="nav-emoji">🧪</span><span>ABG Calc</span>
+  </a>
+  <a class="nav-it" href="<?= app_url('/app/ventguide') ?>#compare" data-feature="compare" data-feature-name="Scenario Comparison">
+    <span class="nav-emoji">📊</span><span>Compare</span>
+  </a>
+  <a class="nav-it" href="<?= app_url('/app/ventguide') ?>#guide" data-feature="guide" data-feature-name="Clinical Guidelines">
+    <span class="nav-emoji">📖</span><span>Guide</span>
+  </a>
+  <a class="nav-it" href="<?= app_url('/app/ventguide') ?>#tools" data-feature="tools" data-feature-name="Clinical Tools">
+    <span class="nav-emoji">🔧</span><span>Tools</span>
+  </a>
+  <a class="nav-it active" href="<?= app_url('/app/coach') ?>" aria-current="page" aria-selected="true">
+    <span class="nav-emoji">🧠</span><span>Coach</span>
+  </a>
+</nav>
 
 <script>
 (function(){
@@ -845,19 +912,18 @@ function vc_box_class(string $level): string {
   function applyDark(dark) {
     document.body.classList.toggle('dark', !!dark);
     if (moon && sun) {
-      moon.style.display = dark ? 'none'  : '';
-      sun.style.display  = dark ? ''      : 'none';
+      moon.style.display = dark ? 'none' : '';
+      sun.style.display  = dark ? ''     : 'none';
     }
   }
 
-  // Initial state: respect saved preference, else fall back to system.
+  // Initial dark-mode state: respect saved preference, else system pref.
   const saved = readState();
   const initialDark = (typeof saved.dark === 'boolean')
     ? saved.dark
     : (window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches);
   applyDark(initialDark);
 
-  // Toggle button
   const toggle = document.getElementById('darkToggle');
   if (toggle) {
     toggle.addEventListener('click', () => {
@@ -867,7 +933,6 @@ function vc_box_class(string $level): string {
     });
   }
 
-  // Print button
   const printBtn = document.getElementById('printBtn');
   if (printBtn) printBtn.addEventListener('click', () => window.print());
 })();

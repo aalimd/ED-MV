@@ -358,8 +358,8 @@ require_once __DIR__ . '/../includes/pwa.php';
     .gate-warn { background:var(--danger-bg); color:var(--danger); padding:12px; border-radius:var(--r-sm); font-weight:700; font-size:.88rem; border-left:3px solid var(--danger); margin-bottom:12px; }
 
     /* ── BOTTOM NAV ── */
-    .bottom-nav { position:fixed; bottom:0; left:0; width:100%; max-width:100vw; background:var(--surface); box-shadow:0 -2px 20px rgba(0,0,0,.09); display:flex; justify-content:space-around; padding:10px 8px calc(10px + env(safe-area-inset-bottom)); z-index:100; border-top:1px solid var(--border); border-top-left-radius:var(--r-xl); border-top-right-radius:var(--r-xl); }
-    .nav-it { display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--text-3); font-size:.58rem; font-weight:800; letter-spacing:.03em; text-transform:uppercase; padding:7px 5px; border-radius:var(--r-sm); cursor:pointer; transition:all .2s ease; width:20%; border:none; background:transparent; font-family:inherit; }
+    .bottom-nav { position:fixed; bottom:0; left:0; width:100%; max-width:100vw; background:var(--surface); box-shadow:0 -2px 20px rgba(0,0,0,.09); display:flex; justify-content:space-around; padding:10px 4px calc(10px + env(safe-area-inset-bottom)); z-index:100; border-top:1px solid var(--border); border-top-left-radius:var(--r-xl); border-top-right-radius:var(--r-xl); gap:2px; }
+    .nav-it { display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--text-3); font-size:.58rem; font-weight:800; letter-spacing:.03em; text-transform:uppercase; padding:7px 3px; border-radius:var(--r-sm); cursor:pointer; transition:all .2s ease; flex:1 1 0; min-width:0; border:none; background:transparent; font-family:inherit; text-decoration:none; }
     .nav-it .nav-emoji { font-size:1.25rem; line-height:1; transition:transform .25s cubic-bezier(.34,1.56,.64,1); }
     .nav-it.active { color:var(--theme); background:var(--theme-light); }
     .nav-it.active .nav-emoji { transform:scale(1.22); }
@@ -1653,6 +1653,9 @@ require_once __DIR__ . '/../includes/pwa.php';
   <button class="nav-it" data-target="view-tools" data-feature="tools" data-feature-name="Clinical Tools" role="tab" aria-selected="false">
     <span class="nav-emoji">🔧</span><span>Tools</span>
   </button>
+  <a class="nav-it" href="<?= app_url('/app/coach') ?>" data-feature="vent_coach" data-feature-name="Vent Coach" aria-label="Open Vent Coach">
+    <span class="nav-emoji">🧠</span><span>Coach</span>
+  </a>
 </nav>
 
 <!-- ████ FAB ████ -->
@@ -2979,21 +2982,39 @@ const App = {
   // ── Navigation ─────────────────────────────────────
   _setupNav() {
     document.querySelectorAll('.nav-it').forEach(btn => {
-      btn.addEventListener('click', () => {
-        // Feature gate check
+      btn.addEventListener('click', (e) => {
         const fk = btn.dataset.feature;
-        if (fk && !FG.has(fk)) { FG.prompt(fk); return; }
-        // Original navigation logic
+        if (fk && !FG.has(fk)) {
+          e.preventDefault();
+          FG.prompt(fk);
+          return;
+        }
+        // External link tab (e.g. Coach <a href>) — let the browser navigate.
+        if (!btn.dataset.target) return;
+        // In-page tab switch
         document.querySelectorAll('.nav-it').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
         btn.classList.add('active'); btn.setAttribute('aria-selected','true');
         const t = btn.dataset.target;
         document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === t));
         document.querySelector('.content').scrollTo({ top:0, behavior:'smooth' });
-        // Render compare spotlight when switching to that tab
         if (t === 'view-compare') { this._renderCompare(); }
         if (t === 'view-tools') this._setupTools();
+        // Update URL hash so deep-links / back-button work
+        try {
+          const slug = t.replace(/^view-/, '');
+          if (window.history && history.replaceState) {
+            history.replaceState(null, '', '#' + slug);
+          }
+        } catch (_) { /* ignore */ }
       });
     });
+
+    // Honour an initial #hash so coach.php (and other deep links) can open a tab.
+    const slug = (window.location.hash || '').replace(/^#/, '').trim();
+    if (slug) {
+      const target = document.querySelector('[data-target="view-' + slug + '"]');
+      if (target) target.click();
+    }
   },
 
   // ── PBW Calculator ─────────────────────────────────
