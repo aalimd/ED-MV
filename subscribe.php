@@ -26,17 +26,29 @@ $pageSubtitle = get_setting('sub_page_subtitle', 'Get full access to evidence-ba
 $pageFooter = get_setting('sub_page_footer', '');
 $currencyOverride = get_setting('sub_currency_symbol', '');
 
+$stmt = $db->prepare("SELECT plan_id FROM subscriptions WHERE user_id=? AND status='active' AND (expires_at IS NULL OR expires_at > NOW()) ORDER BY id DESC LIMIT 1");
+$stmt->execute([$user['id']]);
+$activePlanId = $stmt->fetchColumn() ?: 0;
+
 $requested = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
     $planId = (int)($_POST['plan_id'] ?? 0);
+    $planStmt = $db->prepare('SELECT id FROM plans WHERE id = ? AND is_active = 1 LIMIT 1');
+    $planStmt->execute([$planId]);
+    $validPlan = $planStmt->fetch();
+
     $stmt = $db->prepare("SELECT id FROM subscriptions WHERE user_id = ? AND status = 'pending' LIMIT 1");
     $stmt->execute([$user['id']]);
-    if (!$stmt->fetch() && $planId > 0) {
+    if (!$stmt->fetch() && $validPlan && $planId !== (int)$activePlanId) {
         $db->prepare("INSERT INTO subscriptions (user_id, plan_id, status) VALUES (?, ?, 'pending')")
            ->execute([$user['id'], $planId]);
         log_activity('subscription_request', "Requested plan ID: {$planId}", $user['id']);
+        $requested = true;
+    } elseif ($validPlan && $planId === (int)$activePlanId) {
+        flash('warning', 'You are already on this plan.');
+    } elseif (!$validPlan && $planId > 0) {
+        flash('danger', 'Invalid plan selected.');
     }
-    $requested = true;
 }
 
 // Check for existing pending request
@@ -45,10 +57,6 @@ $stmt->execute([$user['id']]);
 $pending = $stmt->fetch();
 
 // Check for current active plan to prevent re-requesting it
-$stmt = $db->prepare("SELECT plan_id FROM subscriptions WHERE user_id=? AND status='active' AND (expires_at IS NULL OR expires_at > NOW()) ORDER BY id DESC LIMIT 1");
-$stmt->execute([$user['id']]);
-$activePlanId = $stmt->fetchColumn() ?: 0;
-
 $hasSub = has_subscription();
 $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 ?>
@@ -152,7 +160,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 </style>
 </head>
 <body>
-<button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
+<button class="dark-toggle" type="button" data-toggle-dark title="Toggle dark mode"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
 
 <?php if($pending || $requested): ?>
 <!-- ── Pending State ──────────────────────── -->
@@ -180,6 +188,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
   <div style="font-size:2.5rem;margin-bottom:12px">🫁</div>
   <h1><?= e($pageTitle) ?></h1>
   <p><?= e($pageSubtitle) ?></p>
+  <?= render_flashes() ?>
   <?php if($hasSub): ?>
   <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:#059669;padding:12px;border-radius:12px;margin:20px auto 0;max-width:520px;font-size:0.85rem;font-weight:600;text-align:left;">
     💡 <strong>Smart Upgrade:</strong> If you upgrade today, the remaining days on your current plan will be automatically added to your new plan! You will not lose any paid time.
@@ -196,7 +205,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
   $priceInt = floor($plan['price']);
   $priceDec = round(($plan['price'] - $priceInt) * 100);
 ?>
-<form method="POST" class="price-card <?= $isFeatured ? 'featured' : '' ?>" style="--card-accent:<?= e($cardColor) ?>;animation-delay:<?= $i * 0.1 ?>s" onsubmit="return confirm('Just a gentle reminder:\n\nTo help us maintain a high-quality service, please note that all subscription purchases and upgrades are final and non-refundable once approved.\n\nWould you like to proceed with requesting this plan?');">
+<form method="POST" class="price-card <?= $isFeatured ? 'featured' : '' ?>" style="--card-accent:<?= e($cardColor) ?>;animation-delay:<?= $i * 0.1 ?>s" data-confirm="Just a gentle reminder:&#10;&#10;To help us maintain a high-quality service, please note that all subscription purchases and upgrades are final and non-refundable once approved.&#10;&#10;Would you like to proceed with requesting this plan?">
   <?= csrf_field() ?>
   <input type="hidden" name="plan_id" value="<?= $plan['id'] ?>">
   <?php if($plan['badge']): ?>
@@ -244,8 +253,6 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 </div>
 <?php endif; ?>
 
-<script>
-function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}
-</script>
+<?= ui_script_tag() . "\n" ?>
 <?= pwa_script_tag() . "\n" ?>
 </body></html>

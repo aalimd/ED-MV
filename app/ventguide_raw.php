@@ -1,5 +1,6 @@
 <?php
 if (!defined('VENTGUIDE_INTERNAL')) { http_response_code(404); exit('Not found'); }
+require_once __DIR__ . '/../includes/features.php';
 require_once __DIR__ . '/../includes/pwa.php';
 ?>
 <!DOCTYPE html>
@@ -14,7 +15,7 @@ require_once __DIR__ . '/../includes/pwa.php';
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-  <style>
+  <style<?= style_nonce_attr() ?>>
     /* ── PRE-RENDER FLASH PREVENTION ── */
     :root {
       --bg:#f1f5f9; --surface:#ffffff; --surface-2:#f8fafc;
@@ -793,6 +794,7 @@ require_once __DIR__ . '/../includes/pwa.php';
 </div>
 
 <!-- ████ PBW CALCULATOR MODAL ████ -->
+<?php if (has_feature('pbw_calc')): ?>
 <div class="modal-bg" id="calcModal" role="dialog" aria-modal="true" aria-labelledby="calcTitle">
   <div class="modal">
     <div class="modal-hdr">
@@ -816,7 +818,7 @@ require_once __DIR__ . '/../includes/pwa.php';
 
     <div class="calc-field">
       <label class="calc-label">📏 Height
-        <span class="term" style="margin-left:8px;font-size:.75rem;" tabindex="0" onclick="App.toast('💡 Pregnancy: use pre-pregnancy height — not current weight — for PBW.')">ℹ️ Preg note</span>
+        <span class="term" style="margin-left:8px;font-size:.75rem;" tabindex="0" data-tip="💡 Pregnancy: use pre-pregnancy height — not current weight — for PBW.">ℹ️ Preg note</span>
       </label>
       <div class="input-row">
         <input type="number" id="heightInput" class="calc-input" placeholder="e.g. 175" inputmode="decimal" style="flex:1" aria-describedby="heightHint">
@@ -841,6 +843,7 @@ require_once __DIR__ . '/../includes/pwa.php';
     </div>
   </div>
 </div>
+<?php endif; ?>
 
 <!-- ████ UPGRADE MODAL ████ -->
 <div class="modal-bg" id="upgradeModal" role="dialog" aria-modal="true">
@@ -862,9 +865,11 @@ require_once __DIR__ . '/../includes/pwa.php';
       <div class="header-badge" id="hBadge">🏥 STANDARD INITIATION</div>
     </div>
     <div class="header-actions">
+      <?php if (has_feature('print')): ?>
       <button class="hbtn" id="printBtn" data-feature="print" data-feature-name="Print Pocket Card" aria-label="Print pocket card" title="Print">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
       </button>
+      <?php endif; ?>
       <button class="hbtn" id="darkToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
         <svg id="moonIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg id="sunIcon"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
@@ -877,6 +882,7 @@ require_once __DIR__ . '/../includes/pwa.php';
 <main class="content">
 
   <!-- ── SCENARIOS ── -->
+  <?php if (has_feature('scenarios')): ?>
   <section id="view-scenarios" class="view active" aria-label="Ventilation scenarios">
     <div class="scenario-select-wrap">
       <label class="scenario-select-label" for="scenarioSelect">Scenario</label>
@@ -930,14 +936,20 @@ require_once __DIR__ . '/../includes/pwa.php';
     <div class="evidence-bar" id="evidenceBar"></div>
 
     <!-- EHR -->
+    <?php if (has_feature('ehr_export')): ?>
     <button class="ehr-btn" id="ehrBtn" data-feature="ehr_export" data-feature-name="EHR Export">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
       📋 Copy Structured Note to EHR
     </button>
     <p class="text-muted-center">Includes timestamp, evidence references &amp; PBW.</p>
+    <?php endif; ?>
   </section>
+  <?php else: ?>
+  <?php feature_locked_section('view-scenarios', 'Ventilation Scenarios', 'Ventilation scenarios', true); ?>
+  <?php endif; ?>
 
   <!-- ── ABG CALCULATOR ── -->
+  <?php if (has_feature('abg_calc')): ?>
   <section id="view-abg" class="view" aria-label="ABG calculator">
     <div class="sec-hdr mt-4">
       <div class="sec-hdr-title">
@@ -949,7 +961,7 @@ require_once __DIR__ . '/../includes/pwa.php';
 
     <div class="clin-warn">
       ⚠️ <strong>Clinical Warning:</strong> In Asthma, COPD, or severe ARDS,
-      <span class="term" tabindex="0" onclick="App.toast('🫁 Permissive hypercapnia = accepting mild acidosis to avoid dynamic hyperinflation or excess lung stretch.')">permissive hypercapnia</span>
+      <span class="term" tabindex="0" data-tip="🫁 Permissive hypercapnia = accepting mild acidosis to avoid dynamic hyperinflation or excess lung stretch.">permissive hypercapnia</span>
       is often preferred. <strong>Do NOT chase PaCO₂ = 40 if the patient is avoiding breath stacking and the pH remains clinically acceptable.</strong>
     </div>
 
@@ -991,7 +1003,7 @@ require_once __DIR__ . '/../includes/pwa.php';
         🧠 Clinical Pearls
       </h3>
       <ul>
-        <li>In <strong>COPD</strong>, the baseline CO₂ is often chronically elevated (50–60 mmHg) — target <span class="term" tabindex="0" onclick="App.toast('Target the patient\'s baseline CO₂, not the normal value of 40 mmHg.')">their baseline</span>, not 40 mmHg.</li>
+        <li>In <strong>COPD</strong>, the baseline CO₂ is often chronically elevated (50–60 mmHg) — target <span class="term" tabindex="0" data-tip="Target the patient's baseline CO₂, not the normal value of 40 mmHg.">their baseline</span>, not 40 mmHg.</li>
         <li>Recheck ABG or VBG <strong>30–60 min</strong> after any ventilator change.</li>
         <li><strong>VBG</strong> is often adequate for pH and CO₂ trend screening, but do not use venous CO₂ as an exact PaCO₂ substitute in shock or severe respiratory failure.</li>
         <li>Overcorrecting CO₂ too fast risks <strong>post-hypercapnic alkalosis</strong> and seizures.</li>
@@ -999,8 +1011,12 @@ require_once __DIR__ . '/../includes/pwa.php';
       </ul>
     </div>
   </section>
+  <?php else: ?>
+  <?php feature_locked_section('view-abg', 'ABG Calculator', 'ABG calculator'); ?>
+  <?php endif; ?>
 
   <!-- ── COMPARE ── -->
+  <?php if (has_feature('compare')): ?>
   <section id="view-compare" class="view" aria-label="Comparison matrix">
 
     <!-- Mode switcher -->
@@ -1047,8 +1063,12 @@ require_once __DIR__ . '/../includes/pwa.php';
     </div>
 
   </section>
+  <?php else: ?>
+  <?php feature_locked_section('view-compare', 'Scenario Comparison', 'Comparison matrix'); ?>
+  <?php endif; ?>
 
   <!-- ── GUIDE ── -->
+  <?php if (has_feature('guide')): ?>
   <section id="view-guide" class="view" aria-label="Clinical guidelines">
 
     <div class="info-card mt-4">
@@ -1057,7 +1077,7 @@ require_once __DIR__ . '/../includes/pwa.php';
         🛡️ Core Lung-Protective Principles
       </h3>
       <ul>
-        <li>🫁 <strong>Low Tidal Volume:</strong> Most adults start at 6–8 mL/kg <span class="term" tabindex="0" onclick="App.toast('⚖️ PBW = Predicted Body Weight. Always calculate from HEIGHT and SEX — never use actual body weight.')">PBW</span>; established ARDS uses 4–8 mL/kg PBW with plateau pressure control to prevent <span class="term" tabindex="0" onclick="App.toast('💥 VILI = Ventilator-Induced Lung Injury. Includes barotrauma, volutrauma, and atelectrauma.')">VILI</span>.</li>
+        <li>🫁 <strong>Low Tidal Volume:</strong> Most adults start at 6–8 mL/kg <span class="term" tabindex="0" data-tip="⚖️ PBW = Predicted Body Weight. Always calculate from HEIGHT and SEX — never use actual body weight.">PBW</span>; established ARDS uses 4–8 mL/kg PBW with plateau pressure control to prevent <span class="term" tabindex="0" data-tip="💥 VILI = Ventilator-Induced Lung Injury. Includes barotrauma, volutrauma, and atelectrauma.">VILI</span>.</li>
         <li>📐 <strong>Driving Pressure:</strong> Target ΔP (Pplat − PEEP) &lt; <strong>15 cmH₂O</strong>. A key surrogate of lung stress.</li>
         <li>💊 <strong>Sedation &amp; Analgesia:</strong> Use analgesia-first, goal-directed sedation and target the lightest RASS compatible with comfort and synchrony.</li>
         <li>🔄 <strong>Reassess:</strong> ABG or VBG within <strong>30–60 min</strong> of initiation or any major change.</li>
@@ -1168,7 +1188,7 @@ require_once __DIR__ . '/../includes/pwa.php';
         <div class="dope-item"><div class="dope-letter">D</div><div class="dope-word">Displacement</div><div class="dope-desc">ETT dislodged or right mainstem intubation</div></div>
         <div class="dope-item"><div class="dope-letter">O</div><div class="dope-word">Obstruction</div><div class="dope-desc">Secretions, biting tube, or kinking</div></div>
         <div class="dope-item"><div class="dope-letter">P</div><div class="dope-word">Pneumothorax</div><div class="dope-desc">Tension — needle decompress immediately</div></div>
-        <div class="dope-item"><div class="dope-letter">E</div><div class="dope-word">Equipment</div><div class="dope-desc"><span class="term" tabindex="0" onclick="App.toast('💨 Auto-PEEP = breath stacking from incomplete exhalation. Disconnect circuit and allow passive exhalation.')">Auto-PEEP</span> or machine failure</div></div>
+        <div class="dope-item"><div class="dope-letter">E</div><div class="dope-word">Equipment</div><div class="dope-desc"><span class="term" tabindex="0" data-tip="💨 Auto-PEEP = breath stacking from incomplete exhalation. Disconnect circuit and allow passive exhalation.">Auto-PEEP</span> or machine failure</div></div>
       </div>
       <div class="mini-card" style="margin-top:12px;background:rgba(220,38,38,.05);border-left:3px solid #dc2626;">
         <h4 style="color:#dc2626;margin-bottom:4px;">High Pressure Alarm? Press "Inspiratory Hold"</h4>
@@ -1244,8 +1264,12 @@ require_once __DIR__ . '/../includes/pwa.php';
       </ul>
     </div>
 </section>
+  <?php else: ?>
+  <?php feature_locked_section('view-guide', 'Clinical Guidelines', 'Clinical guidelines'); ?>
+  <?php endif; ?>
 
   <!-- ── TOOLS TAB ── -->
+  <?php if (has_feature('tools')): ?>
   <section id="view-tools" class="view" aria-label="Clinical tools">
 
     <!-- ── 1. ASSESSMENT: Difficult Airway Predictor (LEMON) ── -->
@@ -1588,6 +1612,9 @@ require_once __DIR__ . '/../includes/pwa.php';
     </div>
 
   </section>
+  <?php else: ?>
+  <?php feature_locked_section('view-tools', 'Clinical Tools', 'Clinical tools'); ?>
+  <?php endif; ?>
 </main>
 
 <!-- ████ BOTTOM NAV ████ -->
@@ -1610,10 +1637,12 @@ require_once __DIR__ . '/../includes/pwa.php';
 </nav>
 
 <!-- ████ FAB ████ -->
+<?php if (has_feature('pbw_calc')): ?>
 <button class="fab" id="fabCalc" data-feature="pbw_calc" data-feature-name="PBW Calculator" aria-label="Open PBW Calculator" title="PBW Calculator">⚖️</button>
+<?php endif; ?>
 
 <!-- ████ SCRIPT ████ -->
-<script>
+<script<?= script_nonce_attr() ?>>
 'use strict';
 
 // ─── FEATURE GATE ENGINE ─────────────────────────────
@@ -1689,6 +1718,7 @@ const Store = {
 };
 
 // ─── SCENARIO DATA ───────────────────────────────────
+<?php if (has_feature('scenarios') || has_feature('compare')): ?>
 const SCENARIOS = [
   {
     id:'healthy', name:'Healthy Lungs', emoji:'💙',
@@ -1985,6 +2015,9 @@ const SCENARIOS = [
 
   }
 ];
+<?php else: ?>
+const SCENARIOS = [];
+<?php endif; ?>
 
 // ─── WAVEFORM RENDERER ───────────────────────────────
 function renderWaveform(type) {
@@ -3735,7 +3768,7 @@ const App = {
         const toggles = d.modes.length > 1 ? `
           <div style="display:flex;background:var(--surface-3);padding:2px;border-radius:6px;margin-bottom:8px;">
             ${d.modes.map((m, modeIdx) => `
-              <button onclick="setInfusionMode(${drugIdx}, ${modeIdx})" style="flex:1;border:0;padding:4px;font-size:0.65rem;font-weight:700;border-radius:4px;cursor:pointer;background:${d.sel === modeIdx ? 'var(--theme)' : 'transparent'};color:${d.sel === modeIdx ? '#fff' : 'var(--text-3)'};transition:all 0.2s;">
+              <button type="button" class="infusion-mode-btn" data-drug-idx="${drugIdx}" data-mode-idx="${modeIdx}" style="flex:1;border:0;padding:4px;font-size:0.65rem;font-weight:700;border-radius:4px;cursor:pointer;background:${d.sel === modeIdx ? 'var(--theme)' : 'transparent'};color:${d.sel === modeIdx ? '#fff' : 'var(--text-3)'};transition:all 0.2s;">
                 ${m.unit}
               </button>
             `).join('')}
@@ -3766,6 +3799,15 @@ const App = {
           </div>
         `;
       }).join('');
+      list.querySelectorAll('.infusion-mode-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const drugIdx = parseInt(btn.dataset.drugIdx, 10);
+          const modeIdx = parseInt(btn.dataset.modeIdx, 10);
+          if (!Number.isNaN(drugIdx) && !Number.isNaN(modeIdx)) {
+            setInfusionMode(drugIdx, modeIdx);
+          }
+        });
+      });
     };
     document.getElementById('rsiTbw')?.addEventListener('input', (e) => {
       rsiCalc();

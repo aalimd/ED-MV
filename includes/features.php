@@ -108,3 +108,17 @@ function render_feature_script(): string {
 function invalidate_feature_cache(): void {
     unset($_SESSION['_feat_keys'], $_SESSION['_feat_ts']);
 }
+
+/**
+ * Render a locked-feature placeholder section (server-side gate).
+ */
+function feature_locked_section(string $sectionId, string $featureName, string $ariaLabel, bool $active = false): void {
+    $activeClass = $active ? ' active' : '';
+    echo '<section id="' . e($sectionId) . '" class="view' . $activeClass . '" aria-label="' . e($ariaLabel) . '">';
+    echo '<div class="info-card mt-4" style="text-align:center;padding:48px 24px;">';
+    echo '<div style="font-size:2.4rem;margin-bottom:10px;">🔒</div>';
+    echo '<h2 style="font-size:1.1rem;font-weight:800;margin-bottom:8px;">' . e($featureName) . '</h2>';
+    echo '<p style="font-size:.88rem;color:var(--text-2);margin-bottom:20px;">This feature requires a higher subscription plan.</p>';
+    echo '<a href="' . e(APP_URL) . '/subscribe" class="ehr-btn">⬆️ Upgrade Plan</a>';
+    echo '</div></section>';
+}
