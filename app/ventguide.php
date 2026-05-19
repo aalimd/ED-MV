@@ -81,6 +81,26 @@ $userMenu = '
   #vg-user-dropdown a:hover { background: var(--surface-2, #f1f5f9); }
   #vg-user-dropdown a.danger { color: var(--danger, #dc2626); }
   #vg-user-dropdown a.danger:hover { background: rgba(220,38,38,0.05); }
+  #vg-user-dropdown button.danger {
+    font-size: .85rem;
+    font-weight: 800;
+    padding: 10px 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #e11d48 !important;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease;
+  }
+  #vg-user-dropdown button.danger:hover {
+    background: rgba(225, 29, 72, 0.1) !important;
+  }
   
   #vg-chevron { transition: transform 0.2s ease; }
   #vg-user-details[open] #vg-chevron { transform: rotate(180deg); }
@@ -103,9 +123,6 @@ $userMenu = '
       <span class="vg-pill">' . htmlspecialchars($user['role']) . '</span>
     </div>';
 
-if (has_feature('vent_coach')) {
-    $userMenu .= '<a href="' . app_url('/app/coach') . '" data-feature="vent_coach">🧠 <span>Vent Coach</span></a>';
-}
 
 if ($isAdmin) {
     $userMenu .= '<a href="' . app_url('/admin/') . '">⚙️ <span>Admin Dashboard</span></a>';
@@ -114,7 +131,7 @@ if ($isAdmin) {
 $userMenu .= '
     <form method="POST" action="' . app_url('/auth/logout') . '" style="margin:0;">
       ' . csrf_field() . '
-      <button type="submit" class="danger" style="width:100%;text-align:left;border:none;background:none;cursor:pointer;">
+      <button type="submit" class="danger">
         🚪 <span>Sign Out</span>
       </button>
     </form>
