@@ -132,6 +132,39 @@ if (defined('APP_URL')) {
     }
 }
 
+$secretsFound = false;
+foreach (edmv_secrets_paths() as $secretsPath) {
+    if (is_readable($secretsPath)) {
+        $secretsFound = true;
+        checkOk('SMTP secrets file found: ' . $secretsPath);
+        break;
+    }
+}
+if (!$secretsFound) {
+    if (defined('SMTP_PASSWORD') && SMTP_PASSWORD !== '') {
+        checkWarn('No edmv.secrets.ini found; SMTP_PASSWORD is set in config.php. Prefer /home/<user>/private/edmv.secrets.ini on production.');
+    } else {
+        checkFail('SMTP secrets missing. Create /home/<user>/private/edmv.secrets.ini or config.secrets.ini for local dev.');
+    }
+}
+
+$logsDir = $root . '/logs';
+if (is_dir($logsDir)) {
+    checkOk('logs/ directory exists.');
+    if (is_writable($logsDir)) {
+        checkOk('logs/ directory is writable.');
+    } else {
+        checkFail('logs/ directory is not writable by PHP.');
+    }
+    if (is_file($logsDir . '/.htaccess')) {
+        checkOk('logs/.htaccess exists.');
+    } else {
+        checkWarn('logs/.htaccess is missing.');
+    }
+} else {
+    checkWarn('logs/ directory does not exist yet. It will be created on first error log write.');
+}
+
 foreach (['tools/.htaccess', 'migrations/.htaccess', 'includes/.htaccess', 'app/.htaccess'] as $protectedFile) {
     if (is_file($root . '/' . $protectedFile)) {
         checkOk($protectedFile . ' exists.');
@@ -185,6 +218,8 @@ if (is_file($configPath)) {
             'users',
             'plans',
             'subscriptions',
+            'features',
+            'plan_features',
             'login_attempts',
             'password_resets',
             'email_verifications',

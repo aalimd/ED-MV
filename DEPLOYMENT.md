@@ -5,6 +5,21 @@ This project uses Git for application files and SQL migrations for database chan
 ## Production Rules
 
 - Keep `config.php` on the server only. Do not commit it.
+- Store SMTP credentials in `/home/<your-hostinger-user>/private/edmv.secrets.ini` (chmod 600), not in `config.php`. Example:
+
+```ini
+[smtp]
+host = smtp.example.com
+port = 587
+username = smtp_username
+password = your_smtp_password
+secure = tls
+timeout = 10
+from = noreply@your-domain.com
+from_name = ED VentGuide Pro
+```
+
+- Local XAMPP can use `config.secrets.ini` in the project root (gitignored).
 - Keep `APP_DEBUG` set to `false` on hosting.
 - Use HTTPS in `APP_URL`.
 - Do not re-import `db_setup.sql` over a live database after launch.
@@ -101,6 +116,14 @@ Also test the live app:
 - `/auth/register`
 - `/subscribe`
 - `/admin/`
+
+## Scheduled Cleanup
+
+Add a Hostinger cron job (daily) to prune stale auth rows and old logs:
+
+```bash
+php /home/<user>/domains/<domain>/public_html/tools/cleanup.php
+```
 
 ## Rollback
 

@@ -1,7 +1,9 @@
 -- ═══════════════════════════════════════════════════════
--- ED VentGuide Pro — Database Schema
--- One-time local/manual setup file.
--- Production deployments should use tools/migrate.php instead.
+-- ED VentGuide Pro — Database Schema (bootstrap only)
+-- ─────────────────────────────────────────────────────
+-- Source of truth for production: migrations/*.sql + tools/migrate.php
+-- Use this file only for first-time local/phpMyAdmin bootstrap.
+-- Do NOT re-import over a live database after launch.
 -- ═══════════════════════════════════════════════════════
 
 CREATE DATABASE IF NOT EXISTS `edmvpro` 
@@ -16,6 +18,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `name` VARCHAR(100) NOT NULL,
   `email` VARCHAR(255) NOT NULL UNIQUE,
   `password_hash` VARCHAR(255) NOT NULL,
+  `auth_version` INT UNSIGNED NOT NULL DEFAULT 1,
   `role` ENUM('user','subscriber','admin') NOT NULL DEFAULT 'user',
   `status` ENUM('pending','active','suspended','deleted') NOT NULL DEFAULT 'pending',
   `email_verified` TINYINT(1) NOT NULL DEFAULT 0,
@@ -76,12 +79,54 @@ CREATE TABLE IF NOT EXISTS `login_attempts` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `ip` VARCHAR(45) NOT NULL,
   `email` VARCHAR(255) NULL,
+  `action` VARCHAR(50) NOT NULL DEFAULT 'login',
   `attempts` INT UNSIGNED NOT NULL DEFAULT 1,
   `first_attempt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `locked_until` DATETIME NULL,
   INDEX `idx_ip` (`ip`),
+  INDEX `idx_ip_action` (`ip`, `action`),
   INDEX `idx_locked` (`locked_until`)
 ) ENGINE=InnoDB;
+
+-- ── Feature Gating ────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `features` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `key` VARCHAR(50) NOT NULL UNIQUE,
+  `name` VARCHAR(100) NOT NULL,
+  `description` TEXT NULL,
+  `icon` VARCHAR(10) NULL DEFAULT '🔒',
+  `sort_order` INT NOT NULL DEFAULT 0,
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `plan_features` (
+  `plan_id` INT UNSIGNED NOT NULL,
+  `feature_id` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`plan_id`, `feature_id`),
+  FOREIGN KEY (`plan_id`) REFERENCES `plans`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`feature_id`) REFERENCES `features`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO `features` (`key`, `name`, `icon`, `sort_order`) VALUES
+('scenarios',  'Ventilation Scenarios', '🏥', 1),
+('abg_calc',   'ABG Calculator',       '🧪', 2),
+('compare',    'Scenario Comparison',   '📊', 3),
+('guide',      'Clinical Guidelines',   '📖', 4),
+('tools',      'Clinical Tools',        '🔧', 5),
+('pbw_calc',   'PBW Calculator',        '⚖️', 6),
+('ehr_export', 'EHR Export',            '📋', 7),
+('print',      'Print Pocket Card',     '🖨️', 8);
+
+INSERT IGNORE INTO `plan_features` (`plan_id`, `feature_id`)
+SELECT p.id, f.id FROM plans p CROSS JOIN features f;
+
+-- ── Schema Migrations Tracking ────────────────────────
+CREATE TABLE IF NOT EXISTS `schema_migrations` (
+  `migration` VARCHAR(255) NOT NULL PRIMARY KEY,
+  `checksum` CHAR(64) NOT NULL,
+  `applied_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── Password Resets ───────────────────────────────────
 CREATE TABLE IF NOT EXISTS `password_resets` (
