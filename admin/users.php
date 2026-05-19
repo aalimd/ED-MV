@@ -103,12 +103,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
 
                 $db->beginTransaction();
                 try {
+                    $needsAuthBump = ($role !== $target['role'] || $status !== $target['status']);
                     $params = [$name, $email, $role, $status, $emailVerified, $uid];
                     $sql = 'UPDATE users SET name=?, email=?, role=?, status=?, email_verified=? WHERE id=?';
                     if ($newPassword !== '') {
                         $hash = password_hash($newPassword, defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT, defined('PASSWORD_ARGON2ID') ? [] : ['cost' => BCRYPT_COST]);
                         $sql = 'UPDATE users SET name=?, email=?, role=?, status=?, email_verified=?, password_hash=?, auth_version = auth_version + 1 WHERE id=?';
                         $params = [$name, $email, $role, $status, $emailVerified, $hash, $uid];
+                    } elseif ($needsAuthBump) {
+                        $sql = 'UPDATE users SET name=?, email=?, role=?, status=?, email_verified=?, auth_version = auth_version + 1 WHERE id=?';
                     }
                     $db->prepare($sql)->execute($params);
                     if ($newPassword !== '' || $email !== $target['email']) {
@@ -137,41 +140,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
                 flash('success', 'User details updated.');
                 break;
             case 'activate':
-                $db->prepare("UPDATE users SET status='active' WHERE id=?")->execute([$uid]);
+                $db->prepare("UPDATE users SET status='active', auth_version = auth_version + 1 WHERE id=?")->execute([$uid]);
                 log_activity('admin_activate_user', "Activated user ID: {$uid}");
                 flash('success', 'User activated.');
                 break;
             case 'suspend':
-                $db->prepare("UPDATE users SET status='suspended' WHERE id=?")->execute([$uid]);
+                $db->prepare("UPDATE users SET status='suspended', auth_version = auth_version + 1 WHERE id=?")->execute([$uid]);
                 // Also cancel any active subscriptions
                 $db->prepare("UPDATE subscriptions SET status='cancelled' WHERE user_id=? AND status='active'")->execute([$uid]);
                 log_activity('admin_suspend_user', "Suspended user ID: {$uid} (subscriptions cancelled)");
                 flash('warning', 'User suspended. Active subscriptions have been cancelled.');
                 break;
             case 'deactivate':
-                // Soft hold — sets pending, preserves subscription for later
-                $db->prepare("UPDATE users SET status='pending' WHERE id=?")->execute([$uid]);
+                $db->prepare("UPDATE users SET status='pending', auth_version = auth_version + 1 WHERE id=?")->execute([$uid]);
                 log_activity('admin_deactivate_user', "Deactivated (held) user ID: {$uid}");
                 flash('warning', 'User account placed on hold (pending). They cannot log in until reactivated.');
                 break;
             case 'delete':
-                $db->prepare("UPDATE users SET status='deleted' WHERE id=?")->execute([$uid]);
+                $db->prepare("UPDATE users SET status='deleted', auth_version = auth_version + 1 WHERE id=?")->execute([$uid]);
                 $db->prepare("UPDATE subscriptions SET status='cancelled' WHERE user_id=? AND status IN ('active','pending')")->execute([$uid]);
                 log_activity('admin_delete_user', "Soft-deleted user ID: {$uid}");
                 flash('danger', 'User deleted and subscriptions cancelled.');
                 break;
             case 'make_admin':
-                $db->prepare("UPDATE users SET role='admin' WHERE id=?")->execute([$uid]);
+                $db->prepare("UPDATE users SET role='admin', auth_version = auth_version + 1 WHERE id=?")->execute([$uid]);
                 log_activity('admin_promote', "Promoted user ID {$uid} to admin");
                 flash('success', 'User promoted to admin.');
                 break;
             case 'make_subscriber':
-                $db->prepare("UPDATE users SET role='subscriber' WHERE id=?")->execute([$uid]);
+                $db->prepare("UPDATE users SET role='subscriber', auth_version = auth_version + 1 WHERE id=?")->execute([$uid]);
                 log_activity('admin_set_role', "Set user ID {$uid} to subscriber");
                 flash('success', 'Role updated to subscriber.');
                 break;
             case 'make_user':
-                $db->prepare("UPDATE users SET role='user' WHERE id=?")->execute([$uid]);
+                $db->prepare("UPDATE users SET role='user', auth_version = auth_version + 1 WHERE id=?")->execute([$uid]);
                 log_activity('admin_set_role', "Set user ID {$uid} to user");
                 flash('success', 'Role updated to user.');
                 break;
@@ -399,15 +401,15 @@ admin_header('User Management', '👥', 'users');
 if ($u['status'] === 'pending'): ?>
 <button name="action" value="activate" class="act-btn success" title="Approve user">✅ Approve</button>
 <?php elseif ($u['status'] === 'active'): ?>
-<button name="action" value="deactivate" class="act-btn" onclick="return confirm('Place this user on hold? They will not be able to log in.')" title="Hold account (set to pending)">⏸️</button>
-<button name="action" value="suspend" class="act-btn danger" onclick="return confirm('Suspend this user? Their subscriptions will be cancelled.')" title="Suspend user & cancel subscriptions">🚫</button>
+<button name="action" value="deactivate" class="act-btn" data-confirm="Place this user on hold? They will not be able to log in." title="Hold account (set to pending)">⏸️</button>
+<button name="action" value="suspend" class="act-btn danger" data-confirm="Suspend this user? Their subscriptions will be cancelled." title="Suspend user & cancel subscriptions">🚫</button>
 <?php elseif ($u['status'] === 'suspended'): ?>
 <button name="action" value="activate" class="act-btn success" title="Reactivate user">✅ Reactivate</button>
 <?php endif; ?>
 
 <?php // ── Utility Actions ── ?>
-<button name="action" value="reset_password" class="act-btn" onclick="return confirm('Reset this user\'s password?')" title="Reset password">🔑</button>
-<button name="action" value="delete" class="act-btn danger" onclick="return confirm('Delete this user? This action soft-deletes the account and cancels subscriptions.')" title="Delete user">🗑️</button>
+<button name="action" value="reset_password" class="act-btn" data-confirm="Reset this user's password?" title="Reset password">🔑</button>
+<button name="action" value="delete" class="act-btn danger" data-confirm="Delete this user? This action soft-deletes the account and cancels subscriptions." title="Delete user">🗑️</button>
 
 </form>
 <?php else: ?>

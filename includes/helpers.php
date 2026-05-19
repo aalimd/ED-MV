@@ -80,7 +80,15 @@ function redirect_local(string $path, string $fallback = '/'): void {
  */
 function flash(string $type, string $message): void {
     init_session();
-    $_SESSION['flash'][] = ['type' => $type, 'message' => $message];
+    $_SESSION['flash'][] = ['type' => $type, 'message' => $message, 'html' => false];
+}
+
+/**
+ * Flash message that may contain intentional HTML (admin-only trusted content).
+ */
+function flash_html(string $type, string $message): void {
+    init_session();
+    $_SESSION['flash'][] = ['type' => $type, 'message' => $message, 'html' => true];
 }
 
 /**
@@ -102,7 +110,7 @@ function render_flashes(): string {
     $html = '';
     foreach ($flashes as $f) {
         $type = e($f['type']);
-        $msg = e($f['message']);
+        $msg = !empty($f['html']) ? $f['message'] : e($f['message']);
         $icon = match($type) {
             'success' => '✅',
             'danger'  => '❌',

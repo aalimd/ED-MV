@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
             
             // 4. Activate the new subscription
             $db->prepare("UPDATE subscriptions SET status='active', starts_at=NOW(), expires_at=?, activated_by=? WHERE id=?")->execute([$expires, $adminId, $subId]);
-            $db->prepare("UPDATE users u JOIN subscriptions s ON u.id=s.user_id SET u.role='subscriber' WHERE s.id=?")->execute([$subId]);
+            $db->prepare("UPDATE users u JOIN subscriptions s ON u.id=s.user_id SET u.role='subscriber', u.auth_version = u.auth_version + 1 WHERE s.id=?")->execute([$subId]);
             
             log_activity('admin_activate_sub', "Activated sub ID: {$subId} with rollover of " . floor($rolloverSeconds/86400) . " days");
             flash('success', "Subscription activated! Added " . floor($rolloverSeconds/86400) . " rollover days from previous plan.");
@@ -48,14 +48,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
 
 
     } elseif ($action === 'cancel' && $subId > 0) {
+        $userStmt = $db->prepare('SELECT user_id FROM subscriptions WHERE id = ? LIMIT 1');
+        $userStmt->execute([$subId]);
+        $subUserId = (int)($userStmt->fetchColumn() ?: 0);
         $db->prepare("UPDATE subscriptions SET status='cancelled' WHERE id=?")->execute([$subId]);
+        if ($subUserId > 0) {
+            bump_auth_version($subUserId);
+        }
         log_activity('admin_cancel_sub', "Cancelled subscription ID: {$subId}");
         flash('warning', 'Subscription cancelled.');
 
     } elseif ($action === 'modify_days' && $subId > 0) {
         $days = (int)($_POST['extra_days'] ?? 0);
         if ($days !== 0) {
+            $userStmt = $db->prepare('SELECT user_id FROM subscriptions WHERE id = ? LIMIT 1');
+            $userStmt->execute([$subId]);
+            $subUserId = (int)($userStmt->fetchColumn() ?: 0);
             $db->prepare("UPDATE subscriptions SET expires_at = DATE_ADD(IFNULL(expires_at, NOW()), INTERVAL ? DAY) WHERE id=?")->execute([$days, $subId]);
+            if ($subUserId > 0) {
+                bump_auth_version($subUserId);
+            }
             $actionWord = $days > 0 ? "Extended" : "Reduced";
             log_activity('admin_modify_sub_days', "{$actionWord} sub ID {$subId} by " . abs($days) . " days");
             flash('success', "Subscription " . strtolower($actionWord) . " by " . abs($days) . " days.");
@@ -65,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
         $newPlanId = (int)($_POST['new_plan_id'] ?? 0);
         if ($newPlanId > 0) {
             // Validate plan exists
-            $planCheck = $db->prepare("SELECT id, name, duration_days FROM plans WHERE id = ?");
+            $planCheck = $db->prepare("SELECT id, name, duration_days FROM plans WHERE id = ? AND is_active = 1");
             $planCheck->execute([$newPlanId]);
             $newPlan = $planCheck->fetch();
             if ($newPlan) {
@@ -99,23 +111,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
                 }
 
                 log_activity('admin_change_plan', "Changed sub ID {$subId} from \"{$oldPlanName}\" to \"{$newPlan['name']}\" (adjusted expiry by {$dayDifference} days)");
-                flash('success', "Plan changed from <strong>{$oldPlanName}</strong> to <strong>" . e($newPlan['name']) . "</strong>. Expiry date automatically adjusted.");
+                $userStmt = $db->prepare('SELECT user_id FROM subscriptions WHERE id = ? LIMIT 1');
+                $userStmt->execute([$subId]);
+                $subUserId = (int)($userStmt->fetchColumn() ?: 0);
+                if ($subUserId > 0) {
+                    bump_auth_version($subUserId);
+                }
+                flash_html('success', "Plan changed from <strong>" . e($oldPlanName) . "</strong> to <strong>" . e($newPlan['name']) . "</strong>. Expiry date automatically adjusted.");
             } else {
                 flash('danger', 'Invalid plan selected.');
             }
         }
 
     } elseif ($action === 'grant' && $userId > 0) {
-        $planId = (int)($_POST['plan_id'] ?? 1);
-        $planStmt = $db->prepare("SELECT duration_days FROM plans WHERE id=?");
+        $planId = (int)($_POST['plan_id'] ?? 0);
+        $planStmt = $db->prepare("SELECT duration_days FROM plans WHERE id=? AND is_active = 1");
         $planStmt->execute([$planId]); $planRow = $planStmt->fetch();
-        $days = $planRow ? $planRow['duration_days'] : 30;
+        if (!$planRow) {
+            flash('danger', 'Invalid plan selected.');
+        } else {
+        $days = $planRow['duration_days'] ?: 30;
         $expires = date('Y-m-d H:i:s', time() + ($days * 86400));
         $db->prepare("INSERT INTO subscriptions (user_id,plan_id,status,starts_at,expires_at,activated_by) VALUES (?,?,'active',NOW(),?,?)")
            ->execute([$userId, $planId, $expires, $adminId]);
-        $db->prepare("UPDATE users SET role='subscriber' WHERE id=?")->execute([$userId]);
+        $db->prepare("UPDATE users SET role='subscriber', auth_version = auth_version + 1 WHERE id=?")->execute([$userId]);
         log_activity('admin_grant_sub', "Granted subscription to user ID: {$userId}");
         flash('success', 'Subscription granted!');
+        }
     }
     redirect(APP_URL . '/admin/subscriptions' . (isset($_GET['filter']) ? '?filter=' . urlencode($_GET['filter']) : ''));
 }
@@ -202,7 +224,7 @@ admin_header('Subscriptions', '💳', 'subscriptions');
 <button name="action" value="modify_days" class="act-btn" title="Add or remove days (+/-)">⏳</button>
 
 <!-- Cancel -->
-<button name="action" value="cancel" class="act-btn danger" onclick="return confirm('Cancel this subscription?')" title="Cancel subscription">❌</button>
+<button name="action" value="cancel" class="act-btn danger" data-confirm="Cancel this subscription?" title="Cancel subscription">❌</button>
 <?php endif; ?>
 
 </form>
