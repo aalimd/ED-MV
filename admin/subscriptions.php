@@ -5,6 +5,8 @@ require_once __DIR__ . '/../includes/features.php';
 $db = getDB();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
+    // Any plan/subscription mutation should refresh the cached feature set
+    invalidate_feature_cache();
     $action = $_POST['action'] ?? '';
     $subId = (int)($_POST['sub_id'] ?? 0);
     $userId = (int)($_POST['user_id'] ?? 0);
@@ -117,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
         log_activity('admin_grant_sub', "Granted subscription to user ID: {$userId}");
         flash('success', 'Subscription granted!');
     }
-    redirect(APP_URL . '/admin/subscriptions' . (isset($_GET['filter']) ? '?filter=' . urlencode($_GET['filter']) : ''));
+    redirect(app_url('/admin/subscriptions' . (isset($_GET['filter']) ? '?filter=' . urlencode($_GET['filter']) : '')));
 }
 
 $filter = $_GET['filter'] ?? 'all';

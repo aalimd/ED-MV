@@ -18,9 +18,11 @@ require_once __DIR__ . '/../includes/pwa.php';
     /* ── PRE-RENDER FLASH PREVENTION ── */
     :root {
       --bg:#f1f5f9; --surface:#ffffff; --surface-2:#f8fafc;
-      --text:#0f172a; --text-2:#475569; --text-3:#94a3b8;
+      --text:#0f172a; --text-2:#475569; --text-3:#64748b;
       --border:#e2e8f0; --danger:#dc2626; --danger-bg:#fef2f2;
       --danger-border:#fecaca; --success:#16a34a; --warning:#d97706;
+      --success-strong:#15803d; --warning-strong:#b45309;
+      --info:#0284c7; --info-strong:#075985;
       --shadow-xs:0 1px 3px rgba(0,0,0,0.06);
       --shadow-sm:0 2px 8px rgba(0,0,0,0.07);
       --shadow-md:0 4px 16px rgba(0,0,0,0.09);
@@ -53,14 +55,50 @@ require_once __DIR__ . '/../includes/pwa.php';
     /* ── DARK MODE ── */
     .dark {
       --bg:#0b0f1a; --surface:#141929; --surface-2:#1a2236;
-      --text:#f0f4ff; --text-2:#8899bb; --text-3:#4a5a7a;
-      --border:#1e2d47; --danger-bg:rgba(220,38,38,0.12);
-      --danger-border:rgba(220,38,38,0.28);
+      --text:#f0f4ff; --text-2:#8899bb; --text-3:#6f84a8;
+      --border:#1e2d47; --danger:#f87171; --danger-bg:rgba(220,38,38,0.16);
+      --danger-border:rgba(248,113,113,0.32);
+      --success:#4ade80; --success-strong:#86efac;
+      --warning:#fbbf24; --warning-strong:#fde68a;
+      --info:#38bdf8; --info-strong:#7dd3fc;
       --shadow-xs:0 1px 3px rgba(0,0,0,0.3);
       --shadow-sm:0 2px 8px rgba(0,0,0,0.38);
       --shadow-md:0 4px 16px rgba(0,0,0,0.45);
       --shadow-lg:0 8px 32px rgba(0,0,0,0.5);
     }
+
+    /* ── DARK MODE — TEXT/BADGE CONTRAST OVERRIDES ──
+       Brighten saturated brand/status colors that become unreadable on a dark surface. */
+    .dark .tr-badge.ok     { background:rgba(74,222,128,0.18); color:#4ade80; border-color:rgba(74,222,128,0.32); }
+    .dark .tr-badge.warn   { background:rgba(251,191,36,0.18); color:#fbbf24; border-color:rgba(251,191,36,0.32); }
+    .dark .tr-badge.danger { background:rgba(248,113,113,0.18); color:#f87171; border-color:rgba(248,113,113,0.32); }
+
+    .dark .ov-zone-danger  { color:#f87171; }
+    .dark .ov-zone-pearl   { color:#34d399; }
+
+    .dark .ov-grade.A { background:rgba(74,222,128,0.18); color:#4ade80; border-color:rgba(74,222,128,0.32); }
+    .dark .ov-grade.B { background:rgba(251,191,36,0.18); color:#fbbf24; border-color:rgba(251,191,36,0.32); }
+    .dark .ov-grade.C { background:rgba(148,163,184,0.18); color:#cbd5e1; border-color:rgba(148,163,184,0.32); }
+
+    .dark .duel-winner.key  { background:rgba(248,113,113,0.18); color:#f87171; border-color:rgba(248,113,113,0.28); }
+    .dark .duel-winner.diff { background:rgba(251,191,36,0.18); color:#fbbf24; border-color:rgba(251,191,36,0.28); }
+    .dark .cmp-pitfall      { color:#f87171; }
+
+    /* Inline-styled saturated headings (tool cards etc.) — promote contrast in dark mode */
+    .dark [style*="color:#dc2626"] { color:#f87171 !important; }
+    .dark [style*="color:#d97706"] { color:#fbbf24 !important; }
+    .dark [style*="color:#7c2d12"] { color:#fdba74 !important; }
+    .dark [style*="color:#7c3aed"] { color:#c4b5fd !important; }
+    .dark [style*="color:#9333ea"] { color:#d8b4fe !important; }
+    .dark [style*="color:#1d4ed8"] { color:#93c5fd !important; }
+    .dark [style*="color:#2563eb"] { color:#93c5fd !important; }
+    .dark [style*="color:#0284c7"] { color:#7dd3fc !important; }
+    .dark [style*="color:#0f766e"] { color:#5eead4 !important; }
+    .dark [style*="color:#059669"] { color:#6ee7b7 !important; }
+    .dark [style*="color:#16a34a"] { color:#86efac !important; }
+    .dark [style*="color:#ec4899"] { color:#f9a8d4 !important; }
+    .dark [style*="color:#475569"] { color:#cbd5e1 !important; }
+    .dark [style*="color:#7c2d12"] { color:#fdba74 !important; }
 
     /* ── REDUCED MOTION ── */
     @media (prefers-reduced-motion:reduce) {
@@ -245,8 +283,9 @@ require_once __DIR__ . '/../includes/pwa.php';
     /* ── WAVEFORM ── */
     .waveform-card { background:var(--surface); border-radius:var(--r-md); padding:16px; box-shadow:var(--shadow-sm); margin-top:16px; border:1px solid var(--border); }
     .waveform-label { font-size:.75rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--text-3); margin-bottom:10px; display:flex; align-items:center; gap:7px; }
-    .waveform-svg { width:100%; height:110px; background:var(--surface-2); border-radius:var(--r-sm); border:1px solid var(--border); display:block; }
-    .waveform-caption { margin:8px 0 0; font-size:.8rem; color:var(--text-2); font-weight:600; }
+    .waveform-svg { width:100%; height:180px; background:var(--surface-2); border-radius:var(--r-sm); border:1px solid var(--border); display:block; }
+    .waveform-caption { margin:10px 0 0; font-size:.82rem; color:var(--text-2); font-weight:600; line-height:1.5; }
+    .dark .waveform-svg { background:#0f1626; }
 
     /* ── EHR BUTTON ── */
     .ehr-btn { width:100%; background:var(--theme); color:white; border:none; padding:14px; border-radius:var(--r-md); font-weight:800; font-size:.93rem; display:flex; align-items:center; justify-content:center; gap:9px; margin-top:16px; cursor:pointer; transition:all .2s ease; font-family:inherit; box-shadow:var(--shadow-sm); }
@@ -477,7 +516,8 @@ require_once __DIR__ . '/../includes/pwa.php';
     /* ── FEATURE GATING ── */
     .nav-it.feature-locked { opacity:0.4; position:relative; }
     .nav-it.feature-locked .lock-badge { position:absolute; top:0; right:2px; font-size:.55rem; line-height:1; }
-    .feature-locked-el { opacity:0.35; filter:grayscale(0.3); pointer-events:none; position:relative; }
+    .feature-locked-el { opacity:0.5; filter:grayscale(0.4); cursor:not-allowed; position:relative; }
+    .feature-locked-el::after { content:'🔒'; position:absolute; top:-4px; right:-4px; font-size:.7rem; line-height:1; background:var(--surface,#fff); border-radius:50%; padding:1px 3px; box-shadow:0 1px 2px rgba(0,0,0,0.15); pointer-events:none; }
 
     /* ── PRINT ── */
     @media print {
@@ -848,7 +888,7 @@ require_once __DIR__ . '/../includes/pwa.php';
     <div style="font-size:2.4rem;margin-bottom:10px;">🔒</div>
     <h2 style="font-size:1.2rem;font-weight:800;color:var(--theme);margin-bottom:10px;">Premium Feature</h2>
     <p style="font-size:.87rem;color:var(--text-2);line-height:1.65;margin-bottom:20px;"><strong id="upgradeName">This feature</strong> requires a higher subscription plan.</p>
-    <a href="<?= APP_URL ?>/subscribe" class="ehr-btn" style="margin-bottom:8px;">⬆️ Upgrade Plan</a>
+    <a href="<?= app_url('/subscribe') ?>" class="ehr-btn" style="margin-bottom:8px;">⬆️ Upgrade Plan</a>
     <button class="ehr-btn secondary" id="closeUpgrade">✖️ Close</button>
   </div>
 </div>
@@ -922,7 +962,13 @@ require_once __DIR__ . '/../includes/pwa.php';
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         Expected Ventilator Waveform
       </div>
-      <svg id="waveformSvg" class="waveform-svg" viewBox="0 0 400 110" preserveAspectRatio="none" aria-label="Ventilator waveform"></svg>
+      <div class="waveform-container" style="position: relative;">
+        <svg id="waveformSvg" class="waveform-svg" viewBox="0 0 400 200" preserveAspectRatio="none" aria-label="Ventilator waveform"></svg>
+        <div class="waveform-html-label" style="position: absolute; pointer-events: none; font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 700; user-select: none; top: 10%; left: 14px; color: #f59e0b;">Pressure (cmH₂O)</div>
+        <div class="waveform-html-label" style="position: absolute; pointer-events: none; font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 700; user-select: none; top: 59%; left: 14px; color: #10b981;">Flow (L/min)</div>
+        <div class="waveform-html-label" id="peepLabel" style="position: absolute; pointer-events: none; font-family: 'DM Sans', sans-serif; font-size: 0.65rem; font-weight: 700; user-select: none; top: 40%; right: 14px; color: var(--text-3);">PEEP</div>
+        <div class="waveform-html-label" style="position: absolute; pointer-events: none; font-family: 'DM Sans', sans-serif; font-size: 0.65rem; font-weight: 700; user-select: none; top: 75%; right: 14px; color: var(--text-3);">0</div>
+      </div>
       <p class="waveform-caption" id="waveCaption">Loading…</p>
     </div>
 
@@ -1987,57 +2033,122 @@ const SCENARIOS = [
 ];
 
 // ─── WAVEFORM RENDERER ───────────────────────────────
+// Coordinate system: viewBox 0 0 400 200
+// Pressure region: y=15 (top, peak) ↔ y=95 (bottom)
+// Divider:         y=100
+// Flow region:     y=105 (top, peak inspiratory) ↔ y=195 (bottom, peak expiratory)
+//                  Flow baseline (0 flow) = y=155
+//
+// Each scenario draws TWO full breath cycles to clearly show repeating physiology.
+// One cycle spans 190 SVG units; with I:E ≈ 1:2 → inspiration ≈ 63u, expiration ≈ 127u.
 function renderWaveform(type) {
   const svg = document.getElementById('waveformSvg');
   const cap = document.getElementById('waveCaption');
+
   const PATHS = {
+    // ── NORMAL (AC-VC, healthy lungs) ────────────────────────────
+    // PEEP ≈ 5 (baseline y=85). PIP ≈ 25–30 with a small peak-plateau gap.
+    // Square inspiratory flow that returns to baseline before next breath.
     normal: {
-      pressure: 'M0,70 L20,70 L60,20 L80,20 L90,70 L180,70 L200,70 L240,20 L260,20 L270,70 L360,70',
-      flow:     'M0,120 L20,120 L25,85 L80,85 L85,120 C100,160 140,140 180,120 L200,120 L205,85 L260,85 L265,120 C280,160 320,140 360,120',
-      txt: 'Normal Mechanics — Square flow, normal peak/plateau pressure, flow returns to baseline.'
+      pressure:
+        'M10,85 L25,85 L29,60 L78,40 L80,50 L82,50 L88,85 L200,85 ' +
+        'L215,85 L219,60 L268,40 L270,50 L272,50 L278,85 L390,85',
+      flow:
+        'M10,155 L25,155 L29,118 L78,118 L82,155 ' +
+        'L92,182 L120,158 L200,155 ' +
+        'L215,155 L219,118 L268,118 L272,155 ' +
+        'L282,182 L310,158 L390,155',
+      txt: 'Normal mechanics (AC-VC). Square inspiratory flow, modest peak-to-plateau gap, expiratory flow returns cleanly to zero before the next breath.'
     },
+
+    // ── OBSTRUCTIVE (asthma / COPD / anaphylaxis) ────────────────
+    // BIG peak↔plateau gap (high airway resistance) and the hallmark:
+    // expiratory flow that does NOT return to zero before the next breath (Auto-PEEP).
     obstructive: {
-      pressure: 'M0,70 L20,70 L40,10 L50,40 L90,40 L100,70 L250,70 L270,70 L290,10 L300,40 L340,40 L350,70 L400,70',
-      flow:     'M0,120 L20,120 L25,85 L90,85 L95,120 C110,160 180,150 250,130 L270,130 L275,85 L340,85 L345,120 C360,160 400,150 400,145',
-      txt: 'Obstructive — High peak pressure, prolonged expiratory flow failing to reach zero (Auto-PEEP).'
+      pressure:
+        'M10,85 L25,85 L29,50 L78,20 L80,52 L82,52 L88,85 L200,85 ' +
+        'L215,85 L219,50 L268,20 L270,52 L272,52 L278,85 L390,85',
+      flow:
+        'M10,155 L25,155 L29,118 L78,118 L82,155 ' +
+        'L88,180 L130,170 L180,164 L200,162 ' +
+        'L215,162 L219,118 L268,118 L272,162 ' +
+        'L278,182 L320,172 L370,166 L390,164',
+      txt: 'Obstructive disease — high peak vs plateau (resistance) and prolonged expiratory flow that fails to return to zero. This is Auto-PEEP (air trapping).'
     },
+
+    // ── ARDS (stiff lungs, low compliance, lung-protective AC-VC) ─
+    // Elevated PEEP baseline, narrow peak-to-plateau gap (low resistance),
+    // and rapid exhalation back to baseline (high elastic recoil).
     ards: {
-      pressure: 'M0,60 L20,60 L50,20 L80,20 L90,60 L160,60 L180,60 L210,20 L240,20 L250,60 L320,60 L340,60 L370,20 L400,20',
-      flow:     'M0,120 L20,120 L25,85 L80,85 L85,120 C100,150 120,130 160,120 L180,120 L185,85 L240,85 L245,120 C260,150 280,130 320,120 L340,120 L345,85 L400,85',
-      txt: 'ARDS (Stiff Lungs) — High PEEP (baseline), rapid pressure rise to high plateau, rapid exhalation.'
+      pressure:
+        'M10,65 L25,65 L29,48 L78,25 L80,30 L82,30 L88,65 L200,65 ' +
+        'L215,65 L219,48 L268,25 L270,30 L272,30 L278,65 L390,65',
+      flow:
+        'M10,155 L25,155 L29,118 L78,118 L82,155 ' +
+        'L88,188 L100,168 L120,158 L200,155 ' +
+        'L215,155 L219,118 L268,118 L272,155 ' +
+        'L278,188 L290,168 L310,158 L390,155',
+      txt: 'ARDS (stiff lungs) — elevated PEEP baseline, narrow peak-to-plateau gap (Pplat ≤ 30), and rapid expiratory return to baseline from high lung recoil.'
     },
+
+    // ── RESTRICTIVE / PRESSURE-CONTROL (CPE / obesity / pregnancy) ─
+    // Square pressure wave (PC delivers constant pressure), DECELERATING inspiratory flow,
+    // moderate-to-high PEEP.
     restrictive: {
-      pressure: 'M0,60 L20,60 L25,25 L80,25 L90,60 L160,60 L180,60 L185,25 L240,25 L250,60 L320,60',
-      flow:     'M0,120 L20,120 L25,80 L80,120 L85,120 C100,150 130,130 160,120 L180,120 L185,80 L240,120 L245,120 C260,150 290,130 320,120',
-      txt: 'Restrictive (Pressure Control) — Decelerating flow, square pressure wave, elevated PEEP.'
+      pressure:
+        'M10,70 L25,70 L29,32 L78,32 L82,70 ' +
+        'L200,70 ' +
+        'L215,70 L219,32 L268,32 L272,70 ' +
+        'L390,70',
+      flow:
+        'M10,155 L25,155 L29,112 L78,150 L82,155 ' +
+        'L92,180 L130,160 L200,155 ' +
+        'L215,155 L219,112 L268,150 L272,155 ' +
+        'L282,180 L320,160 L390,155',
+      txt: 'Restrictive / Pressure-Control — square pressure plateau with characteristic decelerating inspiratory flow; elevated PEEP supports recruitment.'
     },
+
+    // ── NIV / BiPAP S/T ─────────────────────────────────────────
+    // Pressure cycles smoothly between EPAP (baseline) and IPAP (peak).
+    // Patient-triggered flow with rounded decelerating inspiratory peaks.
     niv: {
-      pressure: 'M0,65 L20,65 L30,30 L60,30 L70,65 L120,65 L130,30 L160,30 L170,65 L220,65 L230,30 L260,30 L270,65 L320,65',
-      flow:     'M0,120 L20,120 L25,85 Q40,100 60,120 L65,120 C75,140 90,130 120,120 L125,85 Q140,100 160,120 L165,120 C175,140 190,130 220,120 L225,85 Q240,100 260,120 L265,120 C275,140 290,130 320,120',
-      txt: 'BiPAP (NIV) — Spontaneous flow patterns, cycling between EPAP and IPAP.'
+      pressure:
+        'M10,80 Q25,80 32,55 L70,40 Q85,40 92,75 L200,80 ' +
+        'L215,80 Q230,80 237,55 L275,40 Q290,40 297,75 L390,80',
+      flow:
+        'M10,155 Q25,155 35,122 Q55,115 80,135 Q98,155 120,180 Q140,160 160,155 L200,155 ' +
+        'L215,155 Q230,155 240,122 Q260,115 285,135 Q303,155 325,180 Q345,160 365,155 L390,155',
+      txt: 'BiPAP / NIV (S/T) — patient triggers each breath; pressure cycles smoothly between EPAP and IPAP with a rounded, decelerating spontaneous flow.'
     }
   };
+
   const d = PATHS[type] || PATHS.normal;
-  
-  svg.setAttribute('viewBox', '0 0 400 160');
-  svg.style.minHeight = '140px';
-  
+
+  svg.setAttribute('viewBox', '0 0 400 200');
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.style.minHeight = '170px';
+
   svg.innerHTML = `
-    <!-- Grid -->
-    <g stroke="var(--border)" stroke-width="1" stroke-dasharray="4 4">
-      <line x1="0" y1="35" x2="400" y2="35"/>
-      <line x1="0" y1="70" x2="400" y2="70"/>
-      <line x1="0" y1="120" x2="400" y2="120"/>
+    <!-- Reference grid: pressure baseline + flow zero -->
+    <g stroke="var(--border)" stroke-width="1" stroke-dasharray="3 4" opacity="0.85">
+      <line x1="10" y1="85" x2="390" y2="85"/>
+      <line x1="10" y1="155" x2="390" y2="155"/>
     </g>
-    
-    <!-- Pressure Waveform (Yellow) -->
-    <path d="${d.pressure}" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="10" y="20" fill="#f59e0b" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">Pressure (cmH₂O)</text>
-    
-    <!-- Flow Waveform (Green) -->
-    <path d="${d.flow}" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="10" y="105" fill="#10b981" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">Flow (L/min)</text>
+    <!-- Region divider -->
+    <line x1="10" y1="100" x2="390" y2="100" stroke="var(--border)" stroke-width="1"/>
+
+    <!-- Pressure waveform (amber) -->
+    <path d="${d.pressure}" fill="none" stroke="#f59e0b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Flow waveform (emerald) -->
+    <path d="${d.flow}" fill="none" stroke="#10b981" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
   `;
+  
+  const peepLabel = document.getElementById('peepLabel');
+  if (peepLabel) {
+    peepLabel.textContent = (type === 'niv') ? 'EPAP' : 'PEEP';
+  }
+  
   cap.textContent = d.txt;
 }
 
@@ -3129,9 +3240,11 @@ const App = {
 
   // ── Print ──────────────────────────────────────────
   _setupPrint() {
-    document.getElementById('printBtn').addEventListener('click', () => {
-      if (!Features.has('print')) {
-        this.toast('🖨️ Printing is disabled by your administrator.', 'danger');
+    const btn = document.getElementById('printBtn');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      if (btn.dataset.feature && !FG.has(btn.dataset.feature)) {
+        FG.prompt(btn.dataset.feature);
         return;
       }
       window.print();

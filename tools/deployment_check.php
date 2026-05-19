@@ -53,6 +53,15 @@ function runCommand(string $command): ?string {
     return trim(implode("\n", $lines));
 }
 
+function isLocalAppUrl(string $url): bool {
+    $host = parse_url($url, PHP_URL_HOST);
+    if (!is_string($host)) {
+        return false;
+    }
+
+    return in_array(strtolower($host), ['localhost', '127.0.0.1', '::1'], true);
+}
+
 function connectForCheck(): ?PDO {
     foreach (['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASS'] as $constant) {
         if (!defined($constant)) {
@@ -125,8 +134,10 @@ if (defined('APP_DEBUG') && APP_DEBUG === false) {
 }
 
 if (defined('APP_URL')) {
-    if (str_starts_with(APP_URL, 'https://') && !str_contains(APP_URL, 'localhost') && !str_contains(APP_URL, '127.0.0.1')) {
+    if (str_starts_with(APP_URL, 'https://') && !isLocalAppUrl(APP_URL)) {
         checkOk('APP_URL uses HTTPS: ' . APP_URL);
+    } elseif (isLocalAppUrl(APP_URL)) {
+        checkWarn('APP_URL is set for local development: ' . APP_URL . '. Use the production HTTPS domain on Hostinger.');
     } else {
         checkFail('APP_URL should be the production HTTPS domain. Current value: ' . APP_URL);
     }

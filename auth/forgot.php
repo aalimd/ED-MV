@@ -51,7 +51,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <title>Forgot Password — <?= e(APP_NAME) ?></title>
 <?= pwa_zoom_lock_script() ?>
 <?= pwa_head_tags('Reset your ED VentGuide Pro password.') . "\n" ?>
-<link rel="stylesheet" href="<?= APP_URL ?>/assets/css/auth.css?v=2">
+<link rel="stylesheet" href="<?= asset_url('/assets/css/auth.css?v=6') ?>">
 </head>
 <body>
 <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
@@ -66,7 +66,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required autofocus></div>
 <button type="submit" class="btn btn-primary">📩 Send Reset Link</button>
 </form>
-<div class="auth-footer"><a href="<?= APP_URL ?>/auth/login">← Back to login</a></div>
+<div class="auth-footer"><a href="<?= app_url('/auth/login') ?>">← Back to login</a></div>
 </div></div>
 <script>
 function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}

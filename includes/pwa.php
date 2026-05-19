@@ -6,6 +6,9 @@ declare(strict_types=1);
  */
 
 function pwa_asset_url(string $path): string {
+    if (function_exists('app_url')) {
+        return app_url($path);
+    }
     $base = defined('APP_URL') ? rtrim((string)APP_URL, '/') : '';
     return $base . '/' . ltrim($path, '/');
 }
@@ -34,7 +37,7 @@ function pwa_head_tags(string $description = 'Evidence-based emergency departmen
 }
 
 function pwa_script_tag(): string {
-    return '<script src="' . pwa_asset_url('/assets/js/pwa.js?v=5') . '" defer></script>';
+    return '<script src="' . pwa_asset_url('/assets/js/pwa.js?v=6') . '" defer></script>';
 }
 
 /**

@@ -103,12 +103,16 @@ $userMenu = '
       <span class="vg-pill">' . htmlspecialchars($user['role']) . '</span>
     </div>';
 
+if (has_feature('vent_coach')) {
+    $userMenu .= '<a href="' . app_url('/app/coach') . '" data-feature="vent_coach">🧠 <span>Vent Coach</span></a>';
+}
+
 if ($isAdmin) {
-    $userMenu .= '<a href="' . APP_URL . '/admin/">⚙️ <span>Admin Dashboard</span></a>';
+    $userMenu .= '<a href="' . app_url('/admin/') . '">⚙️ <span>Admin Dashboard</span></a>';
 }
 
 $userMenu .= '
-    <form method="POST" action="' . APP_URL . '/auth/logout" style="margin:0;">
+    <form method="POST" action="' . app_url('/auth/logout') . '" style="margin:0;">
       ' . csrf_field() . '
       <button type="submit" class="danger" style="width:100%;text-align:left;border:none;background:none;cursor:pointer;">
         🚪 <span>Sign Out</span>

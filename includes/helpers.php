@@ -34,6 +34,64 @@ function app_base_path(): string {
 }
 
 /**
+ * Detect the scheme (http/https) for the current request.
+ * Falls back to APP_URL's scheme on the CLI or when nothing is detectable.
+ */
+function current_scheme(): string {
+    if (PHP_SAPI !== 'cli') {
+        if (!empty($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off') {
+            return 'https';
+        }
+        $forwarded = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '';
+        if (is_string($forwarded) && strtolower(strtok($forwarded, ',')) === 'https') {
+            return 'https';
+        }
+        if (($_SERVER['SERVER_PORT'] ?? '') === '443' || ($_SERVER['SERVER_PORT'] ?? '') === 443) {
+            return 'https';
+        }
+    }
+    $scheme = parse_url(APP_URL, PHP_URL_SCHEME);
+    return is_string($scheme) && $scheme !== '' ? $scheme : 'http';
+}
+
+/**
+ * Build an in-app URL that always uses the scheme of the current request.
+ * This prevents mixed-content errors when the page is loaded over HTTPS but
+ * APP_URL is configured with HTTP (or vice versa).
+ *
+ * Example:
+ *   app_url('/admin/users') → https://localhost/ED-MV/admin/users (on HTTPS)
+ *   app_url('/admin/users') → http://localhost/ED-MV/admin/users  (on HTTP)
+ */
+function app_url(string $path = ''): string {
+    $parts = parse_url(APP_URL);
+    if (!is_array($parts) || empty($parts['host'])) {
+        return rtrim(APP_URL, '/') . ($path === '' ? '' : '/' . ltrim($path, '/'));
+    }
+
+    $scheme = current_scheme();
+    $host   = $parts['host'];
+    $port   = isset($parts['port']) ? ':' . $parts['port'] : '';
+    $base   = isset($parts['path']) ? '/' . trim($parts['path'], '/') : '';
+    if ($base === '/') {
+        $base = '';
+    }
+
+    if ($path === '') {
+        return $scheme . '://' . $host . $port . $base;
+    }
+
+    return $scheme . '://' . $host . $port . $base . '/' . ltrim($path, '/');
+}
+
+/**
+ * Convenience alias for static asset URLs (CSS, JS, images).
+ */
+function asset_url(string $path): string {
+    return app_url($path);
+}
+
+/**
  * Normalize a local path so redirects stay inside the app, even when deployed in a subdirectory.
  */
 function normalize_local_path(string $path, string $fallback = '/'): string {
@@ -72,7 +130,7 @@ function normalize_local_path(string $path, string $fallback = '/'): string {
  * Redirect only to an in-app path to avoid sending users to external URLs.
  */
 function redirect_local(string $path, string $fallback = '/'): void {
-    redirect(APP_URL . normalize_local_path($path, $fallback));
+    redirect(app_url(normalize_local_path($path, $fallback)));
 }
 
 /**

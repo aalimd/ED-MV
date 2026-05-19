@@ -41,15 +41,36 @@
   --surface: #141929;
   --surface-2: #1a2236;
   --text: #f0f4ff;
-  --text-2: #8899bb;
-  --text-3: #6f84a8;
+  --text-2: #a0aec8;
+  --text-3: #8195b8;
   --border: #1e2d47;
-  --theme-light: rgba(37, 99, 235, 0.15);
-  --danger-bg: rgba(220,38,38,0.12);
-  --danger-border: rgba(220,38,38,0.28);
-  --success-bg: rgba(22,163,74,0.12);
-  --warning-bg: rgba(217,119,6,0.12);
+  --theme: #60a5fa;
+  --theme-rgb: 96, 165, 250;
+  --theme-light: rgba(96, 165, 250, 0.18);
+  --theme-hover: #93c5fd;
+  --danger: #f87171;
+  --danger-bg: rgba(248,113,113,0.14);
+  --danger-border: rgba(248,113,113,0.32);
+  --success: #4ade80;
+  --success-bg: rgba(74,222,128,0.14);
+  --warning: #fbbf24;
+  --warning-bg: rgba(251,191,36,0.14);
 }
+
+/* Dark mode — high-contrast variants for status/flash/badge text */
+.dark .flash-success { color: #86efac; border-color: rgba(74,222,128,0.32); }
+.dark .flash-danger  { color: #fca5a5; border-color: rgba(248,113,113,0.32); }
+.dark .flash-warning { color: #fcd34d; border-color: rgba(251,191,36,0.32); }
+.dark .flash-info    { color: #93c5fd; border-color: rgba(96,165,250,0.32); }
+.dark .status-pending { color: #fcd34d; border-color: rgba(251,191,36,0.32); }
+.dark .status-active  { color: #86efac; border-color: rgba(74,222,128,0.32); }
+.dark .pwd-bar.active-weak   { background: #f87171; }
+.dark .pwd-bar.active-medium { background: #fbbf24; }
+.dark .pwd-bar.active-strong { background: #4ade80; }
+.dark .form-input.error      { border-color: #f87171; box-shadow: 0 0 0 3px rgba(248,113,113,0.18); }
+.dark .form-error            { color: #fca5a5; }
+.dark .auth-app-name         { color: #93c5fd; }
+.dark .disc-title            { color: #fca5a5; }
 
 /* Reset */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

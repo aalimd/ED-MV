@@ -26,7 +26,7 @@ function admin_header(string $title, string $icon = '📊', string $activePage =
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover">
 <title><?= e($title) ?> — Admin</title>
 <?= pwa_head_tags('ED VentGuide Pro admin control panel.') . "\n" ?>
-<link rel="stylesheet" href="<?= APP_URL ?>/assets/css/admin.css?v=6">
+<link rel="stylesheet" href="<?= asset_url('/assets/css/admin.css?v=8') ?>">
 </head>
 <body>
 <button class="sb-toggle" onclick="document.querySelector('.admin-sidebar').classList.toggle('open')">☰</button>
@@ -35,13 +35,13 @@ function admin_header(string $title, string $icon = '📊', string $activePage =
   <div class="sb-brand"><span class="sb-logo">🫁</span><div><div class="sb-name">VentGuide Admin</div><div class="sb-sub">Control Panel</div></div></div>
   <nav class="sb-nav">
     <?php foreach($pages as $p): ?>
-    <a href="<?= APP_URL ?>/admin/<?= $p['url'] ?>" class="sb-link <?= $activePage===$p['key']?'active':'' ?>">
+    <a href="<?= app_url('/admin/' . $p['url']) ?>" class="sb-link <?= $activePage===$p['key']?'active':'' ?>">
       <span class="sb-emoji"><?= $p['icon'] ?></span><?= $p['label'] ?>
     </a>
     <?php endforeach; ?>
   </nav>
   <div class="sb-footer">
-    <a href="<?= APP_URL ?>/app/ventguide">← Back to App</a><br>
+    <a href="<?= app_url('/app/ventguide') ?>">← Back to App</a><br>
     Logged in as <strong><?= e($user['name']) ?></strong>
   </div>
 </aside>
@@ -50,7 +50,7 @@ function admin_header(string $title, string $icon = '📊', string $activePage =
   <h1 class="admin-page-title"><?= $icon ?> <?= e($title) ?></h1>
   <div class="topbar-actions">
     <button class="topbar-btn" onclick="toggleDark()"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
-    <form method="POST" action="<?= APP_URL ?>/auth/logout" style="display:inline">
+    <form method="POST" action="<?= app_url('/auth/logout') ?>" style="display:inline">
       <?= csrf_field() ?>
       <button type="submit" class="topbar-btn" style="color:var(--danger)">🚪 Logout</button>
     </form>

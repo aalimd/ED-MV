@@ -7,6 +7,14 @@
   var isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true;
   var isAdminPath = /\/admin(?:\/|$)/.test(location.pathname);
+  var isLocalHost = (location.hostname === 'localhost'
+                  || location.hostname === '127.0.0.1'
+                  || location.hostname === '::1');
+  // Browsers refuse to register a Service Worker on HTTPS with an untrusted
+  // (self-signed) cert — common on local XAMPP/MAMP/laragon. Skip silently
+  // there so the dev console stays clean. Production HTTPS (Hostinger) keeps
+  // working because the certificate is valid.
+  var skipSwOnLocalHttps = isLocalHost && location.protocol === 'https:';
 
   function injectAnimations() {
     if (document.getElementById('pwa-animations')) return;
@@ -22,6 +30,11 @@
 
   // ── Service Worker Registration ──────────────────────────────────
   window.addEventListener('load', function () {
+    if (skipSwOnLocalHttps) {
+      console.info('PWA: Skipping Service Worker on local HTTPS (self-signed cert). It will register normally on production.');
+      return;
+    }
+
     // Robustly find the script element even with query strings (e.g., ?v=3)
     var script = document.currentScript;
     if (!script) {
@@ -33,18 +46,28 @@
         }
       }
     }
-    
+
     var scriptUrl = script ? script.src : new URL('pwa.js', location.href).toString();
     var workerUrl = new URL('../../sw.js', scriptUrl);
     var scopeUrl  = new URL('../../', scriptUrl);
     if (workerUrl.origin !== location.origin) {
       return;
     }
-    
-    console.log('PWA: Registering SW', { worker: workerUrl.toString(), scope: scopeUrl.pathname });
-    
+
     navigator.serviceWorker.register(workerUrl, { scope: scopeUrl.pathname })
-      .catch(function (err) { console.error('PWA: SW registration failed', err); });
+      .then(function (reg) {
+        console.info('PWA: Service Worker registered.', { scope: reg.scope });
+      })
+      .catch(function (err) {
+        // Treat as a soft warning so it does not look like an app bug. The
+        // most common cause locally is an untrusted SSL certificate.
+        var msg = (err && err.message) ? err.message : String(err);
+        if (/SSL|certificate/i.test(msg)) {
+          console.warn('PWA: Service Worker not registered — untrusted HTTPS certificate. This is normal in local development and will work on production.');
+        } else {
+          console.warn('PWA: Service Worker not registered:', msg);
+        }
+      });
   });
 
   // ── Universal Desktop/Android Install Banner ─────────────────────
@@ -61,7 +84,6 @@
 
     // Show banner universally on all non-iOS browsers (Safari Mac, Firefox, Chrome, Android)
     setTimeout(function () {
-      console.log('PWA: Checking install banner conditions', { isIos, isInStandaloneMode, dismissed: sessionStorage.getItem('pwa_install_dismissed') });
       if (document.getElementById('pwa-install-banner')) return; // already exists
       
       injectAnimations();

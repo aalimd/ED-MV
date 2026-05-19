@@ -59,7 +59,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <title><?= e($pageTitle) ?> — <?= e(APP_NAME) ?></title>
 <?= pwa_zoom_lock_script() ?>
 <?= pwa_head_tags('Choose your ED VentGuide Pro access plan.') . "\n" ?>
-<link rel="stylesheet" href="<?= APP_URL ?>/assets/css/auth.css?v=3">
+<link rel="stylesheet" href="<?= asset_url('/assets/css/auth.css?v=6') ?>">
 <style>
 /* ── Pricing Page Styles ──────────────────────── */
 .pricing-wrapper {
@@ -163,9 +163,9 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
   <div class="pending-sub">Your subscription request for <strong><?= e($pending['plan_name'] ?? 'a plan') ?></strong> is awaiting admin approval. You'll get full access as soon as it's approved.</div>
   <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px;">
     <?php if($hasSub): ?>
-      <a href="<?= APP_URL ?>/app/ventguide" class="btn btn-primary" style="flex:1;min-width:140px;">📱 Open App</a>
+      <a href="<?= app_url('/app/ventguide') ?>" class="btn btn-primary" style="flex:1;min-width:140px;">📱 Open App</a>
     <?php endif; ?>
-    <form method="POST" action="<?= APP_URL ?>/auth/logout" style="flex:1;min-width:140px;">
+    <form method="POST" action="<?= app_url('/auth/logout') ?>" style="flex:1;min-width:140px;">
       <?= csrf_field() ?>
       <button type="submit" class="btn btn-secondary" style="width:100%;">🚪 Logout</button>
     </form>
@@ -231,11 +231,11 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 
 <div class="pricing-footer" style="margin-top:0;display:flex;flex-direction:column;gap:12px;align-items:center;">
   <?php if($hasSub): ?>
-    <a href="<?= APP_URL ?>/app/ventguide" class="btn btn-primary" style="max-width:260px;width:100%;font-size:1rem;padding:12px;border-radius:12px;">📱 Return to App</a>
+    <a href="<?= app_url('/app/ventguide') ?>" class="btn btn-primary" style="max-width:260px;width:100%;font-size:1rem;padding:12px;border-radius:12px;">📱 Return to App</a>
   <?php endif; ?>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;">
     <span>Logged in as <strong><?= e($user['name']) ?></strong></span>
-    <form method="POST" action="<?= APP_URL ?>/auth/logout" style="display:inline">
+    <form method="POST" action="<?= app_url('/auth/logout') ?>" style="display:inline">
       <?= csrf_field() ?>
       <button type="submit" style="background:none;border:none;color:var(--theme);padding:0;cursor:pointer;text-decoration:underline;font:inherit;">Logout</button>
     </form>

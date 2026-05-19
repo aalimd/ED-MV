@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             error_log('Password reset logging failed: ' . $e->getMessage());
                         }
                         flash('success', 'Password reset successfully. Please login.');
-                        redirect(APP_URL . '/auth/login');
+                        redirect(app_url('/auth/login'));
                     } catch (Throwable $e) {
                         if ($db->inTransaction()) $db->rollBack();
                         error_log('Password reset failed: ' . $e->getMessage());
@@ -72,7 +72,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <title>Reset Password — <?= e(APP_NAME) ?></title>
 <?= pwa_zoom_lock_script() ?>
 <?= pwa_head_tags('Set a new ED VentGuide Pro password.') . "\n" ?>
-<link rel="stylesheet" href="<?= APP_URL ?>/assets/css/auth.css?v=2">
+<link rel="stylesheet" href="<?= asset_url('/assets/css/auth.css?v=6') ?>">
 </head>
 <body>
 <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
@@ -80,7 +80,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <div class="auth-brand"><div class="auth-logo">🔐</div><div class="auth-app-name"><?= e(APP_NAME) ?></div></div>
 <h1 class="auth-title">Set new password</h1>
 <?php if($error): ?><div class="flash flash-danger">❌ <?= e($error) ?></div>
-<div class="auth-footer"><a href="<?= APP_URL ?>/auth/forgot">Request a new reset link</a></div>
+<div class="auth-footer"><a href="<?= app_url('/auth/forgot') ?>">Request a new reset link</a></div>
 <?php else: ?>
 <form method="POST"><?= csrf_field() ?>
 <input type="hidden" name="token" value="<?= e($token) ?>">

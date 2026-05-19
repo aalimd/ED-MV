@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
 
         if ($errors) {
             flash('danger', implode(' ', $errors));
-            redirect(APP_URL . '/admin/users?create=1' . (isset($_GET['filter']) ? '&filter=' . urlencode($_GET['filter']) : ''));
+            redirect(app_url('/admin/users?create=1' . (isset($_GET['filter']) ? '&filter=' . urlencode($_GET['filter']) : '')));
         }
 
         $hash = password_hash($password, defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT, defined('PASSWORD_ARGON2ID') ? [] : ['cost' => BCRYPT_COST]);
@@ -50,13 +50,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
 
         log_activity('admin_create_user', "Created user ID: {$newUserId} ({$email})", $newUserId);
         flash('success', 'User created successfully.');
-        redirect(APP_URL . '/admin/users?edit=' . $newUserId);
+        redirect(app_url('/admin/users?edit=' . $newUserId));
     }
 
     // Prevent self-modification for destructive actions
     if ($uid > 0 && $uid === $adminUser['id'] && in_array($action, ['suspend', 'delete', 'make_user', 'make_subscriber'], true)) {
         flash('danger', 'You cannot modify your own account this way.');
-        redirect(APP_URL . '/admin/users' . (isset($_GET['filter']) ? '?filter=' . urlencode($_GET['filter']) : ''));
+        redirect(app_url('/admin/users' . (isset($_GET['filter']) ? '?filter=' . urlencode($_GET['filter']) : '')));
     }
 
     if ($uid > 0) {
@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
 
                 if ($errors) {
                     flash('danger', implode(' ', $errors));
-                    redirect(APP_URL . '/admin/users?edit=' . $uid . (isset($_GET['filter']) ? '&filter=' . urlencode($_GET['filter']) : ''));
+                    redirect(app_url('/admin/users?edit=' . $uid . (isset($_GET['filter']) ? '&filter=' . urlencode($_GET['filter']) : '')));
                 }
 
                 $db->beginTransaction();
@@ -184,7 +184,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
                 flash('success', "Password reset. Temporary password: {$newPwd}. Share it securely.");
                 break;
         }
-        redirect(APP_URL . '/admin/users' . (isset($_GET['filter']) ? '?filter=' . urlencode($_GET['filter']) : ''));
+        redirect(app_url('/admin/users' . (isset($_GET['filter']) ? '?filter=' . urlencode($_GET['filter']) : '')));
     }
 }
 
@@ -215,7 +215,7 @@ if ($editId > 0) {
     $editUser = $editStmt->fetch() ?: null;
     if (!$editUser) {
         flash('danger', 'User not found.');
-        redirect(APP_URL . '/admin/users');
+        redirect(app_url('/admin/users'));
     }
 }
 
@@ -237,7 +237,7 @@ admin_header('User Management', '👥', 'users');
 <input type="hidden" name="filter" value="<?= e($filter) ?>">
 <button type="submit" class="topbar-btn">Search</button>
 </form>
-<a href="<?= APP_URL ?>/admin/users?create=1<?= $filter !== 'all' ? '&filter=' . urlencode($filter) : '' ?><?= $search ? '&q=' . urlencode($search) : '' ?>" class="topbar-btn" style="background:var(--theme);color:#fff;border-color:var(--theme);text-decoration:none">➕ Add User</a>
+<a href="<?= app_url('/admin/users?create=1' . ($filter !== 'all' ? '&filter=' . urlencode($filter) : '') . ($search ? '&q=' . urlencode($search) : '')) ?>" class="topbar-btn" style="background:var(--theme);color:#fff;border-color:var(--theme);text-decoration:none">➕ Add User</a>
 </div>
 
 <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
@@ -250,7 +250,7 @@ admin_header('User Management', '👥', 'users');
 <div class="data-card">
 <div class="dc-header">
   <div class="dc-title">➕ Add User</div>
-  <a href="<?= APP_URL ?>/admin/users<?= $filter !== 'all' ? '?filter=' . urlencode($filter) : '' ?>" class="topbar-btn">Close</a>
+  <a href="<?= app_url('/admin/users' . ($filter !== 'all' ? '?filter=' . urlencode($filter) : '')) ?>" class="topbar-btn">Close</a>
 </div>
 <form method="POST" class="admin-form" style="max-width:none;padding:18px;">
 <?= csrf_field() ?>
@@ -294,7 +294,7 @@ admin_header('User Management', '👥', 'users');
 </p>
 <div style="display:flex;gap:10px;flex-wrap:wrap;">
   <button type="submit" class="btn btn-primary" style="max-width:220px;">➕ Create User</button>
-  <a href="<?= APP_URL ?>/admin/users<?= $filter !== 'all' ? '?filter=' . urlencode($filter) : '' ?>" class="btn btn-secondary" style="max-width:160px;">Cancel</a>
+  <a href="<?= app_url('/admin/users' . ($filter !== 'all' ? '?filter=' . urlencode($filter) : '')) ?>" class="btn btn-secondary" style="max-width:160px;">Cancel</a>
 </div>
 </form>
 </div>
@@ -306,7 +306,7 @@ admin_header('User Management', '👥', 'users');
 <div class="data-card">
 <div class="dc-header">
   <div class="dc-title">✏️ Edit User #<?= (int)$editUser['id'] ?></div>
-  <a href="<?= APP_URL ?>/admin/users<?= $filter !== 'all' ? '?filter=' . urlencode($filter) : '' ?>" class="topbar-btn">Close</a>
+  <a href="<?= app_url('/admin/users' . ($filter !== 'all' ? '?filter=' . urlencode($filter) : '')) ?>" class="topbar-btn">Close</a>
 </div>
 <form method="POST" class="admin-form" style="max-width:none;padding:18px;">
 <?= csrf_field() ?>
@@ -355,7 +355,7 @@ admin_header('User Management', '👥', 'users');
 </p>
 <div style="display:flex;gap:10px;flex-wrap:wrap;">
   <button type="submit" class="btn btn-primary" style="max-width:220px;">💾 Save Changes</button>
-  <a href="<?= APP_URL ?>/admin/users<?= $filter !== 'all' ? '?filter=' . urlencode($filter) : '' ?>" class="btn btn-secondary" style="max-width:160px;">Cancel</a>
+  <a href="<?= app_url('/admin/users' . ($filter !== 'all' ? '?filter=' . urlencode($filter) : '')) ?>" class="btn btn-secondary" style="max-width:160px;">Cancel</a>
 </div>
 </form>
 </div>
