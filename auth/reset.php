@@ -7,12 +7,12 @@ require_once __DIR__ . '/../includes/pwa.php';
 init_session();
 
 $error = ''; $success = false;
-$token = $_GET['token'] ?? $_POST['token'] ?? '';
-$email = $_GET['email'] ?? $_POST['email'] ?? '';
+$token = trim((string)($_GET['token'] ?? $_POST['token'] ?? ''));
+$email = strtolower(trim((string)($_GET['email'] ?? $_POST['email'] ?? '')));
 
 // Validate token
-function validateToken($token, $email) {
-    if (!$token || !$email) return false;
+function validateToken(string $token, string $email): array|false {
+    if ($token === '' || !valid_email($email)) return false;
     $db = getDB();
     $hash = hash('sha256', $token);
     $stmt = $db->prepare('SELECT * FROM password_resets WHERE email=? AND token_hash=? AND used=0 AND expires_at > NOW() LIMIT 1');
@@ -37,13 +37,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     try {
                         $db->beginTransaction();
                         $hash = password_hash($password, defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT, defined('PASSWORD_ARGON2ID') ? [] : ['cost' => BCRYPT_COST]);
-                        $updated = $db->prepare('UPDATE users SET password_hash=? WHERE email=? AND status != "deleted"')->execute([$hash, $email]);
+                        $stmt = $db->prepare('UPDATE users SET password_hash=?, auth_version = auth_version + 1 WHERE email=? AND status = "active"');
+                        $stmt->execute([$hash, $email]);
                         $db->prepare('UPDATE password_resets SET used=1 WHERE email=? AND token_hash=?')->execute([$email, hash('sha256', $token)]);
-                        if (!$updated) {
-                            throw new RuntimeException('Password update statement failed.');
+                        if ($stmt->rowCount() !== 1) {
+                            throw new RuntimeException('Password update affected an unexpected number of users.');
                         }
-                        log_activity('password_reset', "Password reset for: {$email}");
                         $db->commit();
+                        try {
+                            log_activity('password_reset', "Password reset for: {$email}");
+                        } catch (Throwable $e) {
+                            error_log('Password reset logging failed: ' . $e->getMessage());
+                        }
                         flash('success', 'Password reset successfully. Please login.');
                         redirect(APP_URL . '/auth/login');
                     } catch (Throwable $e) {

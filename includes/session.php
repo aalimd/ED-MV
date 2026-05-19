@@ -92,6 +92,7 @@ function session_set_user(array $user, bool $rememberMe = false): void {
     $_SESSION['user_email']  = $user['email'];
     $_SESSION['user_role']   = $user['role'];
     $_SESSION['user_status'] = $user['status'];
+    $_SESSION['auth_version'] = (int)($user['auth_version'] ?? 1);
     $_SESSION['logged_in']   = true;
     $_SESSION['login_time']  = time();
     $_SESSION['remember_me'] = $rememberMe;
@@ -109,6 +110,7 @@ function session_user(): ?array {
         'email'  => $_SESSION['user_email'],
         'role'   => $_SESSION['user_role'],
         'status' => $_SESSION['user_status'],
+        'auth_version' => (int)($_SESSION['auth_version'] ?? 1),
     ];
 }
 

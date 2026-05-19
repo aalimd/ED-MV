@@ -3,6 +3,7 @@ require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/rate_limit.php';
 require_once __DIR__ . '/../includes/email_verification.php';
 require_once __DIR__ . '/../includes/pwa.php';
 init_session();
@@ -10,12 +11,17 @@ if (is_logged_in()) redirect(APP_URL . '/');
 
 $errors = []; $name = ''; $email = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!csrf_validate()) { $errors[] = 'Invalid request.'; }
+    $ip = client_ip();
+    if (is_rate_limited($ip, 'register')) {
+        $mins = ceil(lockout_remaining($ip, 'register') / 60);
+        $errors[] = "Too many registration attempts. Please try again in {$mins} minute(s).";
+    } elseif (!csrf_validate()) { $errors[] = 'Invalid request.'; }
     else {
         $name = trim($_POST['name'] ?? '');
-        $email = trim($_POST['email'] ?? '');
+        $email = strtolower(trim($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
         $confirm = $_POST['confirm'] ?? '';
+        record_attempt($ip, valid_email($email) ? $email : null, 'register');
         if (!$name) $errors[] = 'Name is required.';
         if (!valid_email($email)) $errors[] = 'Valid email is required.';
         if ($password !== $confirm) $errors[] = 'Passwords do not match.';
@@ -31,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $db = getDB();
             $stmt = $db->prepare('SELECT id FROM users WHERE email = ?');
             $stmt->execute([$email]);
-            if ($stmt->fetch()) $errors[] = 'An account with this email already exists.';
+            if ($stmt->fetch()) $errors[] = 'Unable to create an account with this email address.';
         }
         if (!$errors) {
             $db = getDB();
@@ -78,7 +84,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <div class="form-group"><label class="form-label" for="email">📧 Email</label>
 <input type="email" id="email" name="email" class="form-input" placeholder="you@hospital.com" value="<?= e($email) ?>" required></div>
 <div class="form-group"><label class="form-label" for="password">🔒 Password</label>
-<div class="input-password-wrap"><input type="password" id="password" name="password" class="form-input" placeholder="Min 8 chars, 1 upper, 1 number" required minlength="8" oninput="checkStrength(this.value)">
+<div class="input-password-wrap"><input type="password" id="password" name="password" class="form-input" placeholder="Min 8 chars, 1 upper, 1 number, 1 special" required minlength="8" oninput="checkStrength(this.value)">
 <button type="button" class="password-toggle" onclick="togglePwd('password')">👁️</button></div>
 <div class="pwd-strength"><div class="pwd-bar" id="b1"></div><div class="pwd-bar" id="b2"></div><div class="pwd-bar" id="b3"></div></div>
 <div class="pwd-label" id="pwdLabel" style="color:var(--text-3)"></div></div>
@@ -92,7 +98,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <script>
 function togglePwd(id){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';}
 function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}
-function checkStrength(p){const b=[document.getElementById('b1'),document.getElementById('b2'),document.getElementById('b3')];const l=document.getElementById('pwdLabel');let s=0;if(p.length>=8)s++;if(/[A-Z]/.test(p)&&/[0-9]/.test(p))s++;if(p.length>=12&&/[^A-Za-z0-9]/.test(p))s++;b.forEach((x,i)=>{x.className='pwd-bar';if(i<s)x.classList.add(s===1?'active-weak':s===2?'active-medium':'active-strong');});l.textContent=s===0?'':s===1?'Weak':s===2?'Medium':'Strong';l.style.color=s===1?'var(--danger)':s===2?'var(--warning)':'var(--success)';}
+function checkStrength(p){const b=[document.getElementById('b1'),document.getElementById('b2'),document.getElementById('b3')];const l=document.getElementById('pwdLabel');let s=0;if(p.length>=8)s++;if(/[A-Z]/.test(p)&&/[0-9]/.test(p)&&/[^A-Za-z0-9]/.test(p))s++;if(p.length>=12)s++;b.forEach((x,i)=>{x.className='pwd-bar';if(i<s)x.classList.add(s===1?'active-weak':s===2?'active-medium':'active-strong');});l.textContent=s===0?'':s===1?'Weak':s===2?'Medium':'Strong';l.style.color=s===1?'var(--danger)':s===2?'var(--warning)':'var(--success)';}
 </script>
 <?= pwa_script_tag() . "\n" ?>
 </body></html>

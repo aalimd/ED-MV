@@ -44,7 +44,6 @@ html,body{min-height:100vh;width:100%;max-width:100vw;overflow-x:hidden;font-fam
 
 /* Data Tables */
 .data-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:20px}
-.data-card [style*="overflow-x:auto"]{-webkit-overflow-scrolling:touch;scrollbar-width:thin}
 .dc-header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--border)}
 .dc-title{font-size:.95rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px}
 .dc-actions{display:flex;gap:6px}
@@ -155,5 +154,5 @@ html,body{min-height:100vh;width:100%;max-width:100vw;overflow-x:hidden;font-fam
   .admin-form label{font-size:.72rem}
   .toggle-wrap{align-items:flex-start}
   .toggle-label{line-height:1.35}
-  .pagination{justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .pagination{justify-content:flex-start;overflow-x:auto}
 }

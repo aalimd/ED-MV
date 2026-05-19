@@ -165,7 +165,10 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
     <?php if($hasSub): ?>
       <a href="<?= APP_URL ?>/app/ventguide" class="btn btn-primary" style="flex:1;min-width:140px;">📱 Open App</a>
     <?php endif; ?>
-    <a href="<?= APP_URL ?>/auth/logout" class="btn btn-secondary" style="flex:1;min-width:140px;">🚪 Logout</a>
+    <form method="POST" action="<?= APP_URL ?>/auth/logout" style="flex:1;min-width:140px;">
+      <?= csrf_field() ?>
+      <button type="submit" class="btn btn-secondary" style="width:100%;">🚪 Logout</button>
+    </form>
   </div>
 </div>
 </div>
@@ -230,7 +233,13 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
   <?php if($hasSub): ?>
     <a href="<?= APP_URL ?>/app/ventguide" class="btn btn-primary" style="max-width:260px;width:100%;font-size:1rem;padding:12px;border-radius:12px;">📱 Return to App</a>
   <?php endif; ?>
-  <p>Logged in as <strong><?= e($user['name']) ?></strong> · <a href="<?= APP_URL ?>/auth/logout">Logout</a></p>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;">
+    <span>Logged in as <strong><?= e($user['name']) ?></strong></span>
+    <form method="POST" action="<?= APP_URL ?>/auth/logout" style="display:inline">
+      <?= csrf_field() ?>
+      <button type="submit" style="background:none;border:none;color:var(--theme);padding:0;cursor:pointer;text-decoration:underline;font:inherit;">Logout</button>
+    </form>
+  </div>
 </div>
 </div>
 <?php endif; ?>

@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
                     $sql = 'UPDATE users SET name=?, email=?, role=?, status=?, email_verified=? WHERE id=?';
                     if ($newPassword !== '') {
                         $hash = password_hash($newPassword, defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT, defined('PASSWORD_ARGON2ID') ? [] : ['cost' => BCRYPT_COST]);
-                        $sql = 'UPDATE users SET name=?, email=?, role=?, status=?, email_verified=?, password_hash=? WHERE id=?';
+                        $sql = 'UPDATE users SET name=?, email=?, role=?, status=?, email_verified=?, password_hash=?, auth_version = auth_version + 1 WHERE id=?';
                         $params = [$name, $email, $role, $status, $emailVerified, $hash, $uid];
                     }
                     $db->prepare($sql)->execute($params);
@@ -176,11 +176,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
                 flash('success', 'Role updated to user.');
                 break;
             case 'reset_password':
-                $newPwd = bin2hex(random_bytes(4)); // 8-char temp password
+                $newPwd = generate_temporary_password();
                 $hash = password_hash($newPwd, defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT, defined('PASSWORD_ARGON2ID') ? [] : ['cost' => BCRYPT_COST]);
-                $db->prepare("UPDATE users SET password_hash=? WHERE id=?")->execute([$hash, $uid]);
+                $db->prepare("UPDATE users SET password_hash=?, auth_version = auth_version + 1 WHERE id=?")->execute([$hash, $uid]);
+                $db->prepare('DELETE FROM password_resets WHERE email = (SELECT email FROM users WHERE id = ? LIMIT 1)')->execute([$uid]);
                 log_activity('admin_reset_password', "Reset password for user ID: {$uid}");
-                flash('success', "Password reset. Temporary password: <strong>{$newPwd}</strong> — share securely.");
+                flash('success', "Password reset. Temporary password: {$newPwd}. Share it securely.");
                 break;
         }
         redirect(APP_URL . '/admin/users' . (isset($_GET['filter']) ? '?filter=' . urlencode($_GET['filter']) : ''));
@@ -289,7 +290,7 @@ admin_header('User Management', '👥', 'users');
   <span class="toggle-label">Email verified</span>
 </label>
 <p style="font-size:.78rem;color:var(--text-3);font-weight:700;margin:-2px 0 14px;">
-  Password must be at least 8 characters and include one uppercase letter and one number.
+  Password must be at least 8 characters and include one uppercase letter, one number, and one special character.
 </p>
 <div style="display:flex;gap:10px;flex-wrap:wrap;">
   <button type="submit" class="btn btn-primary" style="max-width:220px;">➕ Create User</button>

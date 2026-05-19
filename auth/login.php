@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mins = ceil(lockout_remaining($ip) / 60);
             $error = "Too many attempts. Try again in {$mins} minute(s).";
         } else {
-            $email = trim($_POST['email'] ?? '');
+            $email = strtolower(trim($_POST['email'] ?? ''));
             $password = $_POST['password'] ?? '';
             $remember = isset($_POST['remember']);
             if (!$email || !$password) { $error = 'Please fill in all fields.'; }
@@ -39,14 +39,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         session_set_user($user, $remember);
                         $db->prepare('UPDATE users SET last_login=NOW(),last_ip=? WHERE id=?')->execute([$ip,$user['id']]);
                         log_activity('login','Successful login',$user['id']);
-                        $redir = $_SESSION['redirect_after_login'] ?? APP_URL . '/';
+                        
+                        $redir = $_SESSION['redirect_after_login'] ?? '/';
                         unset($_SESSION['redirect_after_login']);
-                        // If $redir is a relative path starting with the app directory, it works fine
-                        // Ensure it doesn't double-prepend APP_URL
-                        if (strpos($redir, APP_URL) === false && strpos($redir, 'http') !== 0) {
-                            $redir = "http://" . $_SERVER['HTTP_HOST'] . $redir;
-                        }
-                        redirect($redir);
+                        
+                        // Ensure $redir is a local path
+                        redirect_local($redir);
                     }
                 } else {
                     record_failed_attempt($ip, $email);
@@ -58,6 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 if (isset($_GET['error']) && $_GET['error']==='suspended') $error='Your account has been suspended.';
+if (isset($_GET['reauth']) && $_GET['reauth']==='1') {
+    flash('warning', 'Please sign in again. Your security settings were updated.');
+}
 if (isset($_GET['registered'])) {
     if ($_GET['registered'] === 'verify') {
         flash('success', 'Account created! Please verify your email address, then wait for admin approval.');

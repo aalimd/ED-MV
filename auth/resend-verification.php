@@ -3,6 +3,7 @@ require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/rate_limit.php';
 require_once __DIR__ . '/../includes/email_verification.php';
 require_once __DIR__ . '/../includes/pwa.php';
 init_session();
@@ -13,30 +14,24 @@ $message = '';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!csrf_validate()) {
+    $ip = client_ip();
+    if (is_rate_limited($ip, 'email_verification')) {
+        $mins = ceil(lockout_remaining($ip, 'email_verification') / 60);
+        $error = "Too many verification requests. Please try again in {$mins} minute(s).";
+    } elseif (!csrf_validate()) {
         $error = 'Invalid request.';
     } else {
         $email = strtolower(trim($_POST['email'] ?? ''));
         if (!valid_email($email)) {
             $error = 'Enter a valid email.';
         } else {
-            $cooldownKey = 'email_verification_last_sent';
-            if (!empty($_SESSION[$cooldownKey]) && (time() - (int)$_SESSION[$cooldownKey]) < 60) {
-                $message = 'If this email needs verification, a new link has been sent.';
-            } else {
-                try {
-                    $sent = resend_verification_email_for_address($email);
-                    if ($sent) {
-                        $_SESSION[$cooldownKey] = time();
-                        $message = 'If this email needs verification, a new link has been sent.';
-                    } else {
-                        $error = 'We were unable to send the verification email. Please try again later or contact support.';
-                    }
-                } catch (Throwable $e) {
-                    error_log('Email verification resend failed: ' . $e->getMessage());
-                    $error = 'An unexpected error occurred while sending the email.';
-                }
+            record_attempt($ip, $email, 'email_verification');
+            try {
+                resend_verification_email_for_address($email);
+            } catch (Throwable $e) {
+                error_log('Email verification resend failed: ' . $e->getMessage());
             }
+            $message = 'If this email needs verification, a new link has been sent.';
         }
     }
 }

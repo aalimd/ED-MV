@@ -23,13 +23,56 @@ function redirect(string $url): void {
 }
 
 /**
+ * Get the app base path from APP_URL, e.g. "/ED-MV".
+ */
+function app_base_path(): string {
+    $path = parse_url(APP_URL, PHP_URL_PATH);
+    if (!is_string($path) || $path === '' || $path === '/') {
+        return '';
+    }
+    return '/' . trim($path, '/');
+}
+
+/**
+ * Normalize a local path so redirects stay inside the app, even when deployed in a subdirectory.
+ */
+function normalize_local_path(string $path, string $fallback = '/'): string {
+    $path = trim($path);
+    if ($path === '' || preg_match('/[\r\n]/', $path)) {
+        return $fallback;
+    }
+    if (!str_starts_with($path, '/') || str_starts_with($path, '//')) {
+        return $fallback;
+    }
+
+    $parts = parse_url($path);
+    if ($parts === false) {
+        return $fallback;
+    }
+
+    $cleanPath = $parts['path'] ?? '/';
+    $query = isset($parts['query']) && $parts['query'] !== '' ? '?' . $parts['query'] : '';
+    $appBase = app_base_path();
+
+    if ($appBase !== '' && ($cleanPath === $appBase || str_starts_with($cleanPath, $appBase . '/'))) {
+        $cleanPath = substr($cleanPath, strlen($appBase));
+        if ($cleanPath === '') {
+            $cleanPath = '/';
+        }
+    }
+
+    if (!str_starts_with($cleanPath, '/') || str_starts_with($cleanPath, '//')) {
+        return $fallback;
+    }
+
+    return $cleanPath . $query;
+}
+
+/**
  * Redirect only to an in-app path to avoid sending users to external URLs.
  */
 function redirect_local(string $path, string $fallback = '/'): void {
-    if ($path === '' || $path[0] !== '/' || str_starts_with($path, '//') || preg_match('/[\r\n]/', $path)) {
-        $path = $fallback;
-    }
-    redirect(APP_URL . $path);
+    redirect(APP_URL . normalize_local_path($path, $fallback));
 }
 
 /**
@@ -117,14 +160,36 @@ function valid_email(string $email): bool {
 }
 
 /**
- * Check password strength: min 8 chars, 1 uppercase, 1 digit
+ * Check password strength: min 8 chars, 1 uppercase, 1 digit, 1 special char
  */
 function validate_password(string $password): array {
     $errors = [];
     if (strlen($password) < 8) $errors[] = 'Minimum 8 characters';
     if (!preg_match('/[A-Z]/', $password)) $errors[] = 'At least one uppercase letter';
     if (!preg_match('/[0-9]/', $password)) $errors[] = 'At least one number';
+    if (!preg_match('/[^A-Za-z0-9]/', $password)) $errors[] = 'At least one special character';
     return $errors;
+}
+
+/**
+ * Generate a temporary password that always meets the app password policy.
+ */
+function generate_temporary_password(int $randomLength = 8): string {
+    $alphabet = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    $specials = '!@#$%^&*';
+    $random = '';
+
+    for ($i = 0; $i < $randomLength; $i++) {
+        $random .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+    }
+
+    $characters = str_split('A' . 'b' . '7' . $specials[random_int(0, strlen($specials) - 1)] . $random);
+    for ($i = count($characters) - 1; $i > 0; $i--) {
+        $j = random_int(0, $i);
+        [$characters[$i], $characters[$j]] = [$characters[$j], $characters[$i]];
+    }
+
+    return implode('', $characters);
 }
 
 /**
@@ -139,7 +204,7 @@ function get_setting(string $key, string $default = ''): string {
         $stmt->execute([$key]);
         $row = $stmt->fetch();
         $cache[$key] = $row ? ($row['setting_value'] ?? $default) : $default;
-    } catch (Exception $e) {
+    } catch (Exception) {
         $cache[$key] = $default;
     }
     return $cache[$key];

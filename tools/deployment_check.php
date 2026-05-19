@@ -194,10 +194,10 @@ if (is_file($configPath)) {
         ];
 
         $requiredColumns = [
-            'users' => ['id', 'name', 'email', 'password_hash', 'role', 'status', 'email_verified', 'last_login', 'last_ip', 'created_at', 'updated_at'],
+            'users' => ['id', 'name', 'email', 'password_hash', 'auth_version', 'role', 'status', 'email_verified', 'last_login', 'last_ip', 'created_at', 'updated_at'],
             'plans' => ['id', 'name', 'slug', 'description', 'features', 'duration_days', 'price', 'currency', 'badge', 'is_featured', 'color', 'is_active', 'sort_order', 'created_at'],
             'subscriptions' => ['id', 'user_id', 'plan_id', 'status', 'starts_at', 'expires_at', 'activated_by', 'notes', 'created_at', 'updated_at'],
-            'login_attempts' => ['id', 'ip', 'email', 'attempts', 'first_attempt', 'locked_until'],
+            'login_attempts' => ['id', 'ip', 'email', 'action', 'attempts', 'first_attempt', 'locked_until'],
             'password_resets' => ['id', 'email', 'token_hash', 'expires_at', 'used', 'created_at'],
             'email_verifications' => ['id', 'user_id', 'email', 'token_hash', 'expires_at', 'used', 'created_at'],
             'activity_log' => ['id', 'user_id', 'action', 'details', 'ip', 'user_agent', 'created_at'],

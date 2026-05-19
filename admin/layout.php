@@ -50,7 +50,10 @@ function admin_header(string $title, string $icon = '📊', string $activePage =
   <h1 class="admin-page-title"><?= $icon ?> <?= e($title) ?></h1>
   <div class="topbar-actions">
     <button class="topbar-btn" onclick="toggleDark()"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
-    <a href="<?= APP_URL ?>/auth/logout" class="topbar-btn" style="color:var(--danger)">🚪 Logout</a>
+    <form method="POST" action="<?= APP_URL ?>/auth/logout" style="display:inline">
+      <?= csrf_field() ?>
+      <button type="submit" class="topbar-btn" style="color:var(--danger)">🚪 Logout</button>
+    </form>
   </div>
 </div>
 <?= render_flashes() ?>

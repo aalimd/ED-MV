@@ -7,6 +7,7 @@
 
 require_once __DIR__ . '/session.php';
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/helpers.php';
 
 init_session();
 
@@ -25,15 +26,15 @@ function require_login(): void {
     $user = session_user();
     if (!$user) {
         $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
-        $_SESSION['redirect_after_login'] = (is_string($requestUri) && str_starts_with($requestUri, '/') && !str_starts_with($requestUri, '//'))
-            ? $requestUri
+        $_SESSION['redirect_after_login'] = is_string($requestUri)
+            ? normalize_local_path($requestUri)
             : '/';
         header('Location: ' . APP_URL . '/auth/login');
         exit;
     }
     // Check if account is still active in DB
     $db = getDB();
-    $stmt = $db->prepare('SELECT status, role FROM users WHERE id = ? LIMIT 1');
+    $stmt = $db->prepare('SELECT status, role, auth_version FROM users WHERE id = ? LIMIT 1');
     $stmt->execute([$user['id']]);
     $row = $stmt->fetch();
     if (!$row || $row['status'] !== 'active') {
@@ -41,11 +42,17 @@ function require_login(): void {
         header('Location: ' . APP_URL . '/auth/login?error=suspended');
         exit;
     }
+    if ((int)$row['auth_version'] !== (int)($user['auth_version'] ?? 1)) {
+        session_destroy_full();
+        header('Location: ' . APP_URL . '/auth/login?reauth=1');
+        exit;
+    }
     // Sync role if changed by admin
     if ($row['role'] !== $_SESSION['user_role']) {
         $_SESSION['user_role'] = $row['role'];
     }
     $_SESSION['user_status'] = $row['status'];
+    $_SESSION['auth_version'] = (int)$row['auth_version'];
 }
 
 /**

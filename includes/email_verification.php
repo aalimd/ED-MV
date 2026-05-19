@@ -92,7 +92,11 @@ function verify_email_token(string $token, string $email): bool
         $db->prepare('UPDATE email_verifications SET used = 1 WHERE id = ?')->execute([(int)$row['id']]);
         $db->commit();
         if (function_exists('log_activity')) {
-            log_activity('email_verified', "Verified email: {$email}", (int)$row['user_id']);
+            try {
+                log_activity('email_verified', "Verified email: {$email}", (int)$row['user_id']);
+            } catch (Throwable $e) {
+                error_log('Email verification logging failed: ' . $e->getMessage());
+            }
         }
         return true;
     } catch (Throwable $e) {

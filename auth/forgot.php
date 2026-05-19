@@ -2,39 +2,39 @@
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../includes/rate_limit.php';
 require_once __DIR__ . '/../includes/mailer.php';
 require_once __DIR__ . '/../includes/pwa.php';
 init_session();
 
 $msg = ''; $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!csrf_validate()) { $error = 'Invalid request.'; }
+    $ip = client_ip();
+    if (is_rate_limited($ip, 'password_reset')) {
+        $mins = ceil(lockout_remaining($ip, 'password_reset') / 60);
+        $error = "Too many reset attempts. Please try again in {$mins} minute(s).";
+    } elseif (!csrf_validate()) { $error = 'Invalid request.'; }
     else {
-        $email = trim($_POST['email'] ?? '');
+        $email = strtolower(trim($_POST['email'] ?? ''));
         if (!valid_email($email)) { $error = 'Enter a valid email.'; }
         else {
             try {
-                $cooldownKey = 'password_reset_last_sent';
-                if (!empty($_SESSION[$cooldownKey]) && (time() - (int) $_SESSION[$cooldownKey]) < 60) {
-                    $msg = 'If an account exists with that email, a reset link has been sent.';
-                } else {
-                    $db = getDB();
-                    $stmt = $db->prepare('SELECT id FROM users WHERE email = ? AND status = "active"');
-                    $stmt->execute([$email]); $user = $stmt->fetch();
-                    if ($user) {
-                        // Delete old tokens for this email
-                        $db->prepare('DELETE FROM password_resets WHERE email = ?')->execute([$email]);
-                        $token = bin2hex(random_bytes(32));
-                        $hash = hash('sha256', $token);
-                        $expires = date('Y-m-d H:i:s', time() + 3600);
-                        $db->prepare('INSERT INTO password_resets (email, token_hash, expires_at) VALUES (?,?,?)')->execute([$email, $hash, $expires]);
-                        $resetUrl = rtrim(APP_URL, '/') . "/auth/reset?token={$token}&email=" . urlencode($email);
-                        $sent = send_password_reset_email($email, $resetUrl);
-                        $_SESSION[$cooldownKey] = time();
-                        log_activity($sent ? 'password_reset_email_sent' : 'password_reset_email_failed', "Reset requested for: {$email}");
-                    }
-                    $msg = 'If an account exists with that email, a reset link has been sent.';
+                record_attempt($ip, $email, 'password_reset');
+                $db = getDB();
+                $stmt = $db->prepare('SELECT id FROM users WHERE email = ? AND status = "active"');
+                $stmt->execute([$email]); $user = $stmt->fetch();
+                if ($user) {
+                    // Delete old tokens for this email
+                    $db->prepare('DELETE FROM password_resets WHERE email = ?')->execute([$email]);
+                    $token = bin2hex(random_bytes(32));
+                    $hash = hash('sha256', $token);
+                    $expires = date('Y-m-d H:i:s', time() + 3600);
+                    $db->prepare('INSERT INTO password_resets (email, token_hash, expires_at) VALUES (?,?,?)')->execute([$email, $hash, $expires]);
+                    $resetUrl = rtrim(APP_URL, '/') . "/auth/reset?token={$token}&email=" . urlencode($email);
+                    $sent = send_password_reset_email($email, $resetUrl);
+                    log_activity($sent ? 'password_reset_email_sent' : 'password_reset_email_failed', "Reset requested for: {$email}");
                 }
+                $msg = 'If an account exists with that email, a reset link has been sent.';
             } catch (Throwable $e) {
                 error_log('Password reset request failed: ' . $e->getMessage());
                 $msg = 'If an account exists with that email, a reset link has been sent.';

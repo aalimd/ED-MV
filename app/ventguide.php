@@ -108,7 +108,12 @@ if ($isAdmin) {
 }
 
 $userMenu .= '
-    <a href="' . APP_URL . '/auth/logout" class="danger">🚪 <span>Sign Out</span></a>
+    <form method="POST" action="' . APP_URL . '/auth/logout" style="margin:0;">
+      ' . csrf_field() . '
+      <button type="submit" class="danger" style="width:100%;text-align:left;border:none;background:none;cursor:pointer;">
+        🚪 <span>Sign Out</span>
+      </button>
+    </form>
   </div>
 </details>';
 
