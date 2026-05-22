@@ -65,6 +65,9 @@ function record_attempt(string $ip, ?string $email = null, string $action = 'log
 
     $windowStart = date('Y-m-d H:i:s', time() - ($windowMinutes * 60));
 
+    // Cleanup old non-locked attempts
+    $db->prepare('DELETE FROM login_attempts WHERE locked_until IS NULL AND action = ? AND first_attempt < ?')->execute([$action, $windowStart]);
+
     // Count recent attempts
     $stmt = $db->prepare(
         'SELECT COUNT(*) as cnt FROM login_attempts WHERE ip = ? AND action = ? AND first_attempt > ?'

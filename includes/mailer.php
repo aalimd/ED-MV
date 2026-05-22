@@ -47,10 +47,6 @@ function send_app_email(string $to, string $subject, string $htmlBody, ?string $
         $mail->setFrom(MAIL_FROM, defined('MAIL_FROM_NAME') ? MAIL_FROM_NAME : APP_NAME);
         $mail->addAddress($to);
 
-        // Add List-Unsubscribe header for better deliverability score
-        $unsubscribeUrl = rtrim(APP_URL, '/') . '/auth/login.php'; // Fallback for transactional mail
-        $mail->addCustomHeader('List-Unsubscribe', '<' . $unsubscribeUrl . '>');
-
         $mail->Subject = $subject;
         $mail->Body = $htmlBody;
         $mail->AltBody = $textBody ?: trim(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $htmlBody)));

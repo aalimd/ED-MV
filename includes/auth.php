@@ -139,7 +139,7 @@ function log_activity(string $action, ?string $details = null, ?int $userId = nu
         $userId ?? ($user['id'] ?? null),
         $action,
         $details,
-        $_SERVER['REMOTE_ADDR'] ?? null,
+        client_ip(),
         substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500),
     ]);
 }

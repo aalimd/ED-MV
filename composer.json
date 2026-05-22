@@ -1,5 +1,8 @@
 {
+    "name": "ed-mv/ventguide-pro",
+    "description": "Evidence-based emergency department ventilation reference.",
     "require": {
-        "phpmailer/phpmailer": "^7.0"
+        "php": ">=8.0",
+        "phpmailer/phpmailer": "^6.0"
     }
 }

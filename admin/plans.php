@@ -23,17 +23,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
         $sort = (int)($_POST['sort_order'] ?? 0);
 
         if ($name) {
-            $db->prepare("INSERT INTO plans (name,slug,description,features,duration_days,price,currency,badge,is_featured,color,is_active,sort_order) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
-               ->execute([$name, $slug, $desc, $features, $days, $price, $currency, $badge, $featured, $color, $active, $sort]);
-            // Save feature assignments
-            $newPlanId = (int)$db->lastInsertId();
-            $featureIds = array_map('intval', $_POST['feature_ids'] ?? []);
-            foreach ($featureIds as $fid) {
-                $db->prepare("INSERT IGNORE INTO plan_features (plan_id, feature_id) VALUES (?, ?)")->execute([$newPlanId, $fid]);
+            $originalSlug = $slug;
+            $counter = 1;
+            while (true) {
+                $stmt = $db->prepare("SELECT COUNT(*) FROM plans WHERE slug = ?");
+                $stmt->execute([$slug]);
+                if ($stmt->fetchColumn() == 0) break;
+                $slug = $originalSlug . '-' . $counter;
+                $counter++;
             }
-            invalidate_feature_cache();
-            log_activity('admin_create_plan', "Created plan: {$name}");
-            flash('success', "Plan \"{$name}\" created!");
+
+            try {
+                $db->beginTransaction();
+                $db->prepare("INSERT INTO plans (name,slug,description,features,duration_days,price,currency,badge,is_featured,color,is_active,sort_order) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
+                   ->execute([$name, $slug, $desc, $features, $days, $price, $currency, $badge, $featured, $color, $active, $sort]);
+                // Save feature assignments
+                $newPlanId = (int)$db->lastInsertId();
+                $featureIds = array_map('intval', $_POST['feature_ids'] ?? []);
+                foreach ($featureIds as $fid) {
+                    $db->prepare("INSERT IGNORE INTO plan_features (plan_id, feature_id) VALUES (?, ?)")->execute([$newPlanId, $fid]);
+                }
+                $db->commit();
+                invalidate_feature_cache();
+                log_activity('admin_create_plan', "Created plan: {$name}");
+                flash('success', "Plan \"{$name}\" created!");
+            } catch (Exception $e) {
+                if ($db->inTransaction()) {
+                    $db->rollBack();
+                }
+                flash('danger', "Failed to create plan.");
+            }
         }
     } elseif ($action === 'update' && $planId > 0) {
         $name = trim($_POST['name'] ?? '');
@@ -49,17 +68,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
         $sort = (int)($_POST['sort_order'] ?? 0);
 
         if ($name) {
-            $db->prepare("UPDATE plans SET name=?,description=?,features=?,duration_days=?,price=?,currency=?,badge=?,is_featured=?,color=?,is_active=?,sort_order=? WHERE id=?")
-               ->execute([$name, $desc, $features, $days, $price, $currency, $badge, $featured, $color, $active, $sort, $planId]);
-            // Update feature assignments
-            $featureIds = array_map('intval', $_POST['feature_ids'] ?? []);
-            $db->prepare("DELETE FROM plan_features WHERE plan_id = ?")->execute([$planId]);
-            foreach ($featureIds as $fid) {
-                $db->prepare("INSERT INTO plan_features (plan_id, feature_id) VALUES (?, ?)")->execute([$planId, $fid]);
+            try {
+                $db->beginTransaction();
+                $db->prepare("UPDATE plans SET name=?,description=?,features=?,duration_days=?,price=?,currency=?,badge=?,is_featured=?,color=?,is_active=?,sort_order=? WHERE id=?")
+                   ->execute([$name, $desc, $features, $days, $price, $currency, $badge, $featured, $color, $active, $sort, $planId]);
+                // Update feature assignments
+                $featureIds = array_map('intval', $_POST['feature_ids'] ?? []);
+                $db->prepare("DELETE FROM plan_features WHERE plan_id = ?")->execute([$planId]);
+                foreach ($featureIds as $fid) {
+                    $db->prepare("INSERT INTO plan_features (plan_id, feature_id) VALUES (?, ?)")->execute([$planId, $fid]);
+                }
+                $db->commit();
+                invalidate_feature_cache();
+                log_activity('admin_update_plan', "Updated plan ID: {$planId}");
+                flash('success', "Plan updated!");
+            } catch (Exception $e) {
+                if ($db->inTransaction()) {
+                    $db->rollBack();
+                }
+                flash('danger', "Failed to update plan.");
             }
-            invalidate_feature_cache();
-            log_activity('admin_update_plan', "Updated plan ID: {$planId}");
-            flash('success', "Plan updated!");
         }
     } elseif ($action === 'delete' && $planId > 0) {
         // Check if any subscriptions use this plan
@@ -87,7 +115,7 @@ $plans = $db->query("SELECT * FROM plans ORDER BY sort_order, id")->fetchAll();
 $editing = null;
 if (isset($_GET['edit'])) {
     $editId = (int)$_GET['edit'];
-    foreach ($plans as $p) { if ($p['id'] === $editId) { $editing = $p; break; } }
+    foreach ($plans as $p) { if ((int)$p['id'] === $editId) { $editing = $p; break; } }
 }
 
 // Load all active features for the checkbox grid

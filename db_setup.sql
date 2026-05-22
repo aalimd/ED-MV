@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `name` VARCHAR(100) NOT NULL,
   `email` VARCHAR(255) NOT NULL UNIQUE,
   `password_hash` VARCHAR(255) NOT NULL,
+  `auth_version` INT UNSIGNED NOT NULL DEFAULT 1,
   `role` ENUM('user','subscriber','admin') NOT NULL DEFAULT 'user',
   `status` ENUM('pending','active','suspended','deleted') NOT NULL DEFAULT 'pending',
   `email_verified` TINYINT(1) NOT NULL DEFAULT 0,
@@ -71,15 +72,68 @@ CREATE TABLE IF NOT EXISTS `subscriptions` (
   INDEX `idx_expires` (`expires_at`)
 ) ENGINE=InnoDB;
 
+-- ── Features & Plan Features ──────────────────────────
+CREATE TABLE IF NOT EXISTS `features` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `key` VARCHAR(50) NOT NULL UNIQUE,
+  `name` VARCHAR(100) NOT NULL,
+  `description` TEXT NULL,
+  `icon` VARCHAR(10) NULL DEFAULT '🔒',
+  `sort_order` INT NOT NULL DEFAULT 0,
+  `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `plan_features` (
+  `plan_id` INT UNSIGNED NOT NULL,
+  `feature_id` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`plan_id`, `feature_id`),
+  FOREIGN KEY (`plan_id`) REFERENCES `plans`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`feature_id`) REFERENCES `features`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO `features` (`key`, `name`, `description`, `icon`, `sort_order`, `is_active`) VALUES
+('scenarios',  'Ventilation Scenarios', NULL, '🏥', 1, 1),
+('abg_calc',   'ABG Calculator',       NULL, '🧪', 2, 1),
+('compare',    'Scenario Comparison',   NULL, '📊', 3, 1),
+('guide',      'Clinical Guidelines',   NULL, '📖', 4, 1),
+('tools',      'Clinical Tools',        NULL, '🔧', 5, 1),
+('pbw_calc',   'PBW Calculator',        NULL, '⚖️', 6, 1),
+('ehr_export', 'EHR Export',            NULL, '📋', 7, 1),
+('vent_coach', 'Vent Coach', 'Real-time safety scoring and titration coaching from current ventilator settings and ABG', '🧠', 9, 1);
+
+INSERT IGNORE INTO `plan_features` (`plan_id`, `feature_id`)
+SELECT p.id, f.id FROM plans p CROSS JOIN features f;
+
+-- ── Patient Cases ─────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `patient_cases` (
+  `id`              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `user_id`         INT UNSIGNED NOT NULL,
+  `reference`       VARCHAR(80)  NULL  COMMENT 'Optional bedside reference, e.g. "Bed 12"',
+  `scenario`        VARCHAR(50)  NOT NULL DEFAULT 'healthy',
+  `pbw_kg`          DECIMAL(5,2) NULL,
+  `vent_data_json`  TEXT NULL  COMMENT 'JSON-encoded ventilator settings',
+  `abg_data_json`   TEXT NULL  COMMENT 'JSON-encoded latest ABG values',
+  `result_json`     TEXT NULL  COMMENT 'JSON-encoded analyzer output (denormalized snapshot)',
+  `safety_level`    ENUM('green','yellow','red') NULL,
+  `created_at`      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  INDEX `idx_user_created` (`user_id`, `created_at`),
+  INDEX `idx_user_updated` (`user_id`, `updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ── Login Attempts (Rate Limiting) ────────────────────
 CREATE TABLE IF NOT EXISTS `login_attempts` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `ip` VARCHAR(45) NOT NULL,
   `email` VARCHAR(255) NULL,
+  `action` VARCHAR(50) NOT NULL DEFAULT 'login',
   `attempts` INT UNSIGNED NOT NULL DEFAULT 1,
   `first_attempt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `locked_until` DATETIME NULL,
   INDEX `idx_ip` (`ip`),
+  INDEX `idx_ip_action` (`ip`, `action`),
   INDEX `idx_locked` (`locked_until`)
 ) ENGINE=InnoDB;
 

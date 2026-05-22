@@ -71,6 +71,10 @@ function get_user_features_cached(): array {
  */
 function has_feature(string $key): bool {
     static $set = null;
+    if ($key === '__reset__') {
+        $set = null;
+        return false;
+    }
     if ($set === null) {
         $set = array_flip(get_user_features_cached());
     }
@@ -107,4 +111,5 @@ function render_feature_script(): string {
  */
 function invalidate_feature_cache(): void {
     unset($_SESSION['_feat_keys'], $_SESSION['_feat_ts']);
+    has_feature('__reset__');
 }

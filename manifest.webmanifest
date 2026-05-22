@@ -3,7 +3,7 @@
   "short_name": "VentGuide",
   "description": "Evidence-based emergency department ventilation reference.",
   "id": "./",
-  "start_url": "./index.php?source=pwa",
+  "start_url": "./index?source=pwa",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
@@ -34,13 +34,13 @@
     {
       "name": "Open VentGuide",
       "short_name": "Guide",
-      "url": "./app/ventguide.php",
+      "url": "./app/ventguide",
       "icons": [{ "src": "./assets/pwa/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Sign in",
       "short_name": "Login",
-      "url": "./auth/login.php",
+      "url": "./auth/login",
       "icons": [{ "src": "./assets/pwa/icon-192.png", "sizes": "192x192" }]
     }
   ]

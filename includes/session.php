@@ -12,15 +12,6 @@ function init_session(): void {
     $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
     ini_set('session.use_strict_mode', '1');
     ini_set('session.use_only_cookies', '1');
-    if (!headers_sent()) {
-        header('X-Frame-Options: SAMEORIGIN');
-        header('X-Content-Type-Options: nosniff');
-        header('Referrer-Policy: same-origin');
-        header("Content-Security-Policy: frame-ancestors 'self'");
-        if ($secure) {
-            header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
-        }
-    }
     
     session_name(SESSION_NAME);
     session_set_cookie_params([
@@ -41,6 +32,7 @@ function init_session(): void {
             session_unset();
             session_destroy();
             session_start();
+            session_regenerate_id(true);
         }
     }
     $_SESSION['last_activity'] = time();

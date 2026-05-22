@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
                 }
 
                 log_activity('admin_change_plan', "Changed sub ID {$subId} from \"{$oldPlanName}\" to \"{$newPlan['name']}\" (adjusted expiry by {$dayDifference} days)");
-                flash('success', "Plan changed from <strong>{$oldPlanName}</strong> to <strong>" . e($newPlan['name']) . "</strong>. Expiry date automatically adjusted.");
+                flash('success', "Plan changed from {$oldPlanName} to " . e($newPlan['name']) . ". Expiry date automatically adjusted.");
             } else {
                 flash('danger', 'Invalid plan selected.');
             }
@@ -113,6 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
         $planStmt->execute([$planId]); $planRow = $planStmt->fetch();
         $days = $planRow ? $planRow['duration_days'] : 30;
         $expires = date('Y-m-d H:i:s', time() + ($days * 86400));
+        $db->prepare("UPDATE subscriptions SET status='cancelled' WHERE user_id=? AND status='active'")->execute([$userId]);
         $db->prepare("INSERT INTO subscriptions (user_id,plan_id,status,starts_at,expires_at,activated_by) VALUES (?,?,'active',NOW(),?,?)")
            ->execute([$userId, $planId, $expires, $adminId]);
         $db->prepare("UPDATE users SET role='subscriber' WHERE id=?")->execute([$userId]);

@@ -10,7 +10,8 @@ require_once __DIR__ . '/db.php';
 /**
  * Sanitize output for HTML
  */
-function e(string $str): string {
+function e(?string $str): string {
+    if ($str === null) return '';
     return htmlspecialchars($str, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 }
 
@@ -42,9 +43,11 @@ function current_scheme(): string {
         if (!empty($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off') {
             return 'https';
         }
-        $forwarded = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '';
-        if (is_string($forwarded) && strtolower(strtok($forwarded, ',')) === 'https') {
-            return 'https';
+        if (defined('TRUST_PROXIES') && TRUST_PROXIES) {
+            $forwarded = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '';
+            if (is_string($forwarded) && strtolower(strtok($forwarded, ',')) === 'https') {
+                return 'https';
+            }
         }
         if (($_SERVER['SERVER_PORT'] ?? '') === '443' || ($_SERVER['SERVER_PORT'] ?? '') === 443) {
             return 'https';
@@ -176,7 +179,18 @@ function render_flashes(): string {
  * Get client IP (handles proxies)
  */
 function client_ip(): string {
-    return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    if (defined('TRUST_PROXIES') && TRUST_PROXIES) {
+        $trusted = defined('TRUSTED_PROXY_IPS') ? TRUSTED_PROXY_IPS : [];
+        if (empty($trusted) || in_array($ip, $trusted)) {
+            $forwarded = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
+            if (is_string($forwarded) && $forwarded !== '') {
+                $ips = explode(',', $forwarded);
+                $ip = trim($ips[0]);
+            }
+        }
+    }
+    return $ip;
 }
 
 /**
@@ -222,7 +236,7 @@ function valid_email(string $email): bool {
  */
 function validate_password(string $password): array {
     $errors = [];
-    if (strlen($password) < 8) $errors[] = 'Minimum 8 characters';
+    if (mb_strlen($password, 'UTF-8') < 8) $errors[] = 'Minimum 8 characters';
     if (!preg_match('/[A-Z]/', $password)) $errors[] = 'At least one uppercase letter';
     if (!preg_match('/[0-9]/', $password)) $errors[] = 'At least one number';
     if (!preg_match('/[^A-Za-z0-9]/', $password)) $errors[] = 'At least one special character';

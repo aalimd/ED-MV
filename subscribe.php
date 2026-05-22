@@ -32,9 +32,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
     $stmt = $db->prepare("SELECT id FROM subscriptions WHERE user_id = ? AND status = 'pending' LIMIT 1");
     $stmt->execute([$user['id']]);
     if (!$stmt->fetch() && $planId > 0) {
-        $db->prepare("INSERT INTO subscriptions (user_id, plan_id, status) VALUES (?, ?, 'pending')")
-           ->execute([$user['id'], $planId]);
-        log_activity('subscription_request', "Requested plan ID: {$planId}", $user['id']);
+        try {
+            $db->beginTransaction();
+            $db->prepare("INSERT INTO subscriptions (user_id, plan_id, status) VALUES (?, ?, 'pending')")
+               ->execute([$user['id'], $planId]);
+            $db->commit();
+            log_activity('subscription_request', "Requested plan ID: {$planId}", $user['id']);
+        } catch (Exception $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+        }
     }
     $requested = true;
 }

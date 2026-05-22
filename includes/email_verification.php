@@ -30,7 +30,7 @@ function create_email_verification_token(int $userId, string $email): string
 function send_verification_email(int $userId, string $email, string $name): bool
 {
     $token = create_email_verification_token($userId, $email);
-    $verifyUrl = rtrim(APP_URL, '/') . '/auth/verify-email.php?token=' . $token . '&email=' . urlencode($email);
+    $verifyUrl = app_url('/auth/verify-email?token=' . $token . '&email=' . urlencode($email));
 
     return send_email_verification_email($email, $name, $verifyUrl);
 }

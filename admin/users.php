@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
     }
 
     // Prevent self-modification for destructive actions
-    if ($uid > 0 && $uid === $adminUser['id'] && in_array($action, ['suspend', 'delete', 'make_user', 'make_subscriber'], true)) {
+    if ($uid > 0 && $uid === (int)$adminUser['id'] && in_array($action, ['suspend', 'delete', 'make_user', 'make_subscriber'], true)) {
         flash('danger', 'You cannot modify your own account this way.');
         redirect(app_url('/admin/users' . (isset($_GET['filter']) ? '?filter=' . urlencode($_GET['filter']) : '')));
     }
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
                 if (!in_array($role, $allowedRoles, true)) $errors[] = 'Invalid role.';
                 if (!in_array($status, $allowedStatuses, true)) $errors[] = 'Invalid status.';
 
-                if ($uid === $adminUser['id']) {
+                if ($uid === (int)$adminUser['id']) {
                     $role = $target['role'] ?? $adminUser['role'];
                     $status = $target['status'] ?? $adminUser['status'];
                 }
@@ -103,8 +103,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
 
                 $db->beginTransaction();
                 try {
+                    $authBump = '';
+                    if ($role !== $target['role'] || $status !== $target['status']) {
+                        $authBump = ', auth_version = auth_version + 1';
+                    }
                     $params = [$name, $email, $role, $status, $emailVerified, $uid];
-                    $sql = 'UPDATE users SET name=?, email=?, role=?, status=?, email_verified=? WHERE id=?';
+                    $sql = "UPDATE users SET name=?, email=?, role=?, status=?, email_verified=?{$authBump} WHERE id=?";
                     if ($newPassword !== '') {
                         $hash = password_hash($newPassword, defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT, defined('PASSWORD_ARGON2ID') ? [] : ['cost' => BCRYPT_COST]);
                         $sql = 'UPDATE users SET name=?, email=?, role=?, status=?, email_verified=?, password_hash=?, auth_version = auth_version + 1 WHERE id=?';
@@ -126,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
                     throw $e;
                 }
 
-                if ($uid === $adminUser['id']) {
+                if ($uid === (int)$adminUser['id']) {
                     $_SESSION['user_name'] = $name;
                     $_SESSION['user_email'] = $email;
                     $_SESSION['user_role'] = $role;
@@ -137,12 +141,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
                 flash('success', 'User details updated.');
                 break;
             case 'activate':
-                $db->prepare("UPDATE users SET status='active' WHERE id=?")->execute([$uid]);
+                $db->prepare("UPDATE users SET status='active', auth_version = auth_version + 1 WHERE id=?")->execute([$uid]);
                 log_activity('admin_activate_user', "Activated user ID: {$uid}");
                 flash('success', 'User activated.');
                 break;
             case 'suspend':
-                $db->prepare("UPDATE users SET status='suspended' WHERE id=?")->execute([$uid]);
+                $db->prepare("UPDATE users SET status='suspended', auth_version = auth_version + 1 WHERE id=?")->execute([$uid]);
                 // Also cancel any active subscriptions
                 $db->prepare("UPDATE subscriptions SET status='cancelled' WHERE user_id=? AND status='active'")->execute([$uid]);
                 log_activity('admin_suspend_user', "Suspended user ID: {$uid} (subscriptions cancelled)");
@@ -150,28 +154,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
                 break;
             case 'deactivate':
                 // Soft hold — sets pending, preserves subscription for later
-                $db->prepare("UPDATE users SET status='pending' WHERE id=?")->execute([$uid]);
+                $db->prepare("UPDATE users SET status='pending', auth_version = auth_version + 1 WHERE id=?")->execute([$uid]);
                 log_activity('admin_deactivate_user', "Deactivated (held) user ID: {$uid}");
                 flash('warning', 'User account placed on hold (pending). They cannot log in until reactivated.');
                 break;
             case 'delete':
-                $db->prepare("UPDATE users SET status='deleted' WHERE id=?")->execute([$uid]);
+                $db->prepare("UPDATE users SET status='deleted', auth_version = auth_version + 1 WHERE id=?")->execute([$uid]);
                 $db->prepare("UPDATE subscriptions SET status='cancelled' WHERE user_id=? AND status IN ('active','pending')")->execute([$uid]);
                 log_activity('admin_delete_user', "Soft-deleted user ID: {$uid}");
                 flash('danger', 'User deleted and subscriptions cancelled.');
                 break;
             case 'make_admin':
-                $db->prepare("UPDATE users SET role='admin' WHERE id=?")->execute([$uid]);
+                $db->prepare("UPDATE users SET role='admin', auth_version = auth_version + 1 WHERE id=?")->execute([$uid]);
                 log_activity('admin_promote', "Promoted user ID {$uid} to admin");
                 flash('success', 'User promoted to admin.');
                 break;
             case 'make_subscriber':
-                $db->prepare("UPDATE users SET role='subscriber' WHERE id=?")->execute([$uid]);
+                $db->prepare("UPDATE users SET role='subscriber', auth_version = auth_version + 1 WHERE id=?")->execute([$uid]);
                 log_activity('admin_set_role', "Set user ID {$uid} to subscriber");
                 flash('success', 'Role updated to subscriber.');
                 break;
             case 'make_user':
-                $db->prepare("UPDATE users SET role='user' WHERE id=?")->execute([$uid]);
+                $db->prepare("UPDATE users SET role='user', auth_version = auth_version + 1 WHERE id=?")->execute([$uid]);
                 log_activity('admin_set_role', "Set user ID {$uid} to user");
                 flash('success', 'Role updated to user.');
                 break;
@@ -301,7 +305,7 @@ admin_header('User Management', '👥', 'users');
 <?php endif; ?>
 
 <?php if ($editUser):
-    $editingSelf = $editUser['id'] === session_user()['id'];
+    $editingSelf = (int)$editUser['id'] === (int)session_user()['id'];
 ?>
 <div class="data-card">
 <div class="dc-header">
@@ -368,7 +372,7 @@ admin_header('User Management', '👥', 'users');
 <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Subscription</th><th>Joined</th><th>Last Login</th><th>Actions</th></tr></thead>
 <tbody>
 <?php foreach($users as $u):
-    $isSelf = $u['id'] === session_user()['id'];
+    $isSelf = (int)$u['id'] === (int)session_user()['id'];
     $sub = $subLookup[$u['id']] ?? null;
 ?>
 <tr>

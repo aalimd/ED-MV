@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $hash = hash('sha256', $token);
                     $expires = date('Y-m-d H:i:s', time() + 3600);
                     $db->prepare('INSERT INTO password_resets (email, token_hash, expires_at) VALUES (?,?,?)')->execute([$email, $hash, $expires]);
-                    $resetUrl = rtrim(APP_URL, '/') . "/auth/reset?token={$token}&email=" . urlencode($email);
+                    $resetUrl = app_url("/auth/reset?token={$token}&email=" . urlencode($email));
                     $sent = send_password_reset_email($email, $resetUrl);
                     log_activity($sent ? 'password_reset_email_sent' : 'password_reset_email_failed', "Reset requested for: {$email}");
                 }

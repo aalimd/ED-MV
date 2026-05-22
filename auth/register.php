@@ -21,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email = strtolower(trim($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
         $confirm = $_POST['confirm'] ?? '';
-        record_attempt($ip, valid_email($email) ? $email : null, 'register');
         if (!$name) $errors[] = 'Name is required.';
         if (!valid_email($email)) $errors[] = 'Valid email is required.';
         if ($password !== $confirm) $errors[] = 'Passwords do not match.';
@@ -40,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt->fetch()) $errors[] = 'Unable to create an account with this email address.';
         }
         if (!$errors) {
+            record_attempt($ip, valid_email($email) ? $email : null, 'register');
             $db = getDB();
             $hash = password_hash($password, defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT, defined('PASSWORD_ARGON2ID') ? [] : ['cost' => BCRYPT_COST]);
             $status = REQUIRE_ADMIN_APPROVAL ? 'pending' : 'active';
