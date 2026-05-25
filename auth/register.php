@@ -70,6 +70,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <?= pwa_zoom_lock_script() ?>
 <?= pwa_head_tags('Request access to ED VentGuide Pro.') . "\n" ?>
 <link rel="stylesheet" href="<?= asset_url('/assets/css/auth.css?v=6') ?>">
+<?= toast_head_tag() ?>
 </head>
 <body>
 <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode"><span id="darkIcon"><?= $dark?'☀️':'🌙' ?></span></button>
@@ -101,4 +102,5 @@ function toggleDark(){document.documentElement.classList.toggle('dark');const d=
 function checkStrength(p){const b=[document.getElementById('b1'),document.getElementById('b2'),document.getElementById('b3')];const l=document.getElementById('pwdLabel');let s=0;if(p.length>=8)s++;if(/[A-Z]/.test(p)&&/[0-9]/.test(p)&&/[^A-Za-z0-9]/.test(p))s++;if(p.length>=12)s++;b.forEach((x,i)=>{x.className='pwd-bar';if(i<s)x.classList.add(s===1?'active-weak':s===2?'active-medium':'active-strong');});l.textContent=s===0?'':s===1?'Weak':s===2?'Medium':'Strong';l.style.color=s===1?'var(--danger)':s===2?'var(--warning)':'var(--success)';}
 </script>
 <?= pwa_script_tag() . "\n" ?>
+<?= toast_script_tag() . "\n" ?>
 </body></html>

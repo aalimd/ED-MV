@@ -27,6 +27,13 @@ function redirect(string $url): void {
  * Get the app base path from APP_URL, e.g. "/ED-MV".
  */
 function app_base_path(): string {
+    if (request_is_local()) {
+        $requestBase = request_base_path();
+        if ($requestBase !== '') {
+            return $requestBase;
+        }
+    }
+
     $path = parse_url(APP_URL, PHP_URL_PATH);
     if (!is_string($path) || $path === '' || $path === '/') {
         return '';
@@ -34,12 +41,70 @@ function app_base_path(): string {
     return '/' . trim($path, '/');
 }
 
+function host_without_port(string $host): string {
+    $host = trim($host);
+    if ($host === '') {
+        return '';
+    }
+    if ($host[0] === '[') {
+        $end = strpos($host, ']');
+        return $end === false ? $host : substr($host, 1, $end - 1);
+    }
+    $colon = strpos($host, ':');
+    return $colon === false ? $host : substr($host, 0, $colon);
+}
+
+function is_local_host(string $host): bool {
+    return in_array(strtolower(host_without_port($host)), ['localhost', '127.0.0.1', '::1'], true);
+}
+
+function request_host(): string {
+    $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? '';
+    return is_string($host) ? trim($host) : '';
+}
+
+function request_is_local(): bool {
+    $host = request_host();
+    return $host !== '' && is_local_host($host);
+}
+
+function request_base_path(): string {
+    if (empty($_SERVER['SCRIPT_NAME']) && empty($_SERVER['REQUEST_URI'])) {
+        return '';
+    }
+
+    $scriptName = str_replace('\\', '/', (string)($_SERVER['SCRIPT_NAME'] ?? ''));
+    $scriptFile = realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? ''));
+    $appRoot = realpath(APP_ROOT);
+    if ($scriptName !== '' && is_string($scriptFile) && is_string($appRoot)) {
+        $scriptFile = str_replace('\\', '/', $scriptFile);
+        $appRoot = rtrim(str_replace('\\', '/', $appRoot), '/');
+        if (str_starts_with($scriptFile, $appRoot . '/')) {
+            $relativeScript = substr($scriptFile, strlen($appRoot));
+            if ($relativeScript !== '' && str_ends_with($scriptName, $relativeScript)) {
+                $base = substr($scriptName, 0, -strlen($relativeScript));
+                $base = '/' . trim($base, '/');
+                return $base === '/' ? '' : $base;
+            }
+        }
+    }
+
+    $requestUri = (string)($_SERVER['REQUEST_URI'] ?? '');
+    if (str_starts_with($requestUri, '/ED-MV/')) {
+        return '/ED-MV';
+    }
+
+    return '';
+}
+
 /**
  * Detect the scheme (http/https) for the current request.
  * Falls back to APP_URL's scheme on the CLI or when nothing is detectable.
  */
 function current_scheme(): string {
-    if (PHP_SAPI !== 'cli') {
+    $configuredScheme = parse_url(APP_URL, PHP_URL_SCHEME);
+    $configuredHost = parse_url(APP_URL, PHP_URL_HOST);
+    if (request_host() !== '') {
         if (!empty($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off') {
             return 'https';
         }
@@ -52,9 +117,14 @@ function current_scheme(): string {
         if (($_SERVER['SERVER_PORT'] ?? '') === '443' || ($_SERVER['SERVER_PORT'] ?? '') === 443) {
             return 'https';
         }
+        if (!request_is_local() && $configuredScheme === 'https' && is_string($configuredHost) && !is_local_host($configuredHost)) {
+            return 'https';
+        }
+        if (request_is_local()) {
+            return 'http';
+        }
     }
-    $scheme = parse_url(APP_URL, PHP_URL_SCHEME);
-    return is_string($scheme) && $scheme !== '' ? $scheme : 'http';
+    return is_string($configuredScheme) && $configuredScheme !== '' ? $configuredScheme : 'http';
 }
 
 /**
@@ -76,6 +146,11 @@ function app_url(string $path = ''): string {
     $host   = $parts['host'];
     $port   = isset($parts['port']) ? ':' . $parts['port'] : '';
     $base   = isset($parts['path']) ? '/' . trim($parts['path'], '/') : '';
+    if (request_is_local()) {
+        $host = request_host();
+        $port = '';
+        $base = request_base_path();
+    }
     if ($base === '/') {
         $base = '';
     }
@@ -155,12 +230,27 @@ function get_flashes(): array {
 }
 
 /**
- * Render flash messages as HTML
+ * Render flash messages as HTML.
+ *
+ * Outputs:
+ *   1. A hidden JSON script tag consumed by assets/js/toast.js to show
+ *      beautiful slide-in toast notifications.
+ *   2. Traditional inline `.flash` divs as a no-JS fallback (hidden via
+ *      the `noscript-flash` class when JS is available).
  */
 function render_flashes(): string {
     $flashes = get_flashes();
     if (empty($flashes)) return '';
-    $html = '';
+
+    // 1. JSON data for the toast system (consumed by toast.js on DOMContentLoaded)
+    $jsonData = json_encode(
+        array_map(fn($f) => ['type' => $f['type'], 'message' => $f['message']], $flashes),
+        JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE
+    );
+    $html = '<script type="application/json" id="toast-flash-data">' . $jsonData . '</script>';
+
+    // 2. Inline fallback (hidden by JS, visible without JS)
+    $html .= '<noscript>';
     foreach ($flashes as $f) {
         $type = e($f['type']);
         $msg = e($f['message']);
@@ -172,7 +262,21 @@ function render_flashes(): string {
         };
         $html .= "<div class=\"flash flash-{$type}\">{$icon} {$msg}</div>";
     }
+    $html .= '</noscript>';
+
     return $html;
+}
+
+/**
+ * Return the CSS + JS tags for the toast notification system.
+ * Include this in the <head> (CSS) or before </body> (JS) of every page.
+ */
+function toast_head_tag(): string {
+    return '<link rel="stylesheet" href="' . asset_url('/assets/css/toast.css?v=1') . '">';
+}
+
+function toast_script_tag(): string {
+    return '<script src="' . asset_url('/assets/js/toast.js?v=1') . '"></script>';
 }
 
 /**

@@ -27,6 +27,7 @@ function admin_header(string $title, string $icon = '📊', string $activePage =
 <title><?= e($title) ?> — Admin</title>
 <?= pwa_head_tags('ED VentGuide Pro admin control panel.') . "\n" ?>
 <link rel="stylesheet" href="<?= asset_url('/assets/css/admin.css?v=8') ?>">
+<?= toast_head_tag() ?>
 </head>
 <body>
 <button class="sb-toggle" onclick="document.querySelector('.admin-sidebar').classList.toggle('open')">☰</button>
@@ -65,5 +66,6 @@ function admin_footer(): void { ?>
 function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}
 </script>
 <?= pwa_script_tag() . "\n" ?>
+<?= toast_script_tag() . "\n" ?>
 </body></html>
 <?php } // end admin_footer

@@ -2,6 +2,7 @@
 
 # Local / production secrets
 config.php
+config.secrets.ini
 .env
 .env.*
 !.env.example

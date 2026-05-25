@@ -138,7 +138,13 @@ $userMenu .= '
   </div>
 </details>';
 
-// Inject after <body> tag
-$html = preg_replace('/<body>/', '<body>' . render_feature_script() . $userMenu, $html, 1);
+// Inject toast CSS into <head>
+$html = preg_replace('/<\/head>/', toast_head_tag() . "\n</head>", $html, 1);
+
+// Inject after <body> tag: feature script + user menu + flash data for toasts
+$html = preg_replace('/<body>/', '<body>' . render_feature_script() . $userMenu . render_flashes(), $html, 1);
+
+// Inject toast JS before </body>
+$html = preg_replace('/<\/body>/', toast_script_tag() . "\n</body>", $html, 1);
 
 echo $html;

@@ -1,6 +1,6 @@
 <?php
 /**
- * SMTP mail helper.
+ * Application mail helper.
  */
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -9,16 +9,123 @@ require_once __DIR__ . '/../config.php';
 
 function mailer_enabled(): bool
 {
+    return sndr_mailer_enabled() || smtp_mailer_enabled();
+}
+
+function smtp_mailer_enabled(): bool
+{
     return defined('SMTP_HOST') && SMTP_HOST !== ''
         && defined('SMTP_USERNAME') && SMTP_USERNAME !== ''
         && defined('SMTP_PASSWORD') && SMTP_PASSWORD !== ''
         && defined('MAIL_FROM') && MAIL_FROM !== '';
 }
 
+function sndr_mailer_enabled(): bool
+{
+    return defined('SNDR_API_KEY') && SNDR_API_KEY !== ''
+        && defined('MAIL_FROM') && MAIL_FROM !== '';
+}
+
+function mail_driver(): string
+{
+    return strtolower(trim((string)(defined('MAIL_DRIVER') ? MAIL_DRIVER : 'smtp')));
+}
+
+function send_via_sndr(string $to, string $subject, string $htmlBody, ?string $textBody = null): bool
+{
+    $apiKey = defined('SNDR_API_KEY') ? SNDR_API_KEY : '';
+    $apiUrl = defined('SNDR_API_URL') ? SNDR_API_URL : 'https://api.sndr.sh/v1/send';
+    $fromEmail = defined('MAIL_FROM') ? MAIL_FROM : '';
+
+    if (empty($apiKey)) {
+        error_log("MAILER ERROR: SNDR API Key is empty.");
+        return false;
+    }
+
+    if (empty($fromEmail)) {
+        error_log("MAILER ERROR: MAIL_FROM is empty for sndr.sh.");
+        return false;
+    }
+
+    if (!function_exists('curl_init')) {
+        error_log("MAILER ERROR: PHP cURL extension is required for sndr.sh.");
+        return false;
+    }
+
+    $payload = [
+        'from' => $fromEmail,
+        'to' => [$to],
+        'subject' => $subject,
+        'html' => $htmlBody,
+    ];
+
+    if ($textBody !== null) {
+        $payload['text'] = $textBody;
+    } else {
+        $payload['text'] = trim(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $htmlBody)));
+    }
+
+    $ch = curl_init($apiUrl);
+    if ($ch === false) {
+        error_log("MAILER ERROR: Failed to initialize cURL.");
+        return false;
+    }
+
+    $jsonPayload = json_encode($payload);
+    if ($jsonPayload === false) {
+        error_log('MAILER ERROR: Failed to encode sndr.sh payload: ' . json_last_error_msg());
+        curl_close($ch);
+        return false;
+    }
+
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonPayload);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $apiKey,
+        'Content-Type: application/json',
+        'Content-Length: ' . strlen($jsonPayload)
+    ]);
+    curl_setopt($ch, CURLOPT_TIMEOUT, (int) (defined('SMTP_TIMEOUT') ? SMTP_TIMEOUT : 15));
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+
+    if ($response === false) {
+        error_log("MAILER ERROR: cURL request failed: " . $error);
+        return false;
+    }
+
+    if ($httpCode >= 200 && $httpCode < 300) {
+        return true;
+    }
+
+    error_log("MAILER ERROR: sndr.sh API returned status code {$httpCode}. Response: " . $response);
+    return false;
+}
+
 function send_app_email(string $to, string $subject, string $htmlBody, ?string $textBody = null): bool
 {
     if (!mailer_enabled()) {
-        error_log("MAILER ERROR: SMTP not configured in config.php. Trying to send to: {$to}");
+        error_log("MAILER ERROR: Mailer is not configured or enabled. Trying to send to: {$to}");
+        return false;
+    }
+
+    $driver = mail_driver();
+    if ($driver === 'sndr') {
+        $success = send_via_sndr($to, $subject, $htmlBody, $textBody);
+        if ($success) {
+            return true;
+        }
+        if (!smtp_mailer_enabled()) {
+            error_log("MAILER ERROR: sndr.sh failed and SMTP fallback is not configured.");
+            return false;
+        }
+        error_log("MAILER WARNING: sndr.sh failed. Falling back to SMTP.");
+    } elseif (!smtp_mailer_enabled()) {
+        error_log("MAILER ERROR: SMTP mailer is not configured. Trying to send to: {$to}");
         return false;
     }
 

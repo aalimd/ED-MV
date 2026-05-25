@@ -68,6 +68,7 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 <?= pwa_zoom_lock_script() ?>
 <?= pwa_head_tags('Choose your ED VentGuide Pro access plan.') . "\n" ?>
 <link rel="stylesheet" href="<?= asset_url('/assets/css/auth.css?v=6') ?>">
+<?= toast_head_tag() ?>
 <style>
 /* ── Pricing Page Styles ──────────────────────── */
 .pricing-wrapper {
@@ -256,4 +257,5 @@ $dark = isset($_COOKIE['ventguide_dark']) && $_COOKIE['ventguide_dark']==='1';
 function toggleDark(){document.documentElement.classList.toggle('dark');const d=document.documentElement.classList.contains('dark');document.getElementById('darkIcon').textContent=d?'☀️':'🌙';document.cookie='ventguide_dark='+(d?'1':'0')+';path=/;max-age=31536000';}
 </script>
 <?= pwa_script_tag() . "\n" ?>
+<?= toast_script_tag() . "\n" ?>
 </body></html>

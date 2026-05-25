@@ -19,15 +19,20 @@ define('APP_URL', 'https://your-domain.com');   // Change for production
 define('APP_ROOT', __DIR__);
 define('APP_DEBUG', false);     // Keep false outside a private local debugging session
 
-// ── Mail / Password Reset SMTP ────────────────────────
-define('SMTP_HOST', 'smtp.example.com');
+// ── Mail / Password Reset ─────────────────────────────
+define('MAIL_DRIVER', 'sndr'); // 'smtp' or 'sndr'
+define('SNDR_API_KEY', 'your_sndr_api_key_here');
+define('SNDR_API_URL', 'https://api.sndr.sh/v1/send');
+
+define('SMTP_HOST', '');
 define('SMTP_PORT', 587);
-define('SMTP_USERNAME', 'smtp_username');
-define('SMTP_PASSWORD', 'smtp_password');
+define('SMTP_USERNAME', '');
+define('SMTP_PASSWORD', '');
 define('SMTP_SECURE', 'tls');    // tls or ssl
 define('SMTP_TIMEOUT', 10);      // seconds
-define('MAIL_FROM', 'noreply@example.com');
+define('MAIL_FROM', 'edu@aalimd.com');
 define('MAIL_FROM_NAME', APP_NAME);
+
 
 // ── Security ──────────────────────────────────────────
 define('SESSION_NAME', 'ventguide_sid');
