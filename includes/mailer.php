@@ -35,7 +35,17 @@ function mail_driver(): string
     return strtolower(trim((string)(defined('MAIL_DRIVER') ? MAIL_DRIVER : 'smtp')));
 }
 
-function send_via_sndr(string $to, string $subject, string $htmlBody, ?string $textBody = null): bool
+function mail_result(bool $success, string $driver, string $message, array $details = []): array
+{
+    return [
+        'success' => $success,
+        'driver' => $driver,
+        'message' => $message,
+        'details' => $details,
+    ];
+}
+
+function send_via_sndr_detailed(string $to, string $subject, string $htmlBody, ?string $textBody = null): array
 {
     $apiKey = defined('SNDR_API_KEY') ? SNDR_API_KEY : '';
     $apiUrl = defined('SNDR_API_URL') ? SNDR_API_URL : 'https://api.sndr.sh/v1/send';
@@ -43,17 +53,17 @@ function send_via_sndr(string $to, string $subject, string $htmlBody, ?string $t
 
     if (empty($apiKey)) {
         error_log("MAILER ERROR: SNDR API Key is empty.");
-        return false;
+        return mail_result(false, 'sndr', 'SNDR API key is empty.');
     }
 
     if (empty($fromEmail)) {
         error_log("MAILER ERROR: SNDR_FROM is empty for sndr.sh.");
-        return false;
+        return mail_result(false, 'sndr', 'SNDR sender address is empty.');
     }
 
     if (!function_exists('curl_init')) {
         error_log("MAILER ERROR: PHP cURL extension is required for sndr.sh.");
-        return false;
+        return mail_result(false, 'sndr', 'PHP cURL extension is required for SNDR.');
     }
 
     $payload = [
@@ -72,14 +82,14 @@ function send_via_sndr(string $to, string $subject, string $htmlBody, ?string $t
     $ch = curl_init($apiUrl);
     if ($ch === false) {
         error_log("MAILER ERROR: Failed to initialize cURL.");
-        return false;
+        return mail_result(false, 'sndr', 'Failed to initialize cURL.');
     }
 
     $jsonPayload = json_encode($payload);
     if ($jsonPayload === false) {
         error_log('MAILER ERROR: Failed to encode sndr.sh payload: ' . json_last_error_msg());
         curl_close($ch);
-        return false;
+        return mail_result(false, 'sndr', 'Failed to encode SNDR payload: ' . json_last_error_msg());
     }
 
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -99,44 +109,41 @@ function send_via_sndr(string $to, string $subject, string $htmlBody, ?string $t
 
     if ($response === false) {
         error_log("MAILER ERROR: cURL request failed: " . $error);
-        return false;
+        return mail_result(false, 'sndr', 'SNDR cURL request failed: ' . $error);
     }
 
     if ($httpCode >= 200 && $httpCode < 300) {
-        return true;
+        return mail_result(true, 'sndr', 'SNDR accepted the message.', [
+            'http_code' => $httpCode,
+            'from' => $fromEmail,
+        ]);
     }
 
-    error_log("MAILER ERROR: sndr.sh API returned status code {$httpCode}. Response: " . $response);
-    return false;
+    $responsePreview = substr((string)$response, 0, 500);
+    error_log("MAILER ERROR: sndr.sh API returned status code {$httpCode}. Response: " . $responsePreview);
+    return mail_result(false, 'sndr', "SNDR API returned HTTP {$httpCode}.", [
+        'http_code' => $httpCode,
+        'response' => $responsePreview,
+        'from' => $fromEmail,
+    ]);
 }
 
-function send_app_email(string $to, string $subject, string $htmlBody, ?string $textBody = null): bool
+function send_via_sndr(string $to, string $subject, string $htmlBody, ?string $textBody = null): bool
 {
-    if (!mailer_enabled()) {
-        error_log("MAILER ERROR: Mailer is not configured or enabled. Trying to send to: {$to}");
-        return false;
-    }
+    return send_via_sndr_detailed($to, $subject, $htmlBody, $textBody)['success'];
+}
 
-    $driver = mail_driver();
-    if ($driver === 'sndr') {
-        $success = send_via_sndr($to, $subject, $htmlBody, $textBody);
-        if ($success) {
-            return true;
-        }
-        if (!smtp_mailer_enabled()) {
-            error_log("MAILER ERROR: sndr.sh failed and SMTP fallback is not configured.");
-            return false;
-        }
-        error_log("MAILER WARNING: sndr.sh failed. Falling back to SMTP.");
-    } elseif (!smtp_mailer_enabled()) {
+function send_via_smtp_detailed(string $to, string $subject, string $htmlBody, ?string $textBody = null): array
+{
+    if (!smtp_mailer_enabled()) {
         error_log("MAILER ERROR: SMTP mailer is not configured. Trying to send to: {$to}");
-        return false;
+        return mail_result(false, 'smtp', 'SMTP mailer is not configured.');
     }
 
     $autoload = __DIR__ . '/../vendor/autoload.php';
     if (!is_file($autoload)) {
         error_log("MAILER ERROR: Composer autoload not found at {$autoload}. Run composer install.");
-        return false;
+        return mail_result(false, 'smtp', 'Composer autoload not found. Run composer install.');
     }
 
     require_once $autoload;
@@ -164,11 +171,49 @@ function send_app_email(string $to, string $subject, string $htmlBody, ?string $
         $mail->Body = $htmlBody;
         $mail->AltBody = $textBody ?: trim(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $htmlBody)));
         $mail->send();
-        return true;
+
+        return mail_result(true, 'smtp', 'SMTP accepted the message.', [
+            'from' => $smtpFrom,
+            'host' => SMTP_HOST,
+        ]);
     } catch (Throwable $e) {
         error_log('Mail send failed: ' . $e->getMessage());
-        return false;
+        return mail_result(false, 'smtp', 'SMTP send failed: ' . $e->getMessage());
     }
+}
+
+function send_app_email_detailed(string $to, string $subject, string $htmlBody, ?string $textBody = null): array
+{
+    if (!mailer_enabled()) {
+        error_log("MAILER ERROR: Mailer is not configured or enabled. Trying to send to: {$to}");
+        return mail_result(false, 'none', 'Mailer is not configured or enabled.');
+    }
+
+    $driver = mail_driver();
+    if ($driver === 'sndr') {
+        $sndrResult = send_via_sndr_detailed($to, $subject, $htmlBody, $textBody);
+        if ($sndrResult['success']) {
+            return $sndrResult;
+        }
+
+        if (!smtp_mailer_enabled()) {
+            error_log("MAILER ERROR: sndr.sh failed and SMTP fallback is not configured.");
+            return $sndrResult;
+        }
+
+        error_log("MAILER WARNING: sndr.sh failed. Falling back to SMTP.");
+        $smtpResult = send_via_smtp_detailed($to, $subject, $htmlBody, $textBody);
+        $smtpResult['details']['fallback_from'] = 'sndr';
+        $smtpResult['details']['primary_error'] = $sndrResult['message'];
+        return $smtpResult;
+    }
+
+    return send_via_smtp_detailed($to, $subject, $htmlBody, $textBody);
+}
+
+function send_app_email(string $to, string $subject, string $htmlBody, ?string $textBody = null): bool
+{
+    return send_app_email_detailed($to, $subject, $htmlBody, $textBody)['success'];
 }
 
 function send_password_reset_email(string $to, string $resetUrl): bool
