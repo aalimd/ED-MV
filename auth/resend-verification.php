@@ -15,13 +15,13 @@ $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ip = client_ip();
-    if (is_rate_limited($ip, 'email_verification')) {
-        $mins = ceil(lockout_remaining($ip, 'email_verification') / 60);
+    $email = strtolower(trim($_POST['email'] ?? ''));
+    if (is_rate_limited($ip, 'email_verification', $email)) {
+        $mins = ceil(lockout_remaining($ip, 'email_verification', $email) / 60);
         $error = "Too many verification requests. Please try again in {$mins} minute(s).";
     } elseif (!csrf_validate()) {
         $error = 'Invalid request.';
     } else {
-        $email = strtolower(trim($_POST['email'] ?? ''));
         if (!valid_email($email)) {
             $error = 'Enter a valid email.';
         } else {

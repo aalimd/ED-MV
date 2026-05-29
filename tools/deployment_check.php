@@ -151,6 +151,34 @@ foreach (['tools/.htaccess', 'migrations/.htaccess', 'includes/.htaccess', 'app/
     }
 }
 
+if (is_file($root . '/config.secrets.ini')) {
+    checkFail('config.secrets.ini is inside the public web root. Move it outside public_html and set EDMV_SECRETS_PATH.');
+} else {
+    checkOk('No config.secrets.ini file in public web root.');
+}
+
+$rootHtaccess = $root . '/.htaccess';
+if (is_file($rootHtaccess)) {
+    $rootHtaccessContents = file_get_contents($rootHtaccess) ?: '';
+    foreach (['*.ini', '*.patch', 'composer.json/composer.lock', 'vendor/', 'includes/', 'logs/'] as $label) {
+        $needle = match ($label) {
+            '*.ini' => '\\.ini',
+            '*.patch' => '\\.patch',
+            'composer.json/composer.lock' => 'composer\\.(json|lock)',
+            'vendor/' => '^(\.git|vendor|tools|migrations|includes|logs)',
+            'includes/' => '^(\.git|vendor|tools|migrations|includes|logs)',
+            'logs/' => '^(\.git|vendor|tools|migrations|includes|logs)',
+        };
+        if (str_contains($rootHtaccessContents, $needle)) {
+            checkOk(".htaccess blocks {$label}.");
+        } else {
+            checkFail(".htaccess does not block {$label}.");
+        }
+    }
+} else {
+    checkFail('Root .htaccess is missing.');
+}
+
 $gitHead = runCommand('git -C ' . escapeshellarg($root) . ' rev-parse --short HEAD');
 if ($gitHead !== null && $gitHead !== '') {
     checkOk('Git commit on this server: ' . $gitHead);
@@ -207,13 +235,18 @@ if (is_file($configPath)) {
         $requiredColumns = [
             'users' => ['id', 'name', 'email', 'password_hash', 'auth_version', 'role', 'status', 'email_verified', 'last_login', 'last_ip', 'created_at', 'updated_at'],
             'plans' => ['id', 'name', 'slug', 'description', 'features', 'duration_days', 'price', 'currency', 'badge', 'is_featured', 'color', 'is_active', 'sort_order', 'created_at'],
-            'subscriptions' => ['id', 'user_id', 'plan_id', 'status', 'starts_at', 'expires_at', 'activated_by', 'notes', 'created_at', 'updated_at'],
+            'subscriptions' => ['id', 'user_id', 'plan_id', 'status', 'starts_at', 'expires_at', 'activated_by', 'notes', 'created_at', 'updated_at', 'active_user_id'],
             'login_attempts' => ['id', 'ip', 'email', 'action', 'attempts', 'first_attempt', 'locked_until'],
             'password_resets' => ['id', 'email', 'token_hash', 'expires_at', 'used', 'created_at'],
             'email_verifications' => ['id', 'user_id', 'email', 'token_hash', 'expires_at', 'used', 'created_at'],
             'activity_log' => ['id', 'user_id', 'action', 'details', 'ip', 'user_agent', 'created_at'],
             'app_settings' => ['setting_key', 'setting_value', 'updated_at'],
             'schema_migrations' => ['migration', 'checksum', 'applied_at'],
+        ];
+
+        $requiredIndexes = [
+            'subscriptions' => ['uniq_active_subscription_user'],
+            'login_attempts' => ['idx_ip_action', 'idx_email_action'],
         ];
 
         $existingTables = [];
@@ -243,6 +276,32 @@ if (is_file($configPath)) {
                     checkOk("Database columns match required set: {$table}");
                 } else {
                     checkFail("Database table {$table} is missing columns: " . implode(', ', $missingColumns));
+                }
+            }
+
+            foreach ($requiredIndexes as $table => $indexes) {
+                if (!in_array($table, $existingTables, true)) {
+                    continue;
+                }
+
+                $indexRows = $pdo->query('SHOW INDEX FROM `' . str_replace('`', '``', $table) . '`')->fetchAll();
+                $existingIndexes = array_values(array_unique(array_map(static fn (array $row): string => $row['Key_name'], $indexRows)));
+                $missingIndexes = array_values(array_diff($indexes, $existingIndexes));
+
+                if ($missingIndexes === []) {
+                    checkOk("Database indexes match required set: {$table}");
+                } else {
+                    checkFail("Database table {$table} is missing indexes: " . implode(', ', $missingIndexes));
+                }
+            }
+
+            if (in_array('users', $existingTables, true)) {
+                $indexRows = $pdo->query('SHOW INDEX FROM `users`')->fetchAll();
+                $existingIndexes = array_values(array_unique(array_map(static fn (array $row): string => $row['Key_name'], $indexRows)));
+                if (in_array('idx_email', $existingIndexes, true)) {
+                    checkFail('Database table users still has redundant idx_email. Apply the subscription integrity hardening migration.');
+                } else {
+                    checkOk('Redundant users.idx_email index is absent.');
                 }
             }
 

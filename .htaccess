@@ -8,7 +8,7 @@ AddType application/javascript .js
     RewriteEngine On
 
     # Security: block access to sensitive dirs
-    RewriteRule ^(\.git|tools|migrations)(/|$) - [F,L]
+    RewriteRule ^(\.git|vendor|tools|migrations|includes|logs)(/|$) - [F,L]
 
     # Clean URLs Step 1: External redirect .php → clean (GET only, preserves POST data)
     RewriteCond %{REQUEST_METHOD} !POST
@@ -25,7 +25,7 @@ AddType application/javascript .js
     Require all denied
 </FilesMatch>
 
-<FilesMatch "^(\.env.*|config\.php|db_setup\.sql|.*\.md)$">
+<FilesMatch "^(\.env.*|config\.php|config\.secrets\.ini|.*\.ini|.*\.patch|composer\.(json|lock)|db_setup\.sql|.*\.md)$">
     Require all denied
 </FilesMatch>
 

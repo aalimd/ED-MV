@@ -187,7 +187,8 @@ function normalize_local_path(string $path, string $fallback = '/'): string {
     }
 
     $cleanPath = $parts['path'] ?? '/';
-    $query = isset($parts['query']) && $parts['query'] !== '' ? '?' . $parts['query'] : '';
+    $queryPart = $parts['query'] ?? null;
+    $query = is_string($queryPart) && $queryPart !== '' ? '?' . $queryPart : '';
     $appBase = app_base_path();
 
     if ($appBase !== '' && ($cleanPath === $appBase || str_starts_with($cleanPath, $appBase . '/'))) {

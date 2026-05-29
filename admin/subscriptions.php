@@ -2,123 +2,162 @@
 /** Admin — Subscription Management */
 require_once __DIR__ . '/layout.php';
 require_once __DIR__ . '/../includes/features.php';
+require_once __DIR__ . '/../includes/subscription_service.php';
 $db = getDB();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
-    // Any plan/subscription mutation should refresh the cached feature set
-    invalidate_feature_cache();
     $action = $_POST['action'] ?? '';
     $subId = (int)($_POST['sub_id'] ?? 0);
     $userId = (int)($_POST['user_id'] ?? 0);
     $adminId = session_user()['id'];
 
-    if ($action === 'activate' && $subId > 0) {
-        // 1. Get new plan details
-        $planStmt = $db->prepare("SELECT s.user_id, p.duration_days FROM subscriptions s JOIN plans p ON s.plan_id=p.id WHERE s.id=?");
-        $planStmt->execute([$subId]); 
-        $subRow = $planStmt->fetch();
-        
-        if ($subRow) {
-            $subUserId = $subRow['user_id'];
-            $newPlanDays = $subRow['duration_days'] ?: 30;
-            
-            // 2. Find any currently active subscription for this user to calculate rollover days
-            $oldSubStmt = $db->prepare("SELECT id, expires_at FROM subscriptions WHERE user_id = ? AND status = 'active' AND id != ?");
-            $oldSubStmt->execute([$subUserId, $subId]);
-            $oldSubs = $oldSubStmt->fetchAll();
-            
-            $rolloverSeconds = 0;
-            foreach ($oldSubs as $oldSub) {
-                if (strtotime($oldSub['expires_at']) > time()) {
-                    $rolloverSeconds += (strtotime($oldSub['expires_at']) - time());
-                }
-                // Cancel old active subscriptions to enforce the "1 active subscription only" rule
-                $db->prepare("UPDATE subscriptions SET status='cancelled' WHERE id=?")->execute([$oldSub['id']]);
+    try {
+        if ($action === 'activate' && $subId > 0) {
+            $db->beginTransaction();
+            $subUserId = subscription_user_id($db, $subId);
+            if ($subUserId === null) {
+                throw new RuntimeException('Subscription not found.');
             }
-            
-            // 3. Calculate new exact expiry: New Plan Days + Rollover Days from old plans
-            $totalSeconds = ($newPlanDays * 86400) + $rolloverSeconds;
-            $expires = date('Y-m-d H:i:s', time() + $totalSeconds);
-            
-            // 4. Activate the new subscription
-            $db->prepare("UPDATE subscriptions SET status='active', starts_at=NOW(), expires_at=?, activated_by=? WHERE id=?")->execute([$expires, $adminId, $subId]);
-            $db->prepare("UPDATE users u JOIN subscriptions s ON u.id=s.user_id SET u.role='subscriber' WHERE s.id=?")->execute([$subId]);
-            
-            log_activity('admin_activate_sub', "Activated sub ID: {$subId} with rollover of " . floor($rolloverSeconds/86400) . " days");
-            flash('success', "Subscription activated! Added " . floor($rolloverSeconds/86400) . " rollover days from previous plan.");
-        }
+            subscription_lock_user($db, $subUserId);
+            $subRow = subscription_row_with_plan($db, $subId);
+            if (!$subRow) {
+                throw new RuntimeException('Subscription not found.');
+            }
+            if ((int)$subRow['is_active'] !== 1) {
+                throw new RuntimeException('The selected subscription uses an inactive plan.');
+            }
 
+            $userSubscriptions = subscription_lock_user_subscriptions($db, $subUserId);
+            $rolloverRows = array_filter(
+                $userSubscriptions,
+                static fn (array $row): bool => (int)$row['id'] !== $subId
+            );
+            $rolloverSeconds = subscription_rollover_seconds($rolloverRows);
+            $expires = subscription_expires_at(subscription_duration_days($subRow), $rolloverSeconds);
 
-    } elseif ($action === 'cancel' && $subId > 0) {
-        $db->prepare("UPDATE subscriptions SET status='cancelled' WHERE id=?")->execute([$subId]);
-        log_activity('admin_cancel_sub', "Cancelled subscription ID: {$subId}");
-        flash('warning', 'Subscription cancelled.');
+            subscription_cancel_user_statuses($db, $subUserId, ['active', 'pending'], $subId);
+            $stmt = $db->prepare("UPDATE subscriptions SET status='active', starts_at=NOW(), expires_at=?, activated_by=? WHERE id=?");
+            $stmt->execute([$expires, $adminId, $subId]);
+            subscription_sync_user_role($db, $subUserId);
+            log_activity('admin_activate_sub', "Activated sub ID: {$subId} with rollover of " . floor($rolloverSeconds / 86400) . " days");
+            $db->commit();
+            invalidate_feature_cache();
+            flash('success', "Subscription activated. Added " . floor($rolloverSeconds / 86400) . " rollover days from previous active time.");
 
-    } elseif ($action === 'modify_days' && $subId > 0) {
-        $days = (int)($_POST['extra_days'] ?? 0);
-        if ($days !== 0) {
-            $db->prepare("UPDATE subscriptions SET expires_at = DATE_ADD(IFNULL(expires_at, NOW()), INTERVAL ? DAY) WHERE id=?")->execute([$days, $subId]);
-            $actionWord = $days > 0 ? "Extended" : "Reduced";
-            log_activity('admin_modify_sub_days', "{$actionWord} sub ID {$subId} by " . abs($days) . " days");
-            flash('success', "Subscription " . strtolower($actionWord) . " by " . abs($days) . " days.");
-        }
+        } elseif ($action === 'cancel' && $subId > 0) {
+            $db->beginTransaction();
+            $subUserId = subscription_user_id($db, $subId);
+            if ($subUserId === null) {
+                throw new RuntimeException('Subscription not found.');
+            }
+            subscription_lock_user($db, $subUserId);
+            $subRow = subscription_row_with_plan($db, $subId);
+            if (!$subRow) {
+                throw new RuntimeException('Subscription not found.');
+            }
+            $db->prepare("UPDATE subscriptions SET status='cancelled' WHERE id=?")->execute([$subId]);
+            subscription_sync_user_role($db, $subUserId);
+            log_activity('admin_cancel_sub', "Cancelled subscription ID: {$subId}");
+            $db->commit();
+            invalidate_feature_cache();
+            flash('warning', 'Subscription cancelled.');
 
-    } elseif ($action === 'change_plan' && $subId > 0) {
-        $newPlanId = (int)($_POST['new_plan_id'] ?? 0);
-        if ($newPlanId > 0) {
-            // Validate plan exists
-            $planCheck = $db->prepare("SELECT id, name, duration_days FROM plans WHERE id = ?");
-            $planCheck->execute([$newPlanId]);
-            $newPlan = $planCheck->fetch();
-            if ($newPlan) {
-                // Get the old plan name for logging
-                $oldStmt = $db->prepare("SELECT p.name FROM subscriptions s JOIN plans p ON s.plan_id=p.id WHERE s.id=?");
-                $oldStmt->execute([$subId]);
-                $oldPlanName = $oldStmt->fetchColumn() ?: 'Unknown';
-
-                // Update the subscription's plan
-                $db->prepare("UPDATE subscriptions SET plan_id = ? WHERE id = ?")->execute([$newPlanId, $subId]);
-
-                // Recalculate expires_at based on the new plan's duration
-                $subStmt = $db->prepare("SELECT status, starts_at, expires_at FROM subscriptions WHERE id = ?");
-                $subStmt->execute([$subId]);
-                $sub = $subStmt->fetch();
-                
-                $dayDifference = 0;
-                if ($sub && $sub['status'] === 'active' && !empty($sub['starts_at'])) {
-                    $newDuration = $newPlan['duration_days'] ?: 30; // default 30 if 0
-                    
-                    // Fetch old plan duration
-                    $oldPlanStmt = $db->prepare("SELECT duration_days FROM plans WHERE name = ? LIMIT 1");
-                    $oldPlanStmt->execute([$oldPlanName]);
-                    $oldPlanDays = $oldPlanStmt->fetchColumn() ?: 30;
-                    
-                    $dayDifference = $newDuration - $oldPlanDays;
-                    
-                    if ($dayDifference !== 0) {
-                        $db->prepare("UPDATE subscriptions SET expires_at = DATE_ADD(IFNULL(expires_at, NOW()), INTERVAL ? DAY) WHERE id=?")->execute([$dayDifference, $subId]);
-                    }
+        } elseif ($action === 'modify_days' && $subId > 0) {
+            $days = (int)($_POST['extra_days'] ?? 0);
+            if ($days !== 0) {
+                if ($days < -3650 || $days > 3650) {
+                    throw new RuntimeException('Day adjustment is outside the allowed range.');
                 }
 
-                log_activity('admin_change_plan', "Changed sub ID {$subId} from \"{$oldPlanName}\" to \"{$newPlan['name']}\" (adjusted expiry by {$dayDifference} days)");
-                flash('success', "Plan changed from {$oldPlanName} to " . e($newPlan['name']) . ". Expiry date automatically adjusted.");
-            } else {
-                flash('danger', 'Invalid plan selected.');
+                $db->beginTransaction();
+                $subUserId = subscription_user_id($db, $subId);
+                if ($subUserId === null) {
+                    throw new RuntimeException('Subscription not found.');
+                }
+                subscription_lock_user($db, $subUserId);
+                $subRow = subscription_row_with_plan($db, $subId);
+                if (!$subRow) {
+                    throw new RuntimeException('Subscription not found.');
+                }
+                $db->prepare("UPDATE subscriptions SET expires_at = DATE_ADD(IFNULL(expires_at, NOW()), INTERVAL ? DAY) WHERE id=?")->execute([$days, $subId]);
+                subscription_sync_user_role($db, $subUserId);
+                $actionWord = $days > 0 ? 'Extended' : 'Reduced';
+                log_activity('admin_modify_sub_days', "{$actionWord} sub ID {$subId} by " . abs($days) . " days");
+                $db->commit();
+                invalidate_feature_cache();
+                flash('success', "Subscription " . strtolower($actionWord) . " by " . abs($days) . " days.");
             }
-        }
 
-    } elseif ($action === 'grant' && $userId > 0) {
-        $planId = (int)($_POST['plan_id'] ?? 1);
-        $planStmt = $db->prepare("SELECT duration_days FROM plans WHERE id=?");
-        $planStmt->execute([$planId]); $planRow = $planStmt->fetch();
-        $days = $planRow ? $planRow['duration_days'] : 30;
-        $expires = date('Y-m-d H:i:s', time() + ($days * 86400));
-        $db->prepare("UPDATE subscriptions SET status='cancelled' WHERE user_id=? AND status='active'")->execute([$userId]);
-        $db->prepare("INSERT INTO subscriptions (user_id,plan_id,status,starts_at,expires_at,activated_by) VALUES (?,?,'active',NOW(),?,?)")
-           ->execute([$userId, $planId, $expires, $adminId]);
-        $db->prepare("UPDATE users SET role='subscriber' WHERE id=?")->execute([$userId]);
-        log_activity('admin_grant_sub', "Granted subscription to user ID: {$userId}");
-        flash('success', 'Subscription granted!');
+        } elseif ($action === 'change_plan' && $subId > 0) {
+            $newPlanId = (int)($_POST['new_plan_id'] ?? 0);
+            if ($newPlanId <= 0) {
+                throw new RuntimeException('Invalid plan selected.');
+            }
+
+            $db->beginTransaction();
+            $subUserId = subscription_user_id($db, $subId);
+            if ($subUserId === null) {
+                throw new RuntimeException('Subscription not found.');
+            }
+            subscription_lock_user($db, $subUserId);
+            $subRow = subscription_row_with_plan($db, $subId);
+            if (!$subRow) {
+                throw new RuntimeException('Subscription not found.');
+            }
+            $newPlan = subscription_active_plan($db, $newPlanId, true);
+            if (!$newPlan) {
+                throw new RuntimeException('Invalid or inactive plan selected.');
+            }
+
+            $oldPlanName = $subRow['plan_name'] ?: 'Unknown';
+            $oldPlanDays = subscription_duration_days($subRow);
+            $newPlanDays = subscription_duration_days($newPlan);
+            $dayDifference = 0;
+
+            $db->prepare('UPDATE subscriptions SET plan_id = ? WHERE id = ?')->execute([$newPlanId, $subId]);
+            if ($subRow['status'] === 'active' && !empty($subRow['starts_at'])) {
+                $dayDifference = $newPlanDays - $oldPlanDays;
+                if ($dayDifference !== 0) {
+                    $db->prepare("UPDATE subscriptions SET expires_at = DATE_ADD(IFNULL(expires_at, NOW()), INTERVAL ? DAY) WHERE id=?")->execute([$dayDifference, $subId]);
+                }
+            }
+
+            subscription_sync_user_role($db, $subUserId);
+            log_activity('admin_change_plan', "Changed sub ID {$subId} from \"{$oldPlanName}\" to \"{$newPlan['name']}\" (adjusted expiry by {$dayDifference} days)");
+            $db->commit();
+            invalidate_feature_cache();
+            flash('success', "Plan changed from {$oldPlanName} to {$newPlan['name']}. Expiry date automatically adjusted.");
+
+        } elseif ($action === 'grant' && $userId > 0) {
+            $planId = (int)($_POST['plan_id'] ?? 0);
+            $db->beginTransaction();
+            $userRow = subscription_lock_user($db, $userId);
+            if (!$userRow || $userRow['status'] !== 'active' || $userRow['role'] === 'admin') {
+                throw new RuntimeException('Subscription can only be granted to active non-admin users.');
+            }
+
+            $planRow = subscription_active_plan($db, $planId, true);
+            if (!$planRow) {
+                throw new RuntimeException('Invalid or inactive plan selected.');
+            }
+
+            subscription_lock_user_subscriptions($db, $userId);
+            subscription_cancel_user_statuses($db, $userId, ['active', 'pending']);
+            $expires = subscription_expires_at(subscription_duration_days($planRow));
+            $stmt = $db->prepare("INSERT INTO subscriptions (user_id, plan_id, status, starts_at, expires_at, activated_by) VALUES (?, ?, 'active', NOW(), ?, ?)");
+            $stmt->execute([$userId, $planId, $expires, $adminId]);
+            subscription_sync_user_role($db, $userId);
+            log_activity('admin_grant_sub', "Granted subscription to user ID: {$userId}");
+            $db->commit();
+            invalidate_feature_cache();
+            flash('success', 'Subscription granted.');
+        }
+    } catch (Throwable $e) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        error_log('Admin subscription mutation failed: ' . $e->getMessage());
+        flash('danger', $e instanceof RuntimeException ? $e->getMessage() : 'Unable to update the subscription. Please try again.');
     }
     redirect(app_url('/admin/subscriptions' . (isset($_GET['filter']) ? '?filter=' . urlencode($_GET['filter']) : '')));
 }

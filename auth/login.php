@@ -14,11 +14,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!csrf_validate()) { $error = 'Invalid request. Please try again.'; }
     else {
         $ip = client_ip();
-        if (is_rate_limited($ip)) {
-            $mins = ceil(lockout_remaining($ip) / 60);
+        $email = strtolower(trim($_POST['email'] ?? ''));
+        if (is_rate_limited($ip, 'login', $email)) {
+            $mins = ceil(lockout_remaining($ip, 'login', $email) / 60);
             $error = "Too many attempts. Try again in {$mins} minute(s).";
         } else {
-            $email = strtolower(trim($_POST['email'] ?? ''));
             $password = $_POST['password'] ?? '';
             $remember = isset($_POST['remember']);
             if (!$email || !$password) { $error = 'Please fill in all fields.'; }
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     elseif ($user['status'] === 'pending') $error = 'Your account is pending admin approval.';
                     else {
-                        clear_login_attempts($ip);
+                        clear_login_attempts($ip, 'login', $email);
                         session_set_user($user, $remember);
                         $db->prepare('UPDATE users SET last_login=NOW(),last_ip=? WHERE id=?')->execute([$ip,$user['id']]);
                         log_activity('login','Successful login',$user['id']);

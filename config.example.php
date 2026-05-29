@@ -3,8 +3,51 @@
  * ED VentGuide Pro — Configuration
  * ──────────────────────────────────
  * Copy this file to config.php on each environment and fill in real values.
- * Never commit config.php with production credentials.
+ * Never commit config.php with production credentials. Put mail/API secrets in
+ * EDMV_SECRETS_PATH or /home/<user>/private/edmv.secrets.ini, outside web root.
  */
+
+function edmv_secrets_paths(): array {
+    $paths = [];
+    $override = getenv('EDMV_SECRETS_PATH') ?: '';
+    if ($override !== '') {
+        $paths[] = $override;
+    }
+    $home = getenv('HOME') ?: '';
+    if ($home !== '') {
+        $paths[] = $home . '/private/edmv.secrets.ini';
+    }
+    $user = get_current_user();
+    if ($user !== '') {
+        $paths[] = '/home/' . $user . '/private/edmv.secrets.ini';
+    }
+    return array_values(array_unique($paths));
+}
+
+function edmv_load_secrets(): array {
+    foreach (edmv_secrets_paths() as $path) {
+        if (!is_readable($path)) {
+            continue;
+        }
+        $parsed = parse_ini_file($path, true, INI_SCANNER_RAW);
+        if (is_array($parsed)) {
+            return $parsed;
+        }
+    }
+    return [];
+}
+
+function edmv_secret(array $secrets, string $section, string $key, string $default = ''): string {
+    if (isset($secrets[$section][$key])) {
+        return (string)$secrets[$section][$key];
+    }
+    if (isset($secrets[$key])) {
+        return (string)$secrets[$key];
+    }
+    return $default;
+}
+
+$edmvSecrets = edmv_load_secrets();
 
 // ── Database ──────────────────────────────────────────
 define('DB_HOST', '127.0.0.1');
@@ -20,18 +63,18 @@ define('APP_ROOT', __DIR__);
 define('APP_DEBUG', false);     // Keep false outside a private local debugging session
 
 // ── Mail / Password Reset ─────────────────────────────
-define('MAIL_DRIVER', 'sndr'); // 'smtp' or 'sndr'
-define('SNDR_API_KEY', 'your_sndr_api_key_here');
-define('SNDR_API_URL', 'https://api.sndr.sh/v1/send');
+define('MAIL_DRIVER', edmv_secret($edmvSecrets, 'mail', 'driver', 'sndr')); // 'smtp' or 'sndr'
+define('SNDR_API_KEY', edmv_secret($edmvSecrets, 'sndr', 'api_key', ''));
+define('SNDR_API_URL', edmv_secret($edmvSecrets, 'sndr', 'api_url', 'https://api.sndr.sh/v1/send'));
 
-define('SMTP_HOST', '');
-define('SMTP_PORT', 587);
-define('SMTP_USERNAME', '');
-define('SMTP_PASSWORD', '');
-define('SMTP_SECURE', 'tls');    // tls or ssl
-define('SMTP_TIMEOUT', 10);      // seconds
-define('MAIL_FROM', 'edu@aalimd.com');
-define('MAIL_FROM_NAME', APP_NAME);
+define('SMTP_HOST', edmv_secret($edmvSecrets, 'smtp', 'host', ''));
+define('SMTP_PORT', (int)edmv_secret($edmvSecrets, 'smtp', 'port', '587'));
+define('SMTP_USERNAME', edmv_secret($edmvSecrets, 'smtp', 'username', ''));
+define('SMTP_PASSWORD', edmv_secret($edmvSecrets, 'smtp', 'password', ''));
+define('SMTP_SECURE', edmv_secret($edmvSecrets, 'smtp', 'secure', 'tls'));
+define('SMTP_TIMEOUT', (int)edmv_secret($edmvSecrets, 'smtp', 'timeout', '10'));
+define('MAIL_FROM', edmv_secret($edmvSecrets, 'smtp', 'from', 'edu@aalimd.com'));
+define('MAIL_FROM_NAME', edmv_secret($edmvSecrets, 'smtp', 'from_name', APP_NAME));
 
 
 // ── Security ──────────────────────────────────────────
@@ -45,6 +88,8 @@ define('REQUIRE_ADMIN_APPROVAL', true);
 // ── Rate Limiting ─────────────────────────────────────
 define('MAX_LOGIN_ATTEMPTS', 5);
 define('LOCKOUT_MINUTES', 15);
+define('TRUST_PROXIES', false); // Set to true if running behind Cloudflare or a load balancer
+define('TRUSTED_PROXY_IPS', []);
 
 // ── Timezone ──────────────────────────────────────────
 date_default_timezone_set('Asia/Riyadh');  // Adjust to your timezone

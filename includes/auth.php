@@ -92,6 +92,20 @@ function require_subscription(): void {
 }
 
 /**
+ * Require the current user to have a specific paid feature.
+ */
+function require_feature(string $key, string $featureName = 'This feature'): void {
+    require_login();
+    require_once __DIR__ . '/features.php';
+
+    if (!has_feature($key)) {
+        flash('warning', $featureName . ' is not included in your current plan.');
+        header('Location: ' . app_url('/subscribe'));
+        exit;
+    }
+}
+
+/**
  * Check if current user is admin (non-redirecting)
  */
 function is_admin(): bool {
@@ -143,3 +157,48 @@ function log_activity(string $action, ?string $details = null, ?int $userId = nu
         substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500),
     ]);
 }
+
+function maintenance_mode_enabled(): bool {
+    return get_setting('maintenance_mode', '0') === '1';
+}
+
+function current_request_path(): string {
+    $path = parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
+    return is_string($path) ? $path : '';
+}
+
+function maintenance_route_allowed(): bool {
+    $path = rtrim(current_request_path(), '/');
+    return str_ends_with($path, '/auth/login')
+        || str_ends_with($path, '/auth/login.php')
+        || str_ends_with($path, '/auth/logout')
+        || str_ends_with($path, '/auth/logout.php');
+}
+
+function render_maintenance_page(): never {
+    http_response_code(503);
+    if (!headers_sent()) {
+        header('Retry-After: 600');
+    }
+    echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover"><title>Maintenance</title>';
+    echo '<link rel="stylesheet" href="' . e(asset_url('/assets/css/auth.css?v=6')) . '"></head><body>';
+    echo '<div class="auth-wrapper"><div class="auth-card" style="text-align:center"><div style="font-size:3rem;margin-bottom:12px">🔧</div>';
+    echo '<h1 class="auth-title">Under Maintenance</h1>';
+    echo '<p class="auth-subtitle">We\'re updating VentGuide Pro. Please check back shortly.</p></div></div></body></html>';
+    exit;
+}
+
+function enforce_maintenance_mode(): void {
+    if (!maintenance_mode_enabled() || maintenance_route_allowed()) {
+        return;
+    }
+
+    $user = session_user();
+    if ($user && ($user['role'] ?? '') === 'admin') {
+        return;
+    }
+
+    render_maintenance_page();
+}
+
+enforce_maintenance_mode();

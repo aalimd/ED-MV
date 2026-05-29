@@ -6,48 +6,84 @@
 
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/security_settings.php';
 
 function rate_limit_config(string $action): array {
-    return match ($action) {
-        'register' => ['window' => 60, 'attempts' => 3, 'lockout' => 120],
-        'password_reset' => ['window' => 15, 'attempts' => 5, 'lockout' => 15],
-        'email_verification' => ['window' => 15, 'attempts' => 5, 'lockout' => 15],
-        default => ['window' => LOCKOUT_MINUTES, 'attempts' => MAX_LOGIN_ATTEMPTS, 'lockout' => LOCKOUT_MINUTES],
+    $window = match ($action) {
+        'register' => 60,
+        'password_reset', 'email_verification' => 15,
+        default => effective_lockout_minutes($action),
     };
+
+    return match ($action) {
+        'register' => ['window' => $window, 'attempts' => effective_max_attempts($action), 'lockout' => effective_lockout_minutes($action)],
+        'password_reset', 'email_verification' => ['window' => $window, 'attempts' => effective_max_attempts($action), 'lockout' => effective_lockout_minutes($action)],
+        default => ['window' => $window, 'attempts' => effective_max_attempts($action), 'lockout' => effective_lockout_minutes($action)],
+    };
+}
+
+function rate_limit_email(?string $email): ?string {
+    $email = strtolower(trim((string)$email));
+    return filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : null;
 }
 
 /**
  * Check if IP is currently locked out for a specific action
  */
-function is_rate_limited(string $ip, string $action = 'login'): bool {
+function is_rate_limited(string $ip, string $action = 'login', ?string $email = null): bool {
     $db = getDB();
+    $email = rate_limit_email($email);
     // Clean expired lockouts
     $db->prepare('DELETE FROM login_attempts WHERE locked_until IS NOT NULL AND locked_until < NOW()')->execute();
 
-    $stmt = $db->prepare(
-        'SELECT attempts, locked_until FROM login_attempts WHERE ip = ? AND action = ? ORDER BY first_attempt DESC LIMIT 1'
-    );
-    $stmt->execute([$ip, $action]);
+    if ($email !== null) {
+        $stmt = $db->prepare(
+            'SELECT locked_until FROM login_attempts
+             WHERE action = ?
+               AND locked_until > NOW()
+               AND (ip = ? OR email = ?)
+             ORDER BY locked_until DESC
+             LIMIT 1'
+        );
+        $stmt->execute([$action, $ip, $email]);
+    } else {
+        $stmt = $db->prepare(
+            'SELECT locked_until FROM login_attempts
+             WHERE ip = ? AND action = ? AND locked_until > NOW()
+             ORDER BY locked_until DESC
+             LIMIT 1'
+        );
+        $stmt->execute([$ip, $action]);
+    }
     $row = $stmt->fetch();
 
     if (!$row) return false;
 
-    if ($row['locked_until'] && strtotime($row['locked_until']) > time()) {
-        return true;
-    }
-
-    return false;
+    return $row['locked_until'] && strtotime($row['locked_until']) > time();
 }
 
 /**
  * Get remaining lockout seconds
  */
-function lockout_remaining(string $ip, string $action = 'login'): int {
+function lockout_remaining(string $ip, string $action = 'login', ?string $email = null): int {
     $db = getDB();
-    $stmt = $db->prepare(
-        'SELECT locked_until FROM login_attempts WHERE ip = ? AND action = ? AND locked_until > NOW() LIMIT 1'
-    );
-    $stmt->execute([$ip, $action]);
+    $email = rate_limit_email($email);
+    if ($email !== null) {
+        $stmt = $db->prepare(
+            'SELECT locked_until FROM login_attempts
+             WHERE action = ?
+               AND locked_until > NOW()
+               AND (ip = ? OR email = ?)
+             ORDER BY locked_until DESC
+             LIMIT 1'
+        );
+        $stmt->execute([$action, $ip, $email]);
+    } else {
+        $stmt = $db->prepare(
+            'SELECT locked_until FROM login_attempts WHERE ip = ? AND action = ? AND locked_until > NOW() ORDER BY locked_until DESC LIMIT 1'
+        );
+        $stmt->execute([$ip, $action]);
+    }
     $row = $stmt->fetch();
     if (!$row) return 0;
     return max(0, strtotime($row['locked_until']) - time());
@@ -58,6 +94,7 @@ function lockout_remaining(string $ip, string $action = 'login'): int {
  */
 function record_attempt(string $ip, ?string $email = null, string $action = 'login'): void {
     $db = getDB();
+    $email = rate_limit_email($email);
     $config = rate_limit_config($action);
     $windowMinutes = $config['window'];
     $maxAttempts = $config['attempts'];
@@ -68,15 +105,24 @@ function record_attempt(string $ip, ?string $email = null, string $action = 'log
     // Cleanup old non-locked attempts
     $db->prepare('DELETE FROM login_attempts WHERE locked_until IS NULL AND action = ? AND first_attempt < ?')->execute([$action, $windowStart]);
 
-    // Count recent attempts
+    // Count recent attempts by IP and by account/email.
     $stmt = $db->prepare(
         'SELECT COUNT(*) as cnt FROM login_attempts WHERE ip = ? AND action = ? AND first_attempt > ?'
     );
     $stmt->execute([$ip, $action, $windowStart]);
-    $count = (int) $stmt->fetch()['cnt'];
+    $ipCount = (int) $stmt->fetch()['cnt'];
+
+    $emailCount = 0;
+    if ($email !== null) {
+        $stmt = $db->prepare(
+            'SELECT COUNT(*) as cnt FROM login_attempts WHERE email = ? AND action = ? AND first_attempt > ?'
+        );
+        $stmt->execute([$email, $action, $windowStart]);
+        $emailCount = (int) $stmt->fetch()['cnt'];
+    }
 
     $locked = null;
-    if ($count + 1 >= $maxAttempts) {
+    if (($ipCount + 1) >= $maxAttempts || ($email !== null && ($emailCount + 1) >= $maxAttempts)) {
         $locked = date('Y-m-d H:i:s', time() + ($lockoutMinutes * 60));
     }
 
@@ -96,7 +142,12 @@ function record_failed_attempt(string $ip, string $email): void {
 /**
  * Clear attempts for an IP and action
  */
-function clear_login_attempts(string $ip, string $action = 'login'): void {
+function clear_login_attempts(string $ip, string $action = 'login', ?string $email = null): void {
     $db = getDB();
+    $email = rate_limit_email($email);
+    if ($email !== null) {
+        $db->prepare('DELETE FROM login_attempts WHERE action = ? AND (ip = ? OR email = ?)')->execute([$action, $ip, $email]);
+        return;
+    }
     $db->prepare('DELETE FROM login_attempts WHERE ip = ? AND action = ?')->execute([$ip, $action]);
 }

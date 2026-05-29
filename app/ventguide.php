@@ -7,6 +7,7 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/features.php';
 require_login();
 require_subscription();
+require_feature('scenarios', 'Ventilation Scenarios');
 
 $user = session_user();
 $isAdmin = $user['role'] === 'admin';
@@ -110,7 +111,7 @@ $userMenu = '
 <details id="vg-user-details">
   <summary id="vg-user-summary">
     <div class="left">
-      <span class="vg-user-name">👤 ' . htmlspecialchars($user['name']) . '</span>
+      <span class="vg-user-name">👤 ' . e($user['name']) . '</span>
     </div>
     <div class="right">
       ' . ($daysLeftText ? '<span class="vg-pill time">⏳ ' . $daysLeftText . '</span>' : '') . '
@@ -120,7 +121,7 @@ $userMenu = '
   <div id="vg-user-dropdown">
     <div class="meta">
       <span>Account Role</span>
-      <span class="vg-pill">' . htmlspecialchars($user['role']) . '</span>
+      <span class="vg-pill">' . e($user['role']) . '</span>
     </div>';
 
 

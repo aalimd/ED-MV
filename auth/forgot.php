@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/rate_limit.php';
 require_once __DIR__ . '/../includes/mailer.php';
 require_once __DIR__ . '/../includes/pwa.php';
@@ -10,12 +11,12 @@ init_session();
 $msg = ''; $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ip = client_ip();
-    if (is_rate_limited($ip, 'password_reset')) {
-        $mins = ceil(lockout_remaining($ip, 'password_reset') / 60);
+    $email = strtolower(trim($_POST['email'] ?? ''));
+    if (is_rate_limited($ip, 'password_reset', $email)) {
+        $mins = ceil(lockout_remaining($ip, 'password_reset', $email) / 60);
         $error = "Too many reset attempts. Please try again in {$mins} minute(s).";
     } elseif (!csrf_validate()) { $error = 'Invalid request.'; }
     else {
-        $email = strtolower(trim($_POST['email'] ?? ''));
         if (!valid_email($email)) { $error = 'Enter a valid email.'; }
         else {
             try {

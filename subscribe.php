@@ -7,6 +7,7 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/features.php';
 require_once __DIR__ . '/includes/pwa.php';
+require_once __DIR__ . '/includes/subscription_service.php';
 require_login();
 
 $user = session_user();
@@ -27,24 +28,45 @@ $pageFooter = get_setting('sub_page_footer', '');
 $currencyOverride = get_setting('sub_currency_symbol', '');
 
 $requested = false;
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_validate()) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!csrf_validate()) {
+        flash('danger', 'Invalid request. Please try again.');
+        redirect(app_url('/subscribe'));
+    }
+
     $planId = (int)($_POST['plan_id'] ?? 0);
-    $stmt = $db->prepare("SELECT id FROM subscriptions WHERE user_id = ? AND status = 'pending' LIMIT 1");
-    $stmt->execute([$user['id']]);
-    if (!$stmt->fetch() && $planId > 0) {
-        try {
-            $db->beginTransaction();
-            $db->prepare("INSERT INTO subscriptions (user_id, plan_id, status) VALUES (?, ?, 'pending')")
-               ->execute([$user['id'], $planId]);
-            $db->commit();
-            log_activity('subscription_request', "Requested plan ID: {$planId}", $user['id']);
-        } catch (Exception $e) {
-            if ($db->inTransaction()) {
+    try {
+        $db->beginTransaction();
+        subscription_lock_user($db, (int)$user['id']);
+
+        $plan = subscription_active_plan($db, $planId, true);
+        if (!$plan) {
+            throw new RuntimeException('Please choose a valid active plan.');
+        }
+
+        $existingSubscriptions = subscription_lock_user_subscriptions($db, (int)$user['id']);
+        foreach ($existingSubscriptions as $subscription) {
+            if (($subscription['status'] ?? '') === 'pending') {
                 $db->rollBack();
+                flash('warning', 'You already have a pending subscription request.');
+                redirect(app_url('/subscribe'));
             }
         }
+
+        $db->prepare("INSERT INTO subscriptions (user_id, plan_id, status) VALUES (?, ?, 'pending')")
+           ->execute([$user['id'], (int)$plan['id']]);
+        log_activity('subscription_request', "Requested plan ID: {$plan['id']}", $user['id']);
+        $db->commit();
+        flash('success', 'Subscription request submitted. It is now awaiting admin approval.');
+        $requested = true;
+    } catch (Throwable $e) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        error_log('Subscription request failed: ' . $e->getMessage());
+        flash('danger', $e instanceof RuntimeException ? $e->getMessage() : 'Unable to submit your subscription request right now. Please try again or contact support.');
+        redirect(app_url('/subscribe'));
     }
-    $requested = true;
 }
 
 // Check for existing pending request

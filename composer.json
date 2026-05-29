@@ -1,8 +1,9 @@
 {
     "name": "ed-mv/ventguide-pro",
     "description": "Evidence-based emergency department ventilation reference.",
+    "license": "proprietary",
     "require": {
         "php": ">=8.0",
-        "phpmailer/phpmailer": "^6.0"
+        "phpmailer/phpmailer": "^7.0"
     }
 }

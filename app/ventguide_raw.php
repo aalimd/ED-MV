@@ -1,6 +1,7 @@
 <?php
 if (!defined('VENTGUIDE_INTERNAL')) { http_response_code(404); exit('Not found'); }
 require_once __DIR__ . '/../includes/pwa.php';
+$canFeature = static fn(string $key): bool => !function_exists('has_feature') || has_feature($key);
 ?>
 <!DOCTYPE html>
 <html lang="en" class="no-js">
@@ -1087,6 +1088,7 @@ require_once __DIR__ . '/../includes/pwa.php';
 </div>
 
 <!-- ████ PBW CALCULATOR MODAL ████ -->
+<?php if ($canFeature('pbw_calc')): ?>
 <div class="modal-bg" id="calcModal" role="dialog" aria-modal="true" aria-labelledby="calcTitle">
   <div class="modal">
     <div class="modal-hdr">
@@ -1135,6 +1137,7 @@ require_once __DIR__ . '/../includes/pwa.php';
     </div>
   </div>
 </div>
+<?php endif; ?>
 
 <!-- ████ UPGRADE MODAL ████ -->
 <div class="modal-bg" id="upgradeModal" role="dialog" aria-modal="true">
@@ -1156,9 +1159,9 @@ require_once __DIR__ . '/../includes/pwa.php';
       <div class="header-badge" id="hBadge">🏥 STANDARD INITIATION</div>
     </div>
     <div class="header-actions">
-      <button class="hbtn" id="printBtn" data-feature="print" data-feature-name="Print Pocket Card" aria-label="Print pocket card" title="Print">
+      <?php if ($canFeature('print')): ?><button class="hbtn" id="printBtn" data-feature="print" data-feature-name="Print Pocket Card" aria-label="Print pocket card" title="Print">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-      </button>
+      </button><?php endif; ?>
       <button class="hbtn" id="darkToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
         <svg id="moonIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg id="sunIcon"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
@@ -1303,14 +1306,17 @@ require_once __DIR__ . '/../includes/pwa.php';
     <div class="evidence-bar" id="evidenceBar"></div>
 
     <!-- EHR -->
+    <?php if ($canFeature('ehr_export')): ?>
     <button class="ehr-btn" id="ehrBtn" data-feature="ehr_export" data-feature-name="EHR Export">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
       📋 Copy Structured Note to EHR
     </button>
     <p class="text-muted-center">Includes timestamp, evidence references &amp; PBW.</p>
+    <?php endif; ?>
   </section>
 
   <!-- ── ABG CALCULATOR ── -->
+<?php if ($canFeature('abg_calc')): ?>
   <section id="view-abg" class="view" aria-label="ABG calculator">
     <div class="sec-hdr mt-4">
       <div class="sec-hdr-title">
@@ -1372,8 +1378,10 @@ require_once __DIR__ . '/../includes/pwa.php';
       </ul>
     </div>
   </section>
+<?php endif; ?>
 
   <!-- ── COMPARE ── -->
+<?php if ($canFeature('compare')): ?>
   <section id="view-compare" class="view" aria-label="Comparison matrix">
 
     <!-- Mode switcher -->
@@ -1420,8 +1428,10 @@ require_once __DIR__ . '/../includes/pwa.php';
     </div>
 
   </section>
+<?php endif; ?>
 
   <!-- ── GUIDE ── -->
+<?php if ($canFeature('guide')): ?>
   <section id="view-guide" class="view" aria-label="Clinical guidelines">
 
     <div class="info-card mt-4">
@@ -1617,8 +1627,10 @@ require_once __DIR__ . '/../includes/pwa.php';
       </ul>
     </div>
 </section>
+<?php endif; ?>
 
   <!-- ── TOOLS TAB ── -->
+<?php if ($canFeature('tools')): ?>
   <section id="view-tools" class="view" aria-label="Clinical tools">
 
     <!-- ── 1. ASSESSMENT: Difficult Airway Predictor (LEMON) ── -->
@@ -1961,6 +1973,7 @@ require_once __DIR__ . '/../includes/pwa.php';
     </div>
 
   </section>
+<?php endif; ?>
 </main>
 
 <!-- ████ BOTTOM NAV ████ -->
@@ -1968,25 +1981,27 @@ require_once __DIR__ . '/../includes/pwa.php';
   <button class="nav-it active" data-target="view-scenarios" data-feature="scenarios" data-feature-name="Ventilation Scenarios" role="tab" aria-selected="true">
     <span class="nav-emoji">🏥</span><span>Scenarios</span>
   </button>
-  <button class="nav-it" data-target="view-abg" data-feature="abg_calc" data-feature-name="ABG Calculator" role="tab" aria-selected="false">
+  <?php if ($canFeature('abg_calc')): ?><button class="nav-it" data-target="view-abg" data-feature="abg_calc" data-feature-name="ABG Calculator" role="tab" aria-selected="false">
     <span class="nav-emoji">🧪</span><span>ABG Calc</span>
-  </button>
-  <button class="nav-it" data-target="view-compare" data-feature="compare" data-feature-name="Scenario Comparison" role="tab" aria-selected="false">
+  </button><?php endif; ?>
+  <?php if ($canFeature('compare')): ?><button class="nav-it" data-target="view-compare" data-feature="compare" data-feature-name="Scenario Comparison" role="tab" aria-selected="false">
     <span class="nav-emoji">📊</span><span>Compare</span>
-  </button>
-  <button class="nav-it" data-target="view-guide" data-feature="guide" data-feature-name="Clinical Guidelines" role="tab" aria-selected="false">
+  </button><?php endif; ?>
+  <?php if ($canFeature('guide')): ?><button class="nav-it" data-target="view-guide" data-feature="guide" data-feature-name="Clinical Guidelines" role="tab" aria-selected="false">
     <span class="nav-emoji">📖</span><span>Guide</span>
-  </button>
-  <button class="nav-it" data-target="view-tools" data-feature="tools" data-feature-name="Clinical Tools" role="tab" aria-selected="false">
+  </button><?php endif; ?>
+  <?php if ($canFeature('tools')): ?><button class="nav-it" data-target="view-tools" data-feature="tools" data-feature-name="Clinical Tools" role="tab" aria-selected="false">
     <span class="nav-emoji">🔧</span><span>Tools</span>
-  </button>
-  <a class="nav-it" href="<?= app_url('/app/coach') ?>" data-feature="vent_coach" data-feature-name="Vent Coach" aria-label="Open Vent Coach">
+  </button><?php endif; ?>
+  <?php if ($canFeature('vent_coach')): ?><a class="nav-it" href="<?= app_url('/app/coach') ?>" data-feature="vent_coach" data-feature-name="Vent Coach" aria-label="Open Vent Coach">
     <span class="nav-emoji">🧠</span><span>Coach</span>
-  </a>
+  </a><?php endif; ?>
 </nav>
 
 <!-- ████ FAB ████ -->
+<?php if ($canFeature('pbw_calc')): ?>
 <button class="fab" id="fabCalc" data-feature="pbw_calc" data-feature-name="PBW Calculator" aria-label="Open PBW Calculator" title="PBW Calculator">⚖️</button>
+<?php endif; ?>
 
 <!-- ████ SCRIPT ████ -->
 <script>
@@ -4460,6 +4475,7 @@ const App = {
     const sexBtns  = document.querySelectorAll('#sexToggle .seg-btn');
     const unitBtns = document.querySelectorAll('#unitToggle .seg-btn');
     const hIn  = document.getElementById('heightInput');
+    if (!modal || !fab || !close || !apply || !reset || !hIn) return;
 
     // Restore
     const sx = Store.get('sex'), un = Store.get('unit'), ht = Store.get('height');
@@ -4556,6 +4572,7 @@ const App = {
   // ── ABG Calc ───────────────────────────────────────
   _setupABG() {
     const ids = ['abgPh','abgPco2','abgHco3','abgRr','abgTarget'];
+    if (!ids.every(id => document.getElementById(id))) return;
     const calc = () => {
       const ph  = parseFloat(document.getElementById('abgPh').value);
       const co2 = parseFloat(document.getElementById('abgPco2').value);
@@ -4635,10 +4652,11 @@ const App = {
 
   // ── EHR Copy ───────────────────────────────────────
   _setupEHR() {
-    document.getElementById('ehrBtn').addEventListener('click', async () => {
+    const ehrBtn = document.getElementById('ehrBtn');
+    if (!ehrBtn) return;
+    ehrBtn.addEventListener('click', async () => {
       // Feature gate check
-      const ehrEl = document.getElementById('ehrBtn');
-      if (ehrEl.dataset.feature && !FG.has(ehrEl.dataset.feature)) { FG.prompt(ehrEl.dataset.feature); return; }
+      if (ehrBtn.dataset.feature && !FG.has(ehrBtn.dataset.feature)) { FG.prompt(ehrBtn.dataset.feature); return; }
       const s   = SCENARIOS.find(x => x.id === Store.get('scenario'));
       const pbw = Store.get('pbw');
       const now = new Date().toISOString().slice(0,16).replace('T',' ');

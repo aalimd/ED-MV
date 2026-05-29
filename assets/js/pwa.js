@@ -121,7 +121,7 @@
   window.addEventListener('load', function () {
     if (isAdminPath || !isIos || isInStandaloneMode) return;
 
-    if (sessionStorage.getItem('pwa_ios_guide_dismissed')) return;
+    if (sessionStorage.getItem('pwa_ios_guide_dismissed') || localStorage.getItem('pwa_ios_guide_dismissed')) return;
 
     setTimeout(function () {
       injectAnimations();
@@ -173,7 +173,7 @@
         closeSheet();
       });
       document.getElementById('pwa-ios-never').addEventListener('click', function () {
-        localStorage.setItem('pwa_ios_guide_dismissed', '1'); // If they click 'never', we can respect it permanently via localstorage if you prefer, but let's just make it session to be extremely aggressive like you want:
+        localStorage.setItem('pwa_ios_guide_dismissed', '1');
         sessionStorage.setItem('pwa_ios_guide_dismissed', '1');
         closeSheet();
       });

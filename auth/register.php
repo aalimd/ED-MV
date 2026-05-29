@@ -12,13 +12,13 @@ if (is_logged_in()) redirect(app_url('/'));
 $errors = []; $name = ''; $email = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ip = client_ip();
-    if (is_rate_limited($ip, 'register')) {
-        $mins = ceil(lockout_remaining($ip, 'register') / 60);
+    $email = strtolower(trim($_POST['email'] ?? ''));
+    if (is_rate_limited($ip, 'register', $email)) {
+        $mins = ceil(lockout_remaining($ip, 'register', $email) / 60);
         $errors[] = "Too many registration attempts. Please try again in {$mins} minute(s).";
     } elseif (!csrf_validate()) { $errors[] = 'Invalid request.'; }
     else {
         $name = trim($_POST['name'] ?? '');
-        $email = strtolower(trim($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
         $confirm = $_POST['confirm'] ?? '';
         if (!$name) $errors[] = 'Name is required.';

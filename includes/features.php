@@ -43,22 +43,15 @@ function get_user_features(): array {
 }
 
 /**
- * Get features with session-level caching (3-minute TTL).
- * Used on every page load to avoid repeated DB queries.
+ * Get features for the current request.
+ * Authorization state must reflect admin plan/subscription edits immediately,
+ * so this intentionally avoids a session TTL cache.
  *
- * @return string[] Cached array of feature key strings
+ * @return string[] Array of feature key strings
  */
 function get_user_features_cached(): array {
-    if (
-        isset($_SESSION['_feat_keys'], $_SESSION['_feat_ts'])
-        && (time() - $_SESSION['_feat_ts']) < 180
-    ) {
-        return $_SESSION['_feat_keys'];
-    }
-    $keys = get_user_features();
-    $_SESSION['_feat_keys'] = $keys;
-    $_SESSION['_feat_ts'] = time();
-    return $keys;
+    unset($_SESSION['_feat_keys'], $_SESSION['_feat_ts'], $_SESSION['_feat_user_id']);
+    return get_user_features();
 }
 
 /**
@@ -110,6 +103,6 @@ function render_feature_script(): string {
  * Call from admin when activating/changing subscriptions.
  */
 function invalidate_feature_cache(): void {
-    unset($_SESSION['_feat_keys'], $_SESSION['_feat_ts']);
+    unset($_SESSION['_feat_keys'], $_SESSION['_feat_ts'], $_SESSION['_feat_user_id']);
     has_feature('__reset__');
 }

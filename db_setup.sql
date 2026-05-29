@@ -24,7 +24,6 @@ CREATE TABLE IF NOT EXISTS `users` (
   `last_ip` VARCHAR(45) NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX `idx_email` (`email`),
   INDEX `idx_status` (`status`),
   INDEX `idx_role` (`role`)
 ) ENGINE=InnoDB;
@@ -65,9 +64,12 @@ CREATE TABLE IF NOT EXISTS `subscriptions` (
   `notes` TEXT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `active_user_id` INT UNSIGNED
+    GENERATED ALWAYS AS (CASE WHEN `status` = 'active' THEN `user_id` ELSE NULL END) STORED,
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
   FOREIGN KEY (`plan_id`) REFERENCES `plans`(`id`),
   FOREIGN KEY (`activated_by`) REFERENCES `users`(`id`) ON DELETE SET NULL,
+  UNIQUE KEY `uniq_active_subscription_user` (`active_user_id`),
   INDEX `idx_user_status` (`user_id`, `status`),
   INDEX `idx_expires` (`expires_at`)
 ) ENGINE=InnoDB;
@@ -134,6 +136,7 @@ CREATE TABLE IF NOT EXISTS `login_attempts` (
   `locked_until` DATETIME NULL,
   INDEX `idx_ip` (`ip`),
   INDEX `idx_ip_action` (`ip`, `action`),
+  INDEX `idx_email_action` (`email`, `action`),
   INDEX `idx_locked` (`locked_until`)
 ) ENGINE=InnoDB;
 
