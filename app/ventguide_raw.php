@@ -147,13 +147,13 @@ $canFeature = static fn(string $key): bool => !function_exists('has_feature') ||
     .term { border-bottom:2px dotted var(--theme); cursor:help; font-weight:700; transition:border-color .3s; }
 
     /* ── TOAST ── */
-    .toast-wrap { position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:8px; width:92%; max-width:400px; pointer-events:none; }
-    .toast { background:var(--surface); color:var(--text); padding:13px 16px; border-radius:var(--r-md); box-shadow:var(--shadow-lg); font-size:.88rem; font-weight:700; line-height:1.45; display:flex; align-items:flex-start; gap:10px; opacity:0; pointer-events:auto; border:1px solid var(--border); border-left:4px solid var(--theme); animation:toastIn .32s cubic-bezier(.16,1,.3,1) forwards; }
-    .toast.danger { border-left-color:var(--danger); }
-    .toast.success { border-left-color:var(--success); }
+    .vg-toast-wrap { position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:8px; width:92%; max-width:400px; pointer-events:none; }
+    .vg-toast { background:var(--surface); color:var(--text); padding:13px 16px; border-radius:var(--r-md); box-shadow:var(--shadow-lg); font-size:.88rem; font-weight:700; line-height:1.45; display:flex; align-items:flex-start; gap:10px; opacity:0; pointer-events:auto; border:1px solid var(--border); border-left:4px solid var(--theme); animation:toastIn .32s cubic-bezier(.16,1,.3,1) forwards; }
+    .vg-toast.danger { border-left-color:var(--danger); }
+    .vg-toast.success { border-left-color:var(--success); }
     @keyframes toastIn { from{opacity:0;transform:translateY(-14px) scale(.96)} to{opacity:1;transform:translateY(0) scale(1)} }
     @keyframes toastOut { to{opacity:0;transform:translateY(-10px) scale(.96)} }
-    .toast.removing { animation:toastOut .28s forwards; }
+    .vg-toast.removing { animation:toastOut .28s forwards; }
 
     /* ── HEADER ── */
     .header {
@@ -524,7 +524,7 @@ $canFeature = static fn(string $key): bool => !function_exists('has_feature') ||
     @media print {
       html,body { height:auto; max-width:none; overflow:visible; }
       body { position:static; inset:auto; overflow:visible; background:white; color:black; }
-      .header,.bottom-nav,.fab,.chips-outer,.scenario-select-wrap,.ehr-btn,.modal-bg,.toast-wrap,.contra-banner { display:none!important; }
+      .header,.bottom-nav,.fab,.chips-outer,.scenario-select-wrap,.ehr-btn,.modal-bg,.vg-toast-wrap,.contra-banner { display:none!important; }
       .content { overflow:visible; padding:0; }
       .view { display:block!important; animation:none; }
       .view:not(.active) { display:none!important; }
@@ -1039,7 +1039,7 @@ $canFeature = static fn(string $key): bool => !function_exists('has_feature') ||
 <body>
 
 <!-- ████ TOAST ████ -->
-<div id="toastWrap" class="toast-wrap" role="region" aria-live="polite" aria-label="Notifications"></div>
+<div id="toastWrap" class="vg-toast-wrap" role="region" aria-live="polite" aria-label="Notifications"></div>
 
 <!-- ████ DISCLAIMER MODAL ████ -->
 <div class="modal-bg open" id="disclaimerModal" role="dialog" aria-modal="true" aria-labelledby="discTitle">
@@ -4727,9 +4727,11 @@ const App = {
   toast(msg, type = 'info') {
     const wrap = document.getElementById('toastWrap');
     const el = document.createElement('div');
-    el.className = `toast${type==='danger'?' danger':type==='success'?' success':''}`;
+    el.className = `vg-toast${type==='danger'?' danger':type==='success'?' success':''}`;
     el.setAttribute('role','status');
-    el.innerHTML = `<span>${msg}</span>`;
+    const text = document.createElement('span');
+    text.textContent = msg;
+    el.appendChild(text);
     wrap.appendChild(el);
     setTimeout(() => {
       el.classList.add('removing');

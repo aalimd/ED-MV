@@ -273,11 +273,11 @@ function render_flashes(): string {
  * Include this in the <head> (CSS) or before </body> (JS) of every page.
  */
 function toast_head_tag(): string {
-    return '<link rel="stylesheet" href="' . asset_url('/assets/css/toast.css?v=1') . '">';
+    return '<link rel="stylesheet" href="' . asset_url('/assets/css/toast.css?v=2') . '">';
 }
 
 function toast_script_tag(): string {
-    return '<script src="' . asset_url('/assets/js/toast.js?v=1') . '"></script>';
+    return '<script src="' . asset_url('/assets/js/toast.js?v=2') . '"></script>';
 }
 
 /**
