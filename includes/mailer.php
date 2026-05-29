@@ -14,16 +14,20 @@ function mailer_enabled(): bool
 
 function smtp_mailer_enabled(): bool
 {
+    $fromEmail = defined('SMTP_FROM') ? SMTP_FROM : (defined('MAIL_FROM') ? MAIL_FROM : '');
+
     return defined('SMTP_HOST') && SMTP_HOST !== ''
         && defined('SMTP_USERNAME') && SMTP_USERNAME !== ''
         && defined('SMTP_PASSWORD') && SMTP_PASSWORD !== ''
-        && defined('MAIL_FROM') && MAIL_FROM !== '';
+        && $fromEmail !== '';
 }
 
 function sndr_mailer_enabled(): bool
 {
+    $fromEmail = defined('SNDR_FROM') ? SNDR_FROM : (defined('MAIL_FROM') ? MAIL_FROM : '');
+
     return defined('SNDR_API_KEY') && SNDR_API_KEY !== ''
-        && defined('MAIL_FROM') && MAIL_FROM !== '';
+        && $fromEmail !== '';
 }
 
 function mail_driver(): string
@@ -35,7 +39,7 @@ function send_via_sndr(string $to, string $subject, string $htmlBody, ?string $t
 {
     $apiKey = defined('SNDR_API_KEY') ? SNDR_API_KEY : '';
     $apiUrl = defined('SNDR_API_URL') ? SNDR_API_URL : 'https://api.sndr.sh/v1/send';
-    $fromEmail = defined('MAIL_FROM') ? MAIL_FROM : '';
+    $fromEmail = defined('SNDR_FROM') ? SNDR_FROM : (defined('MAIL_FROM') ? MAIL_FROM : '');
 
     if (empty($apiKey)) {
         error_log("MAILER ERROR: SNDR API Key is empty.");
@@ -43,7 +47,7 @@ function send_via_sndr(string $to, string $subject, string $htmlBody, ?string $t
     }
 
     if (empty($fromEmail)) {
-        error_log("MAILER ERROR: MAIL_FROM is empty for sndr.sh.");
+        error_log("MAILER ERROR: SNDR_FROM is empty for sndr.sh.");
         return false;
     }
 
@@ -151,7 +155,9 @@ function send_app_email(string $to, string $subject, string $htmlBody, ?string $
         $mail->Encoding = 'base64';
         $mail->CharSet = 'UTF-8';
         $mail->isHTML(true);
-        $mail->setFrom(MAIL_FROM, defined('MAIL_FROM_NAME') ? MAIL_FROM_NAME : APP_NAME);
+        $smtpFrom = defined('SMTP_FROM') ? SMTP_FROM : (defined('MAIL_FROM') ? MAIL_FROM : '');
+        $smtpFromName = defined('SMTP_FROM_NAME') ? SMTP_FROM_NAME : (defined('MAIL_FROM_NAME') ? MAIL_FROM_NAME : APP_NAME);
+        $mail->setFrom($smtpFrom, $smtpFromName);
         $mail->addAddress($to);
 
         $mail->Subject = $subject;

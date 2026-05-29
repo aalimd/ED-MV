@@ -66,6 +66,8 @@ define('APP_DEBUG', false);     // Keep false outside a private local debugging 
 define('MAIL_DRIVER', edmv_secret($edmvSecrets, 'mail', 'driver', 'sndr')); // 'smtp' or 'sndr'
 define('SNDR_API_KEY', edmv_secret($edmvSecrets, 'sndr', 'api_key', ''));
 define('SNDR_API_URL', edmv_secret($edmvSecrets, 'sndr', 'api_url', 'https://api.sndr.sh/v1/send'));
+define('SNDR_FROM', edmv_secret($edmvSecrets, 'sndr', 'from', 'edu@aalimd.com'));
+define('SNDR_FROM_NAME', edmv_secret($edmvSecrets, 'sndr', 'from_name', APP_NAME));
 
 define('SMTP_HOST', edmv_secret($edmvSecrets, 'smtp', 'host', ''));
 define('SMTP_PORT', (int)edmv_secret($edmvSecrets, 'smtp', 'port', '587'));
@@ -73,8 +75,10 @@ define('SMTP_USERNAME', edmv_secret($edmvSecrets, 'smtp', 'username', ''));
 define('SMTP_PASSWORD', edmv_secret($edmvSecrets, 'smtp', 'password', ''));
 define('SMTP_SECURE', edmv_secret($edmvSecrets, 'smtp', 'secure', 'tls'));
 define('SMTP_TIMEOUT', (int)edmv_secret($edmvSecrets, 'smtp', 'timeout', '10'));
-define('MAIL_FROM', edmv_secret($edmvSecrets, 'smtp', 'from', 'edu@aalimd.com'));
-define('MAIL_FROM_NAME', edmv_secret($edmvSecrets, 'smtp', 'from_name', APP_NAME));
+define('SMTP_FROM', edmv_secret($edmvSecrets, 'smtp', 'from', 'noreply@aamd.sa'));
+define('SMTP_FROM_NAME', edmv_secret($edmvSecrets, 'smtp', 'from_name', APP_NAME));
+define('MAIL_FROM', MAIL_DRIVER === 'sndr' ? SNDR_FROM : SMTP_FROM);
+define('MAIL_FROM_NAME', MAIL_DRIVER === 'sndr' ? SNDR_FROM_NAME : SMTP_FROM_NAME);
 
 
 // ── Security ──────────────────────────────────────────
